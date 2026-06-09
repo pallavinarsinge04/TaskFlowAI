@@ -1,179 +1,81 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
-
-import API from "../../api/axios";
-import socket from "../../socket/socket";
-
 import Column from "./Column";
-import AddTaskModal from "./AddTaskModal";
 
 const Board = () => {
-  const [tasks, setTasks] = useState([]);
 
-  // ==========================
-  // Fetch Tasks
-  // ==========================
+  const [tasks, setTasks] = useState({
 
-  const fetchTasks = async () => {
-    try {
-      const res = await API.get("/tasks");
+    Todo: [
+      {
+        _id: "1",
+        title: "Login UI",
+        description: "Create Login Screen",
+        priority: "High",
+        assignee: "Pallavi",
+      },
+    ],
 
-      setTasks(res.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    fetchTasks();
-
-    socket.on("taskCreated", () => {
-      fetchTasks();
-    });
-
-    socket.on("taskUpdated", () => {
-      fetchTasks();
-    });
-
-    socket.on("taskDeleted", () => {
-      fetchTasks();
-    });
-
-    return () => {
-      socket.off("taskCreated");
-      socket.off("taskUpdated");
-      socket.off("taskDeleted");
-    };
-  }, []);
-
-  // ==========================
-  // Add Task
-  // ==========================
-
-  const addTask = async (title, description) => {
-    try {
-      await API.post("/tasks", {
-        title,
-        description,
+    "In Progress": [
+      {
+        _id: "2",
+        title: "Dashboard",
+        description: "Build Dashboard",
         priority: "Medium",
-        status: "todo",
-      });
+        assignee: "John",
+      },
+    ],
 
-      fetchTasks();
-    } catch (error) {
-      console.log(error);
-    }
+    Done: [
+      {
+        _id: "3",
+        title: "Landing Page",
+        description: "Completed",
+        priority: "Low",
+        assignee: "Alex",
+      },
+    ],
+
+  });
+
+  const onDragEnd = (result) => {
+
+    if (!result.destination) return;
+
+    const source = result.source.droppableId;
+    const destination = result.destination.droppableId;
+
+    const sourceItems = [...tasks[source]];
+    const destItems = [...tasks[destination]];
+
+    const [removed] = sourceItems.splice(result.source.index, 1);
+
+    destItems.splice(result.destination.index, 0, removed);
+
+    setTasks({
+      ...tasks,
+      [source]: sourceItems,
+      [destination]: destItems,
+    });
+
   };
-
-  // ==========================
-  // Delete Task
-  // ==========================
-
-  const deleteTask = async (id) => {
-    try {
-      await API.delete(`/tasks/${id}`);
-
-      fetchTasks();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // ==========================
-  // Drag and Drop
-  // ==========================
-
-  const onDragEnd = async (result) => {
-    const { source, destination } = result;
-
-    if (!destination) return;
-
-    if (
-      source.droppableId === destination.droppableId &&
-      source.index === destination.index
-    ) {
-      return;
-    }
-
-    const sourceTasks = tasks.filter(
-      (task) => task.status === source.droppableId
-    );
-
-    const movedTask = sourceTasks[source.index];
-
-    if (!movedTask) return;
-
-    try {
-      await API.put(`/tasks/${movedTask._id}`, {
-        status: destination.droppableId,
-      });
-
-      fetchTasks();
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // ==========================
-  // Filter Tasks
-  // ==========================
-
-  const todo = tasks.filter((task) => task.status === "todo");
-
-  const progress = tasks.filter(
-    (task) => task.status === "progress"
-  );
-
-  const review = tasks.filter(
-    (task) => task.status === "review"
-  );
-
-  const done = tasks.filter(
-    (task) => task.status === "done"
-  );
 
   return (
-    <div className="mt-8">
 
-      <AddTaskModal addTask={addTask} />
+    <DragDropContext onDragEnd={onDragEnd}>
 
-      <DragDropContext onDragEnd={onDragEnd}>
+      <div className="grid grid-cols-3 gap-6 mt-10">
 
-        <div className="flex gap-6 overflow-x-auto pb-10">
+        <Column title="Todo" tasks={tasks.Todo} />
 
-          <Column
-            title="📝 Todo"
-            columnId="todo"
-            tasks={todo}
-            onDelete={deleteTask}
-          />
+        <Column title="In Progress" tasks={tasks["In Progress"]} />
 
-          <Column
-            title="🚀 In Progress"
-            columnId="progress"
-            tasks={progress}
-            onDelete={deleteTask}
-          />
+        <Column title="Done" tasks={tasks.Done} />
 
-          <Column
-            title="🔍 Review"
-            columnId="review"
-            tasks={review}
-            onDelete={deleteTask}
-          />
+      </div>
 
-          <Column
-            title="✅ Done"
-            columnId="done"
-            tasks={done}
-            onDelete={deleteTask}
-          />
+    </DragDropContext>
 
-        </div>
-
-      </DragDropContext>
-
-    </div>
   );
 };
 
