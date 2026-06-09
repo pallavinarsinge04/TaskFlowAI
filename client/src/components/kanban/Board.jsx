@@ -1,139 +1,178 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
-import { v4 as uuid } from "uuid";
+
+import API from "../../api/axios";
+import socket from "../../socket/socket";
 
 import Column from "./Column";
 import AddTaskModal from "./AddTaskModal";
 
 const Board = () => {
-  const [columns, setColumns] = useState({
-    todo: [
-      {
-        id: uuid(),
-        title: "Design Landing Page",
-        description: "Create Hero Section",
-        priority: "High",
-      },
-    ],
+  const [tasks, setTasks] = useState([]);
 
-    progress: [
-      {
-        id: uuid(),
-        title: "Build Authentication",
-        description: "JWT Login & Register",
-        priority: "Medium",
-      },
-    ],
+  // ==========================
+  // Fetch Tasks
+  // ==========================
 
-    review: [
-      {
-        id: uuid(),
-        title: "Review Dashboard",
-        description: "Check UI and responsiveness",
-        priority: "Low",
-      },
-    ],
+  const fetchTasks = async () => {
+    try {
+      const res = await API.get("/tasks");
 
-    done: [
-      {
-        id: uuid(),
-        title: "Project Setup",
-        description: "MERN project initialized",
-        priority: "Completed",
-      },
-    ],
-  });
-
-  // Add New Task
-  const addTask = (title, description) => {
-    if (!title.trim()) return;
-
-    const newTask = {
-      id: uuid(),
-      title,
-      description,
-      priority: "Medium",
-    };
-
-    setColumns((prev) => ({
-      ...prev,
-      todo: [...prev.todo, newTask],
-    }));
+      setTasks(res.data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  // Delete Task
-  const deleteTask = (id) => {
-    const updatedColumns = {};
+  useEffect(() => {
+    fetchTasks();
 
-    Object.keys(columns).forEach((key) => {
-      updatedColumns[key] = columns[key].filter(
-        (task) => task.id !== id
-      );
+    socket.on("taskCreated", () => {
+      fetchTasks();
     });
 
-    setColumns(updatedColumns);
+    socket.on("taskUpdated", () => {
+      fetchTasks();
+    });
+
+    socket.on("taskDeleted", () => {
+      fetchTasks();
+    });
+
+    return () => {
+      socket.off("taskCreated");
+      socket.off("taskUpdated");
+      socket.off("taskDeleted");
+    };
+  }, []);
+
+  // ==========================
+  // Add Task
+  // ==========================
+
+  const addTask = async (title, description) => {
+    try {
+      await API.post("/tasks", {
+        title,
+        description,
+        priority: "Medium",
+        status: "todo",
+      });
+
+      fetchTasks();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
+  // ==========================
+  // Delete Task
+  // ==========================
+
+  const deleteTask = async (id) => {
+    try {
+      await API.delete(`/tasks/${id}`);
+
+      fetchTasks();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // ==========================
   // Drag and Drop
-  const onDragEnd = (result) => {
+  // ==========================
+
+  const onDragEnd = async (result) => {
     const { source, destination } = result;
 
     if (!destination) return;
 
-    const sourceColumn = [...columns[source.droppableId]];
-    const destinationColumn = [...columns[destination.droppableId]];
+    if (
+      source.droppableId === destination.droppableId &&
+      source.index === destination.index
+    ) {
+      return;
+    }
 
-    const [movedTask] = sourceColumn.splice(source.index, 1);
+    const sourceTasks = tasks.filter(
+      (task) => task.status === source.droppableId
+    );
 
-    destinationColumn.splice(destination.index, 0, movedTask);
+    const movedTask = sourceTasks[source.index];
 
-    setColumns({
-      ...columns,
-      [source.droppableId]: sourceColumn,
-      [destination.droppableId]: destinationColumn,
-    });
+    if (!movedTask) return;
+
+    try {
+      await API.put(`/tasks/${movedTask._id}`, {
+        status: destination.droppableId,
+      });
+
+      fetchTasks();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  return (
-    <div className="mt-6">
+  // ==========================
+  // Filter Tasks
+  // ==========================
 
-      {/* Add Task Form */}
+  const todo = tasks.filter((task) => task.status === "todo");
+
+  const progress = tasks.filter(
+    (task) => task.status === "progress"
+  );
+
+  const review = tasks.filter(
+    (task) => task.status === "review"
+  );
+
+  const done = tasks.filter(
+    (task) => task.status === "done"
+  );
+
+  return (
+    <div className="mt-8">
+
       <AddTaskModal addTask={addTask} />
 
-      {/* Kanban Board */}
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex gap-6 overflow-x-auto pb-6">
+
+        <div className="flex gap-6 overflow-x-auto pb-10">
 
           <Column
             title="📝 Todo"
             columnId="todo"
-            tasks={columns.todo}
+            tasks={todo}
             onDelete={deleteTask}
           />
 
           <Column
             title="🚀 In Progress"
             columnId="progress"
-            tasks={columns.progress}
+            tasks={progress}
             onDelete={deleteTask}
           />
 
           <Column
             title="🔍 Review"
             columnId="review"
-            tasks={columns.review}
+            tasks={review}
             onDelete={deleteTask}
           />
 
           <Column
             title="✅ Done"
             columnId="done"
-            tasks={columns.done}
+            tasks={done}
             onDelete={deleteTask}
           />
 
         </div>
+
       </DragDropContext>
+
     </div>
   );
 };
