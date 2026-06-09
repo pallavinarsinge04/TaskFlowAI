@@ -11,40 +11,22 @@ const {
   deleteTask,
 } = require("../controllers/taskController");
 
-// =====================
-// GET All Tasks
-// =====================
-
+// Get all tasks
 router.get("/", getTasks);
 
-// =====================
-// GET Single Task
-// =====================
-
+// Get single task
 router.get("/:id", getTaskById);
 
-// =====================
-// CREATE Task
-// =====================
-
+// Create task
 router.post("/", createTask);
 
-// =====================
-// UPDATE Task
-// =====================
-
+// Update task
 router.put("/:id", updateTask);
 
-// =====================
-// UPDATE Task Status
-// =====================
-
+// Update task status
 router.put("/:id/status", updateStatus);
 
-// =====================
-// DELETE Task
-// =====================
-
+// Delete task
 router.delete("/:id", deleteTask);
 
 module.exports = router;
