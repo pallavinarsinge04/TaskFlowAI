@@ -6,11 +6,10 @@ exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    const userExist = await User.findOne({ email });
+    const exists = await User.findOne({ email });
 
-    if (userExist) {
+    if (exists) {
       return res.status(400).json({
-        success: false,
         message: "User already exists",
       });
     }
@@ -29,37 +28,9 @@ exports.register = async (req, res) => {
       user,
     });
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ email });
-
-    if (
-      !user ||
-      !(await bcrypt.compare(password, user.password))
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid credentials",
-      });
-    }
-
-    res.json({
-      success: true,
-      token: generateToken(user._id),
-      user,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
       message: error.message,
     });
   }
