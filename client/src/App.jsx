@@ -16,6 +16,7 @@ import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import AITaskAnalyzer from "./pages/AITaskAnalyzer/AITaskAnalyzer";
 import TimeTracker from "./pages/TimeTracker/TimeTracker";
 import Analytics from "./pages/Analytics/Analytics";
+import Chat from "./pages/Chat/Chat";
 
 function App() {
   return (
@@ -108,6 +109,10 @@ function App() {
 <Route
   path="/analytics"
   element={<Analytics />}
+/>
+<Route
+  path="/chat"
+  element={<Chat />}
 />
       </Routes>
     </BrowserRouter>

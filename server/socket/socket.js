@@ -6,32 +6,33 @@ const initSocket = (server) => {
 
   io = new Server(server, {
     cors: {
-      origin: [
-        "http://localhost:5173",
-        "https://taskflowai.vercel.app",
-      ],
-      methods: ["GET", "POST", "PUT", "DELETE"],
+      origin: "http://localhost:5173",
       credentials: true,
     },
   });
 
-  let onlineUsers = 0;
-
   io.on("connection", (socket) => {
 
-    console.log("🟢 User Connected:", socket.id);
+    console.log(socket.id);
 
-    onlineUsers++;
+    socket.on("joinRoom", (room) => {
 
-    io.emit("onlineUsers", onlineUsers);
+      socket.join(room);
 
-    socket.on("disconnect", () => {
+    });
 
-      console.log("🔴 User Disconnected:", socket.id);
+    socket.on("sendMessage", (data) => {
 
-      onlineUsers--;
+      io.to(data.room).emit(
+        "receiveMessage",
+        data
+      );
 
-      io.emit("onlineUsers", onlineUsers);
+    });
+
+    socket.on("typing", (room) => {
+
+      socket.to(room).emit("userTyping");
 
     });
 
@@ -39,9 +40,6 @@ const initSocket = (server) => {
 
 };
 
-const getIO = () => io;
-
 module.exports = {
   initSocket,
-  getIO,
 };

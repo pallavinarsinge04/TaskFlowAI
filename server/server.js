@@ -114,7 +114,9 @@ const passwordRoutes = require(
 );
 const timeRoutes = require("./routes/timeRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 
+app.use("/api/messages", messageRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/time", timeRoutes);
 app.use(
