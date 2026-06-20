@@ -17,7 +17,7 @@ import AITaskAnalyzer from "./pages/AITaskAnalyzer/AITaskAnalyzer";
 import TimeTracker from "./pages/TimeTracker/TimeTracker";
 import Analytics from "./pages/Analytics/Analytics";
 import Chat from "./pages/Chat/Chat";
-
+import Meeting from "./pages/Meeting/Meeting";
 function App() {
   return (
     <BrowserRouter>
@@ -113,6 +113,13 @@ function App() {
 <Route
   path="/chat"
   element={<Chat />}
+/>
+<Route
+
+path="/meeting"
+
+element={<Meeting/>}
+
 />
       </Routes>
     </BrowserRouter>
