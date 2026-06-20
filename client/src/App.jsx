@@ -12,6 +12,8 @@ import Admin from "./pages/Admin/Admin";
 import Manager from "./pages/Manager/Manager";
 import Member from "./pages/Member/Member";
 import Profile from "./pages/Profile/Profile";
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
+import AITaskAnalyzer from "./pages/AITaskAnalyzer/AITaskAnalyzer";
 
 function App() {
   return (
@@ -88,6 +90,14 @@ function App() {
 <Route
   path="/profile"
   element={<Profile />}
+/>
+<Route
+  path="/forgot-password"
+  element={<ForgotPassword />}
+/>
+<Route
+  path="/ai-analyzer"
+  element={<AITaskAnalyzer />}
 />
       </Routes>
     </BrowserRouter>
