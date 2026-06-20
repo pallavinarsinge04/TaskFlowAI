@@ -15,6 +15,7 @@ import Profile from "./pages/Profile/Profile";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import AITaskAnalyzer from "./pages/AITaskAnalyzer/AITaskAnalyzer";
 import TimeTracker from "./pages/TimeTracker/TimeTracker";
+import Analytics from "./pages/Analytics/Analytics";
 
 function App() {
   return (
@@ -103,6 +104,10 @@ function App() {
 <Route
   path="/time-tracker"
   element={<TimeTracker />}
+/>
+<Route
+  path="/analytics"
+  element={<Analytics />}
 />
       </Routes>
     </BrowserRouter>
