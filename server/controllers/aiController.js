@@ -1,29 +1,14 @@
-const { generateResponse } = require("../services/aiService");
+const { getAISuggestion } = require("./../services/aiServices");
 
-exports.analyzeTask = async (req, res) => {
+exports.suggest = async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { task } = req.body;
 
-    const prompt = `
-Task Title: ${title}
-
-Description:
-${description}
-
-Provide:
-
-1. Priority
-2. Estimated Hours
-3. Summary
-4. Suggested Subtasks
-5. Productivity Tips
-`;
-
-    const response = await generateResponse(prompt);
+    const suggestion = getAISuggestion(task);
 
     res.json({
       success: true,
-      result: response,
+      suggestion,
     });
   } catch (error) {
     res.status(500).json({

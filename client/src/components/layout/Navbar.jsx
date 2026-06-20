@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import socket from "../../socket/socket";
+import { Link } from "react-router-dom";
+import socket from "./../../socket/socket";
 
-const Navbar = () => {
+function Navbar() {
   const [onlineUsers, setOnlineUsers] = useState(0);
 
   useEffect(() => {
@@ -26,12 +27,13 @@ const Navbar = () => {
         <span className="text-green-600 font-semibold">
           🟢 {onlineUsers} Online
         </span>
+
         <Link
-  to="/profile"
-  className="px-4 py-2 bg-blue-600 text-white rounded-lg"
->
-  👤 Profile
-</Link>
+          to="/profile"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+        >
+          👤 Profile
+        </Link>
 
         <img
           src="https://i.pravatar.cc/40"
@@ -43,6 +45,6 @@ const Navbar = () => {
 
     </div>
   );
-};
+}
 
 export default Navbar;

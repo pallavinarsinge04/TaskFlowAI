@@ -1,13 +1,27 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+function getAISuggestion(task) {
+  if (!task) return "Low";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const text = task.toLowerCase();
 
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
-});
+  if (
+    text.includes("bug") ||
+    text.includes("urgent") ||
+    text.includes("critical")
+  ) {
+    return "High";
+  }
 
-exports.generateResponse = async (prompt) => {
-  const result = await model.generateContent(prompt);
+  if (
+    text.includes("api") ||
+    text.includes("backend") ||
+    text.includes("database")
+  ) {
+    return "Medium";
+  }
 
-  return result.response.text();
+  return "Low";
+}
+
+module.exports = {
+  getAISuggestion,
 };

@@ -1,35 +1,66 @@
 const express = require("express");
+const http = require("http");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
-const http = require("http");
+const { Server } = require("socket.io");
 
-// Load Environment Variables
 dotenv.config();
 
-// Database Connection
+// Database
 const connectDB = require("./config/db");
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const aiRoutes = require("./routes/aiRoutes");
-const commentRoutes = require("./routes/commentRoutes");
-const projectRoutes = require("./routes/projectRoutes");
 
-// Socket
-const { initSocket } = require("./socket/socket");
-
-// Connect Database
+// Connect MongoDB
 connectDB();
 
 const app = express();
 const server = http.createServer(app);
 
-// ======================
-// Middlewares
-// ======================
+// Socket.io
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+});
 
+let onlineUsers = 0;
+
+io.on("connection", (socket) => {
+  console.log("User Connected:", socket.id);
+
+  onlineUsers++;
+
+  io.emit("onlineUsers", onlineUsers);
+
+  socket.on("disconnect", () => {
+    onlineUsers--;
+
+    io.emit("onlineUsers", onlineUsers);
+
+    console.log("User Disconnected");
+  });
+
+  socket.on("joinRoom", (room) => {
+    socket.join(room);
+  });
+
+  socket.on("sendMessage", (data) => {
+    io.to(data.room).emit("receiveMessage", data);
+  });
+
+  socket.on("typing", (room) => {
+    socket.to(room).emit("userTyping");
+  });
+});
+
+// Middlewares
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -38,40 +69,23 @@ app.use(
 );
 
 app.use(express.json());
-
 app.use(express.urlencoded({ extended: true }));
-
 app.use(cookieParser());
 
-// ======================
 // Routes
-// ======================
-
 app.use("/api/auth", authRoutes);
-
 app.use("/api/tasks", taskRoutes);
-
 app.use("/api/ai", aiRoutes);
 
-app.use("/api/comments", commentRoutes);
-
-app.use("/api/projects", projectRoutes);
-
-// ======================
-// Home Route
-// ======================
-
+// Home
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "🚀 TaskFlow AI Backend Running Successfully",
+    message: "🚀 TaskFlow AI Backend Running",
   });
 });
 
-// ======================
-// Health Check
-// ======================
-
+// Health
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
@@ -79,10 +93,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// ======================
-// 404 Handler
-// ======================
-
+// 404
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -90,69 +101,8 @@ app.use((req, res) => {
   });
 });
 
-// ======================
-// Socket.io Initialization
-// ======================
-
-initSocket(server);
-
-// ======================
-// Start Server
-// ======================
-const notificationRoutes = require("./routes/notificationRoutes");
-const analyticsRoutes = require("./routes/analyticsRoutes");
 const PORT = process.env.PORT || 5000;
-const teamRoutes = require("./routes/teamRoutes");
-const calendarRoutes = require("./routes/calendarRoutes");
-const commentRoutes = require("./routes/commentRoutes");
-const attachmentRoutes = require("./routes/attachmentRoutes");
-const userRoutes = require("./routes/userRoutes");
-const profileRoutes = require("./routes/profileRoutes");
-const searchRoutes = require("./routes/searchRoutes");
-const passwordRoutes = require(
-  "./routes/passwordRoutes"
-);
-const timeRoutes = require("./routes/timeRoutes");
-const analyticsRoutes = require("./routes/analyticsRoutes");
-const messageRoutes = require("./routes/messageRoutes");
-const { Server } = require("socket.io");
 
-const videoSocket=require("./socket/videoSocket");
-
-const io=new Server(server,{
-
-    cors:{
-
-        origin:"http://localhost:5173"
-
-    }
-
-});
-
-videoSocket(io);
-const adminRoutes=require("./routes/adminRoutes");
-
-app.use("/api/admin",adminRoutes);
-app.use("/api/messages", messageRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/time", timeRoutes);
-app.use(
-  "/api/password",
-  passwordRoutes
-);
-app.use("/api/search", searchRoutes);
-app.use("/api/profile", profileRoutes);
-app.use("/api/comments", commentRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/attachments", attachmentRoutes);
-app.use("/uploads", express.static("uploads"));
-app.use("/api/calendar", calendarRoutes);
-app.use("/api/analytics", analyticsRoutes);
-app.use("/api/team", teamRoutes);
-app.use("/api/notifications", notificationRoutes);
 server.listen(PORT, () => {
-  console.log("=================================");
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`🌐 http://localhost:${PORT}`);
-  console.log("=================================");
+  console.log(`🚀 Server running on ${PORT}`);
 });

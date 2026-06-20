@@ -2,10 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 
-const {
-  analyzeTask,
-} = require("../controllers/aiController");
+const { suggest } = require("../controllers/aiController");
 
-router.post("/analyze", analyzeTask);
+router.post("/suggest", suggest);
 
 module.exports = router;

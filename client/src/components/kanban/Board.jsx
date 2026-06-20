@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-import SearchBar from "./SearchBar";
-import TaskFilters from "./TaskFilters";
+import SearchBar from "./../../components/SearchBar";
+import TaskFilters from "./../../components/TaskFilters";
 
 const Board = () => {
   const [tasks, setTasks] = useState([]);
