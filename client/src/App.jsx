@@ -7,6 +7,10 @@ import Projects from "./pages/Projects/Projects";
 import Team from "./pages/Team/Team";
 import Analytics from "./pages/Analytics/Analytics";
 import Calendar from "./pages/Calendar/Calendar";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Admin from "./pages/Admin/Admin";
+import Manager from "./pages/Manager/Manager";
+import Member from "./pages/Member/Member";
 function App() {
   return (
     <BrowserRouter>
@@ -52,6 +56,32 @@ function App() {
 <Route
   path="/calendar"
   element={<Calendar />}
+/>
+<Route
+  path="/admin"
+  element={
+    <ProtectedRoute role="Admin">
+      <Admin />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/manager"
+  element={
+    <ProtectedRoute role="Manager">
+      <Manager />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/member"
+  element={
+    <ProtectedRoute role="Member">
+      <Member />
+    </ProtectedRoute>
+  }
 />
 
       </Routes>

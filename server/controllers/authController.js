@@ -16,13 +16,12 @@ exports.register = async (req, res) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
+  name,
+  email,
+  password: hashedPassword,
+  role: req.body.role || "Member",
+});
 
     res.status(201).json({
       success: true,

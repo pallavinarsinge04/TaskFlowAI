@@ -106,11 +106,11 @@ const teamRoutes = require("./routes/teamRoutes");
 const calendarRoutes = require("./routes/calendarRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const attachmentRoutes = require("./routes/attachmentRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 app.use("/api/comments", commentRoutes);
-
+app.use("/api/users", userRoutes);
 app.use("/api/attachments", attachmentRoutes);
-
 app.use("/uploads", express.static("uploads"));
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/analytics", analyticsRoutes);
