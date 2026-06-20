@@ -5,6 +5,7 @@ import Register from "./pages/Register/Register";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Projects from "./pages/Projects/Projects";
 import Team from "./pages/Team/Team";
+import Analytics from "./pages/Analytics/Analytics";
 function App() {
   return (
     <BrowserRouter>
@@ -42,6 +43,10 @@ function App() {
         <Route
   path="/team"
   element={<Team />}
+/>
+<Route
+  path="/analytics"
+  element={<Analytics />}
 />
 
       </Routes>
