@@ -19,6 +19,8 @@ import Analytics from "./pages/Analytics/Analytics";
 import Chat from "./pages/Chat/Chat";
 import Meeting from "./pages/Meeting/Meeting";
 import VoiceAssistantPage from "./pages/VoiceAssistant/VoiceAssistantPage";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import Users from "./pages/Admin/Users";
 
 function App() {
   return (
@@ -126,6 +128,21 @@ element={<Meeting/>}
 <Route
   path="/voice"
   element={<VoiceAssistantPage />}
+/>
+<Route
+
+path="/admin"
+
+element={<AdminDashboard/>}
+
+/>
+
+<Route
+
+path="/admin/users"
+
+element={<Users/>}
+
 />
       </Routes>
     </BrowserRouter>

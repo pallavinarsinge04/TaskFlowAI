@@ -130,7 +130,9 @@ const io=new Server(server,{
 });
 
 videoSocket(io);
+const adminRoutes=require("./routes/adminRoutes");
 
+app.use("/api/admin",adminRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/time", timeRoutes);
