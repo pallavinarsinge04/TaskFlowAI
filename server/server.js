@@ -107,7 +107,9 @@ const calendarRoutes = require("./routes/calendarRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const attachmentRoutes = require("./routes/attachmentRoutes");
 const userRoutes = require("./routes/userRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 
+app.use("/api/profile", profileRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/attachments", attachmentRoutes);

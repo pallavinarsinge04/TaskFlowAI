@@ -11,6 +11,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Admin from "./pages/Admin/Admin";
 import Manager from "./pages/Manager/Manager";
 import Member from "./pages/Member/Member";
+import Profile from "./pages/Profile/Profile";
+
 function App() {
   return (
     <BrowserRouter>
@@ -83,7 +85,10 @@ function App() {
     </ProtectedRoute>
   }
 />
-
+<Route
+  path="/profile"
+  element={<Profile />}
+/>
       </Routes>
     </BrowserRouter>
   );
