@@ -1,11 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
 import Landing from "./pages/Landing/Landing";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Projects from "./pages/Projects/Projects";
-
+import Team from "./pages/Team/Team";
 function App() {
   return (
     <BrowserRouter>
@@ -39,6 +38,11 @@ function App() {
           path="/projects"
           element={<Projects />}
         />
+
+        <Route
+  path="/team"
+  element={<Team />}
+/>
 
       </Routes>
     </BrowserRouter>

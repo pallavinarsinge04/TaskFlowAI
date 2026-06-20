@@ -2,11 +2,10 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../../api/axios";
 
-const Register = () => {
+const Login = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
   });
@@ -22,14 +21,16 @@ const Register = () => {
     e.preventDefault();
 
     try {
-      const res = await API.post("/auth/register", formData);
+      const res = await API.post("/auth/login", formData);
 
-      alert(res.data.message || "Registration Successful");
+      localStorage.setItem("token", res.data.token);
 
-      navigate("/login");
+      alert("Login Successful");
+
+      navigate("/dashboard");
     } catch (error) {
       alert(
-        error.response?.data?.message || "Registration Failed"
+        error.response?.data?.message || "Login Failed"
       );
     }
   };
@@ -41,18 +42,8 @@ const Register = () => {
         className="bg-white p-8 rounded-xl shadow-lg w-96"
       >
         <h1 className="text-3xl font-bold text-center mb-6">
-          Register
+          Login
         </h1>
-
-        <input
-          type="text"
-          name="name"
-          placeholder="Enter Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full border p-3 rounded mb-4"
-          required
-        />
 
         <input
           type="email"
@@ -76,18 +67,15 @@ const Register = () => {
 
         <button
           type="submit"
-          className="w-full bg-green-600 text-white p-3 rounded hover:bg-green-700"
+          className="w-full bg-blue-600 text-white p-3 rounded"
         >
-          Register
+          Login
         </button>
 
-        <p className="text-center mt-4">
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            className="text-blue-600 font-semibold"
-          >
-            Login
+        <p className="mt-4 text-center">
+          Don't have an account?{" "}
+          <Link to="/register" className="text-blue-600">
+            Register
           </Link>
         </p>
       </form>
@@ -95,4 +83,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default Login;

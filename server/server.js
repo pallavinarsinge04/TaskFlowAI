@@ -101,7 +101,8 @@ initSocket(server);
 // ======================
 
 const PORT = process.env.PORT || 5000;
-
+const teamRoutes = require("./routes/teamRoutes");
+app.use("/api/team", teamRoutes);
 server.listen(PORT, () => {
   console.log("=================================");
   console.log(`🚀 Server running on port ${PORT}`);
