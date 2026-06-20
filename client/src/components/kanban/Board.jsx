@@ -1,81 +1,79 @@
-import { useState } from "react";
-import { DragDropContext } from "@hello-pangea/dnd";
-import Column from "./Column";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+import SearchBar from "./SearchBar";
+import TaskFilters from "./TaskFilters";
 
 const Board = () => {
+  const [tasks, setTasks] = useState([]);
 
-  const [tasks, setTasks] = useState({
+  const [keyword, setKeyword] = useState("");
 
-    Todo: [
+  const [status, setStatus] = useState("All");
+
+  const [priority, setPriority] =
+    useState("All");
+
+  useEffect(() => {
+    searchTasks();
+  }, [keyword, status, priority]);
+
+  const searchTasks = async () => {
+    const res = await axios.get(
+      "http://localhost:5000/api/search",
       {
-        _id: "1",
-        title: "Login UI",
-        description: "Create Login Screen",
-        priority: "High",
-        assignee: "Pallavi",
-      },
-    ],
+        params: {
+          keyword,
+          status,
+          priority,
+        },
+      }
+    );
 
-    "In Progress": [
-      {
-        _id: "2",
-        title: "Dashboard",
-        description: "Build Dashboard",
-        priority: "Medium",
-        assignee: "John",
-      },
-    ],
-
-    Done: [
-      {
-        _id: "3",
-        title: "Landing Page",
-        description: "Completed",
-        priority: "Low",
-        assignee: "Alex",
-      },
-    ],
-
-  });
-
-  const onDragEnd = (result) => {
-
-    if (!result.destination) return;
-
-    const source = result.source.droppableId;
-    const destination = result.destination.droppableId;
-
-    const sourceItems = [...tasks[source]];
-    const destItems = [...tasks[destination]];
-
-    const [removed] = sourceItems.splice(result.source.index, 1);
-
-    destItems.splice(result.destination.index, 0, removed);
-
-    setTasks({
-      ...tasks,
-      [source]: sourceItems,
-      [destination]: destItems,
-    });
-
+    setTasks(res.data.tasks);
   };
 
   return (
+    <div>
 
-    <DragDropContext onDragEnd={onDragEnd}>
+      <SearchBar
+        keyword={keyword}
+        setKeyword={setKeyword}
+      />
 
-      <div className="grid grid-cols-3 gap-6 mt-10">
+      <TaskFilters
+        status={status}
+        setStatus={setStatus}
+        priority={priority}
+        setPriority={setPriority}
+      />
 
-        <Column title="Todo" tasks={tasks.Todo} />
+      <div className="grid grid-cols-3 gap-5 mt-8">
 
-        <Column title="In Progress" tasks={tasks["In Progress"]} />
+        {tasks.map((task) => (
+          <div
+            key={task._id}
+            className="bg-white p-5 rounded-xl shadow"
+          >
+            <h2 className="font-bold text-xl">
+              {task.title}
+            </h2>
 
-        <Column title="Done" tasks={tasks.Done} />
+            <p>{task.description}</p>
+
+            <p className="mt-2">
+              Status: {task.status}
+            </p>
+
+            <p>
+              Priority: {task.priority}
+            </p>
+          </div>
+        ))}
 
       </div>
 
-    </DragDropContext>
-
+    </div>
   );
 };
 

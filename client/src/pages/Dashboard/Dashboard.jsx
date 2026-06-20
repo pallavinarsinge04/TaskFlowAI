@@ -12,6 +12,22 @@ const Dashboard = () => {
       <Sidebar />
 
       {/* Main Content */}
+      <div className="bg-white rounded-xl shadow p-6 mt-8">
+
+  <h2 className="text-2xl font-bold mb-4">
+
+    🔍 Smart Task Search
+
+  </h2>
+
+  <p>
+
+    Search tasks by title, description,
+    status and priority instantly.
+
+  </p>
+
+</div>
 
       <div className="ml-64 flex-1">
         {/* Navbar */}

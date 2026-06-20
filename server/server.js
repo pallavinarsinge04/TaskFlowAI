@@ -108,7 +108,9 @@ const commentRoutes = require("./routes/commentRoutes");
 const attachmentRoutes = require("./routes/attachmentRoutes");
 const userRoutes = require("./routes/userRoutes");
 const profileRoutes = require("./routes/profileRoutes");
+const searchRoutes = require("./routes/searchRoutes");
 
+app.use("/api/search", searchRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/users", userRoutes);
