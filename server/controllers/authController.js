@@ -75,5 +75,22 @@ exports.login = async (req, res) => {
       success: false,
       message: error.message,
     });
+    const sendEmail = require(
+  "../utils/sendEmail"
+);
+
+await sendEmail(
+  email,
+  "Welcome to TaskFlow AI",
+  `
+    <h1>Welcome ${name}</h1>
+
+    <p>
+
+    Your account has been created successfully.
+
+    </p>
+  `
+);
   }
 };

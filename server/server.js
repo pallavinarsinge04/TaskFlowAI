@@ -109,7 +109,14 @@ const attachmentRoutes = require("./routes/attachmentRoutes");
 const userRoutes = require("./routes/userRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const searchRoutes = require("./routes/searchRoutes");
+const passwordRoutes = require(
+  "./routes/passwordRoutes"
+);
 
+app.use(
+  "/api/password",
+  passwordRoutes
+);
 app.use("/api/search", searchRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/comments", commentRoutes);

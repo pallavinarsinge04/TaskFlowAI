@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema(
       default: "Member",
     },
   },
+  
   {
     timestamps: true,
   }
