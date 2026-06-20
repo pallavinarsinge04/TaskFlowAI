@@ -3,7 +3,7 @@ import Navbar from "../../components/layout/Navbar";
 import StatCard from "./StatsCard";
 import Board from "./../../components/kanban/Board";
 import AIAssistant from "./AIAssistant";
-
+import NotificationPanel from "./../../components/notifications/NotificationPanel";
 const Dashboard = () => {
   return (
     <div className="flex bg-gray-100 min-h-screen">
@@ -30,6 +30,7 @@ const Dashboard = () => {
 
             <StatCard title="Team" value="12" />
           </div>
+          <NotificationPanel />
 
           {/* Kanban Board */}
 

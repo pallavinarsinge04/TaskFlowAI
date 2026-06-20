@@ -99,10 +99,11 @@ initSocket(server);
 // ======================
 // Start Server
 // ======================
-
+const notificationRoutes = require("./routes/notificationRoutes");
 const PORT = process.env.PORT || 5000;
 const teamRoutes = require("./routes/teamRoutes");
 app.use("/api/team", teamRoutes);
+app.use("/api/notifications", notificationRoutes);
 server.listen(PORT, () => {
   console.log("=================================");
   console.log(`🚀 Server running on port ${PORT}`);
