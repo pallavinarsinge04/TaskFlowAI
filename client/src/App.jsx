@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard/Dashboard";
 import Projects from "./pages/Projects/Projects";
 import Team from "./pages/Team/Team";
 import Analytics from "./pages/Analytics/Analytics";
+import Calendar from "./pages/Calendar/Calendar";
 function App() {
   return (
     <BrowserRouter>
@@ -47,6 +48,10 @@ function App() {
 <Route
   path="/analytics"
   element={<Analytics />}
+/>
+<Route
+  path="/calendar"
+  element={<Calendar />}
 />
 
       </Routes>
