@@ -115,6 +115,21 @@ const passwordRoutes = require(
 const timeRoutes = require("./routes/timeRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const { Server } = require("socket.io");
+
+const videoSocket=require("./socket/videoSocket");
+
+const io=new Server(server,{
+
+    cors:{
+
+        origin:"http://localhost:5173"
+
+    }
+
+});
+
+videoSocket(io);
 
 app.use("/api/messages", messageRoutes);
 app.use("/api/analytics", analyticsRoutes);

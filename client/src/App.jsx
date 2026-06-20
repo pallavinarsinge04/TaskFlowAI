@@ -18,6 +18,8 @@ import TimeTracker from "./pages/TimeTracker/TimeTracker";
 import Analytics from "./pages/Analytics/Analytics";
 import Chat from "./pages/Chat/Chat";
 import Meeting from "./pages/Meeting/Meeting";
+import VoiceAssistantPage from "./pages/VoiceAssistant/VoiceAssistantPage";
+
 function App() {
   return (
     <BrowserRouter>
@@ -120,6 +122,10 @@ path="/meeting"
 
 element={<Meeting/>}
 
+/>
+<Route
+  path="/voice"
+  element={<VoiceAssistantPage />}
 />
       </Routes>
     </BrowserRouter>
