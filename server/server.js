@@ -112,7 +112,9 @@ const searchRoutes = require("./routes/searchRoutes");
 const passwordRoutes = require(
   "./routes/passwordRoutes"
 );
+const timeRoutes = require("./routes/timeRoutes");
 
+app.use("/api/time", timeRoutes);
 app.use(
   "/api/password",
   passwordRoutes
