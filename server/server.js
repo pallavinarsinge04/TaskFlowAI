@@ -104,6 +104,14 @@ const analyticsRoutes = require("./routes/analyticsRoutes");
 const PORT = process.env.PORT || 5000;
 const teamRoutes = require("./routes/teamRoutes");
 const calendarRoutes = require("./routes/calendarRoutes");
+const commentRoutes = require("./routes/commentRoutes");
+const attachmentRoutes = require("./routes/attachmentRoutes");
+
+app.use("/api/comments", commentRoutes);
+
+app.use("/api/attachments", attachmentRoutes);
+
+app.use("/uploads", express.static("uploads"));
 app.use("/api/calendar", calendarRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/team", teamRoutes);

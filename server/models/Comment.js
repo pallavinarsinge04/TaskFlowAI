@@ -5,15 +5,14 @@ const commentSchema = new mongoose.Schema(
     taskId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Task",
-      required: true,
     },
 
-    user: {
+    author: {
       type: String,
       required: true,
     },
 
-    message: {
+    text: {
       type: String,
       required: true,
     },
