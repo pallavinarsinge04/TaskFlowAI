@@ -3,24 +3,29 @@ const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
 
-const app = express();
-const server = http.createServer(app); // ✅ FIRST
-const onlineUsers = new Map();
-const profileRoutes = require("./routes/profileRoutes");
 const connectDB = require("./config/db");
+const authRoutes = require("./routes/authRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+
+const app = express();
+const server = http.createServer(app);
+
 connectDB();
+
+// Middleware
 app.use(cors({
   origin: "http://localhost:5173",
   credentials: true
 }));
-const authRoutes = require("./routes/authRoutes");
 
-
-app.use("/api/auth", authRoutes);
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 
+// Socket
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
@@ -31,10 +36,8 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("Connected:", socket.id);
 
-  socket.emit("onlineUsers", 1);
-
   socket.on("disconnect", () => {
-    console.log("Disconnected");
+    console.log("Disconnected:", socket.id);
   });
 });
 

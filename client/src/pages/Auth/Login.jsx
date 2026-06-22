@@ -20,15 +20,11 @@ const handleSubmit = async (e) => {
 
     alert("Login Successful");
 
-    if (res.data.user.role === "Admin") {
-      navigate("/admin");
-    } else if (res.data.user.role === "Manager") {
-      navigate("/manager");
-    } else {
-      navigate("/member");
-    }
+    navigate("/dashboard");
 
   } catch (err) {
+
+    console.log(err);
 
     alert(
       err.response?.data?.message ||

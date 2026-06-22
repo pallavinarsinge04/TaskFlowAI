@@ -28,25 +28,33 @@ function Register() {
 
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    e.preventDefault();
+  try {
 
-    try {
+    const res = await API.post(
+      "/auth/register",
+      form
+    );
 
-      await API.post("/auth/register", form);
+    console.log(res.data);
 
-      alert("Registration Successful");
+    alert("Registration Successful");
 
-      navigate("/login");
+    navigate("/login");
 
-    } catch (err) {
+  } catch (err) {
 
-      alert(err.response?.data?.message || "Registration Failed");
+    console.log(err);
 
-    }
+    alert(
+      err.response?.data?.message ||
+      "Registration Failed"
+    );
 
-  };
+  }
+};
 
   return (
 
