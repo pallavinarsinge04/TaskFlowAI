@@ -1,95 +1,110 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import "./Profile.css";
 
-const Profile = () => {
-
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  const [profile, setProfile] = useState({});
-
-  useEffect(() => {
-
-    loadProfile();
-
-  }, []);
-
-  const loadProfile = async () => {
-
-    const res = await axios.get(
-
-      `http://localhost:5000/api/profile/${user._id}`
-
-    );
-
-    setProfile(res.data.user);
-
+function Profile() {
+  const user = {
+    name: "Pallavi Narsinge",
+    role: "Full Stack Developer",
+    email: "pallavi@example.com",
+    phone: "+91 9876543210",
+    location: "Latur, Maharashtra",
+    bio: "Passionate Full Stack Developer focused on React, Node.js, MongoDB, Android Development and AI-powered applications.",
+    image: "https://i.pravatar.cc/300",
   };
 
   return (
+    <div className="profile-page">
 
-    <div className="min-h-screen bg-gray-100 p-10">
-
-      <div className="bg-white p-8 rounded-xl shadow-lg max-w-3xl mx-auto">
-
-        <div className="flex items-center gap-6">
-
-          <img
-
-            src={
-              profile.profileImage ||
-              "https://via.placeholder.com/120"
-            }
-
-            className="w-32 h-32 rounded-full object-cover"
-
-          />
+      <div className="profile-banner">
+        <div className="profile-card">
+          <img src={user.image} alt="" />
 
           <div>
+            <h1>{user.name}</h1>
+            <p>{user.role}</p>
 
-            <h1 className="text-3xl font-bold">
-
-              {profile.name}
-
-            </h1>
-
-            <p>{profile.email}</p>
-
-            <p>{profile.role}</p>
-
+            <div className="profile-actions">
+              <button>Edit Profile</button>
+              <button>Share Profile</button>
+            </div>
           </div>
+        </div>
+      </div>
 
+      <div className="profile-grid">
+
+        <div className="card">
+          <h2>About Me</h2>
+          <p>{user.bio}</p>
         </div>
 
-        <div className="mt-8">
+        <div className="card">
+          <h2>Contact Information</h2>
+          <p>Email: {user.email}</p>
+          <p>Phone: {user.phone}</p>
+          <p>Location: {user.location}</p>
+        </div>
 
-          <h2 className="text-xl font-bold mb-4">
+        <div className="card">
+          <h2>Skills</h2>
 
-            About
+          <div className="skills">
+            <span>React</span>
+            <span>Node.js</span>
+            <span>MongoDB</span>
+            <span>Express</span>
+            <span>Java</span>
+            <span>Kotlin</span>
+            <span>Firebase</span>
+            <span>AI</span>
+          </div>
+        </div>
 
-          </h2>
+        <div className="card">
+          <h2>Statistics</h2>
 
-          <p>{profile.bio}</p>
+          <div className="stats">
+            <div>
+              <h3>25</h3>
+              <p>Projects</p>
+            </div>
 
-          <p className="mt-2">
+            <div>
+              <h3>120</h3>
+              <p>Tasks</p>
+            </div>
 
-            📞 {profile.phone}
+            <div>
+              <h3>98%</h3>
+              <p>Completion</p>
+            </div>
+          </div>
+        </div>
 
-          </p>
+        <div className="card">
+          <h2>Recent Projects</h2>
 
-          <p>
+          <ul>
+            <li>TaskFlow AI</li>
+            <li>Smart AI Ecommerce</li>
+            <li>Student Attendance App</li>
+            <li>Flashcard Quiz App</li>
+          </ul>
+        </div>
 
-            📍 {profile.location}
+        <div className="card">
+          <h2>AI Productivity Score</h2>
 
-          </p>
+          <div className="progress">
+            <div className="progress-fill"></div>
+          </div>
 
+          <h3>92%</h3>
         </div>
 
       </div>
 
     </div>
-
   );
-
-};
+}
 
 export default Profile;

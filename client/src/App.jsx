@@ -59,22 +59,12 @@ function App() {
   path="/team"
   element={<Team />}
 />
-<Route
-  path="/analytics"
-  element={<Analytics />}
-/>
+
 <Route
   path="/calendar"
   element={<Calendar />}
 />
-<Route
-  path="/admin"
-  element={
-    <ProtectedRoute role="Admin">
-      <Admin />
-    </ProtectedRoute>
-  }
-/>
+
 
 <Route
   path="/manager"
@@ -128,13 +118,7 @@ element={<Meeting/>}
   path="/voice"
   element={<VoiceAssistantPage />}
 />
-<Route
 
-path="/admin"
-
-element={<AdminDashboard/>}
-
-/>
 
 <Route
 
