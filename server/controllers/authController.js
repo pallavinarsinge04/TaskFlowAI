@@ -16,12 +16,14 @@ exports.register = async (req, res) => {
       });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await User.create({
-  name,
-  email,
-  password: hashedPassword,
-  role: req.body.role || "Member",
-});
+      name,
+      email,
+      password: hashedPassword,
+      role: req.body.role || "Member",
+    });
 
     res.status(201).json({
       success: true,
@@ -29,6 +31,7 @@ exports.register = async (req, res) => {
       token: generateToken(user._id),
       user,
     });
+
   } catch (error) {
     console.log(error);
 
