@@ -2,36 +2,22 @@ const mongoose = require("mongoose");
 
 const projectSchema = new mongoose.Schema(
   {
-    name: {
+    title: {
       type: String,
       required: true,
     },
 
-    description: {
-      type: String,
-      default: "",
-    },
-
-    status: {
-      type: String,
-      enum: ["Active", "Completed", "Archived"],
-      default: "Active",
-    },
-
     owner: {
-      type: String,
-      default: "",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
 
-    members: [
-      {
-        type: String,
-      },
-    ],
+    progress: {
+      type: Number,
+      default: 0,
+    },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Project", projectSchema);
