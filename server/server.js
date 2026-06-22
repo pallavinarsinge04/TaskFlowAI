@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
@@ -12,20 +14,16 @@ const server = http.createServer(app);
 
 connectDB();
 
-// Middleware
 app.use(cors({
   origin: "http://localhost:5173",
   credentials: true
 }));
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 
-// Socket
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
@@ -41,6 +39,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(5000, () => {
-  console.log("Server Started on 5000");
+server.listen(process.env.PORT || 5000, () => {
+  console.log(`Server Started on ${process.env.PORT || 5000}`);
 });
