@@ -1,80 +1,72 @@
-import {
-  FaHome,
-  FaTasks,
-  FaProjectDiagram,
-  FaUsers,
-  FaRobot,
-  FaCog
-} from "react-icons/fa";
+import { NavLink, useNavigate } from "react-router-dom";
+import "./Sidebar.css";
 
-const Sidebar = () => {
+function Sidebar() {
+  const navigate = useNavigate();
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
+  const menu = [
+    { icon: "🏠", title: "Dashboard", path: "/dashboard" },
+    { icon: "📝", title: "Tasks", path: "/tasks" },
+    { icon: "📁", title: "Projects", path: "/projects" },
+    { icon: "🤖", title: "AI Task Analyzer", path: "/ai-analyzer" },
+    { icon: "🧠", title: "AI Assistant", path: "/ai-assistant" },
+    { icon: "📊", title: "Analytics", path: "/analytics" },
+    { icon: "⏱", title: "Time Tracker", path: "/time-tracker" },
+    { icon: "💬", title: "Chat", path: "/chat" },
+    { icon: "🎥", title: "Meetings", path: "/meeting" },
+    { icon: "👥", title: "Team", path: "/team" },
+    { icon: "📅", title: "Calendar", path: "/calendar" },
+    { icon: "🔔", title: "Notifications", path: "/notifications" },
+    { icon: "👤", title: "Profile", path: "/profile" },
+    { icon: "⚙️", title: "Settings", path: "/settings" },
+  ];
 
   return (
+    <aside className="sidebar">
 
-    <div className="w-64 h-screen bg-slate-900 text-white fixed">
+      <div className="logo">
+        <h2>🚀 TaskFlow AI</h2>
+        <p>Project Management</p>
+      </div>
 
-      <h1 className="text-3xl font-bold p-6 text-blue-400">
+      <nav className="menu">
 
-        🚀 TaskFlow AI
+        {menu.map((item) => (
+          <NavLink
+            key={item.title}
+            to={item.path}
+            className={({ isActive }) =>
+              isActive ? "menu-item active" : "menu-item"
+            }
+          >
+            <span className="icon">{item.icon}</span>
 
-      </h1>
+            <span>{item.title}</span>
 
-      <ul className="space-y-2 p-4">
+          </NavLink>
+        ))}
 
-        <li className="flex items-center gap-3 p-3 rounded hover:bg-slate-700 cursor-pointer">
+      </nav>
 
-          <FaHome />
+      <div className="sidebar-footer">
 
-          Dashboard
+        <button
+          className="logout-btn"
+          onClick={logout}
+        >
+          🚪 Logout
+        </button>
 
-        </li>
+      </div>
 
-        <li className="flex items-center gap-3 p-3 rounded hover:bg-slate-700 cursor-pointer">
-
-          <FaProjectDiagram />
-
-          Projects
-
-        </li>
-
-        <li className="flex items-center gap-3 p-3 rounded hover:bg-slate-700 cursor-pointer">
-
-          <FaTasks />
-
-          Tasks
-
-        </li>
-
-        <li className="flex items-center gap-3 p-3 rounded hover:bg-slate-700 cursor-pointer">
-
-          <FaUsers />
-
-          Team
-
-        </li>
-
-        <li className="flex items-center gap-3 p-3 rounded hover:bg-slate-700 cursor-pointer">
-
-          <FaRobot />
-
-          AI Assistant
-
-        </li>
-
-        <li className="flex items-center gap-3 p-3 rounded hover:bg-slate-700 cursor-pointer">
-
-          <FaCog />
-
-          Settings
-
-        </li>
-
-      </ul>
-
-    </div>
-
+    </aside>
   );
-
-};
+}
 
 export default Sidebar;

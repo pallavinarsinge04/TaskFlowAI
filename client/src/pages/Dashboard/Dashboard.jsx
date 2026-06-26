@@ -1,103 +1,129 @@
-import Sidebar from "./Sidebar";
-import { useNavigate } from "react-router-dom";
+import "./Dashboard.css";
+import Sidebar from "./../../components/Sidebar/Sidebar"
+
+import Navbar from "./Navbar";
+import StatsCard from "./StatsCard";
+import ProductivityChart from "./ProductivityChart";
+import ProjectProgress from "./ProjectProgress";
+import RecentTasks from "./RecentTasks";
+import AIInsights from "./AIInsights";
+import TeamMembers from "./TeamMembers";
+import Meetings from "./Meetings";
+import Notifications from "./Notifications";
+import Activity from "./Activity";
 
 function Dashboard() {
-  const navigate = useNavigate();
-
   return (
-    <div className="flex bg-gray-100 min-h-screen">
+    <div className="dashboard">
 
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <div className="flex-1">
+      <div className="dashboard-main">
 
-        {/* Navbar */}
-        <div className="bg-blue-700 text-white flex justify-between items-center px-10 py-5 shadow">
+        {/* Top Navbar */}
+        <Navbar />
 
-          <h1 className="text-3xl font-bold">
-            🚀 TaskFlow AI Dashboard
-          </h1>
+        {/* Welcome Section */}
+        <section className="welcome-section">
 
-          <button
-            onClick={() => navigate("/login")}
-            className="bg-red-500 hover:bg-red-600 px-5 py-2 rounded-lg"
-          >
-            Logout
+          <div>
+            <h1>Welcome Back 👋</h1>
+            <p>
+              Manage your projects, collaborate with your team and
+              boost productivity using AI.
+            </p>
+          </div>
+
+          <button className="create-btn">
+            + New Project
           </button>
 
-        </div>
-
-        {/* Welcome */}
-
-        <div className="px-10 py-8">
-
-          <h2 className="text-4xl font-bold">
-            Welcome Back 👋
-          </h2>
-
-          <p className="text-gray-500 mt-2">
-            Manage your projects from one place.
-          </p>
-
-        </div>
+        </section>
 
         {/* Statistics */}
+        <section className="stats-grid">
 
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 px-10">
+          <StatsCard
+            title="Total Tasks"
+            value="128"
+            color="#2563EB"
+            icon="📝"
+          />
 
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3>Total Tasks</h3>
-            <h1 className="text-4xl text-blue-600 font-bold mt-2">24</h1>
-          </div>
+          <StatsCard
+            title="Projects"
+            value="14"
+            color="#22C55E"
+            icon="📁"
+          />
 
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3>Projects</h3>
-            <h1 className="text-4xl text-green-600 font-bold mt-2">8</h1>
-          </div>
+          <StatsCard
+            title="Completed"
+            value="102"
+            color="#8B5CF6"
+            icon="✅"
+          />
 
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3>Completed</h3>
-            <h1 className="text-4xl text-purple-600 font-bold mt-2">17</h1>
-          </div>
+          <StatsCard
+            title="Team Members"
+            value="21"
+            color="#F59E0B"
+            icon="👥"
+          />
 
-          <div className="bg-white p-6 rounded-xl shadow">
-            <h3>Productivity</h3>
-            <h1 className="text-4xl text-orange-600 font-bold mt-2">
-              89%
-            </h1>
-          </div>
+          <StatsCard
+            title="Productivity"
+            value="92%"
+            color="#EF4444"
+            icon="🔥"
+          />
 
-        </div>
+          <StatsCard
+            title="AI Score"
+            value="9.4"
+            color="#06B6D4"
+            icon="🤖"
+          />
 
-        {/* Recent Activity */}
+        </section>
 
-        <div className="px-10 py-10">
+        {/* Charts */}
+        <section className="chart-grid">
 
-          <div className="bg-white rounded-xl shadow p-6">
+          <ProductivityChart />
 
-            <h2 className="text-2xl font-bold mb-5">
-              📈 Recent Activity
-            </h2>
+          <ProjectProgress />
 
-            <ul className="space-y-4">
+        </section>
 
-              <li>✅ Completed Login Module</li>
+        {/* Tasks & AI */}
+        <section className="middle-grid">
 
-              <li>📁 New Project Created</li>
+          <RecentTasks />
 
-              <li>🤖 AI analyzed 12 Tasks</li>
+          <AIInsights />
 
-              <li>💬 New Team Message</li>
+        </section>
 
-              <li>📅 Meeting Tomorrow 10:00 AM</li>
+        {/* Team */}
+        <section className="middle-grid">
 
-            </ul>
+          <TeamMembers />
 
-          </div>
+          <Notifications />
 
-        </div>
+        </section>
+
+        {/* Meetings */}
+        <section className="middle-grid">
+
+          <Meetings />
+
+          <Activity />
+
+        </section>
 
       </div>
 
