@@ -1,0 +1,81 @@
+.settings-page {
+  padding: 30px;
+  background: #f4f6f9;
+  min-height: 100vh;
+}
+
+.settings-header h1 {
+  font-size: 28px;
+  margin-bottom: 5px;
+}
+
+.settings-header p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.settings-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.settings-card h2 {
+  margin-bottom: 15px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.save-btn {
+  background: #4f46e5;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #4338ca;
+}
+
+.danger {
+  background: #e11d48;
+}
+
+.danger-zone {
+  border: 1px solid #ffcccc;
+}
+
+.delete-btn {
+  background: red;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}

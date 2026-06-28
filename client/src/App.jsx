@@ -16,7 +16,6 @@ import AITaskAnalyzer from "./pages/AITaskAnalyzer/AITaskAnalyzer";
 import TimeTracker from "./pages/TimeTracker/TimeTracker";
 import Analytics from "./pages/Analytics/Analytics";
 import Chat from "./pages/Chat/Chat";
-import Meeting from "./pages/Meeting/Meeting";
 import VoiceAssistantPage from "./pages/VoiceAssistant/VoiceAssistantPage";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Users from "./pages/Admin/Users";
@@ -27,6 +26,10 @@ import KanbanBoard from "./pages/Kanban/KanbanBoard";
 import AIAssistant from "./pages/AI/AIAssistant";
 import Notifications from "./pages/Notifications/Notifications";
 import Meetings from "./pages/Meetings/Meetings";
+import Settings from "./pages/Settings/Settings";
+
+
+
 
 
 function App() {
@@ -115,13 +118,7 @@ function App() {
   path="/chat"
   element={<Chat />}
 />
-<Route
 
-path="/meeting"
-
-element={<Meeting/>}
-
-/>
 <Route
   path="/voice"
   element={<VoiceAssistantPage />}
@@ -147,13 +144,14 @@ element={<Users/>}
 
 <Route path="/project" element={<ProjectPage />} />
 <Route path="/kanban" element={<KanbanBoard />} />
-<Route path="/Ai" element={<AIAssistant />} />
+<Route path="/ai-assistant" element={<AIAssistant />} />
 
 
 <Route path="/notifications" element={<Notifications />} />
 
 
 <Route path="/meetings" element={<Meetings />} />
+<Route path="/settings" element={<Settings />} />
 
       </Routes>
       

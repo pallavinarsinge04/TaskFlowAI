@@ -1,24 +1,33 @@
+import express from "express";
+import http from "http";
+import cors from "cors";
+import { Server } from "socket.io";
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+// HTTP SERVER (IMPORTANT)
+const server = http.createServer(app);
+
+// SOCKET SERVER
+const io = new Server(server, {
+  cors: {
+    origin: "*"
+  }
+});
+
 io.on("connection", (socket) => {
-  console.log("Connected:", socket.id);
+  console.log("User connected:", socket.id);
+});
 
-  // 👤 USER ONLINE
-  socket.on("user-online", (userId) => {
-    onlineUsers.set(userId, socket.id);
+// TEST ROUTE
+app.get("/", (req, res) => {
+  res.send("Backend Working");
+});
 
-    io.emit("online-users", Array.from(onlineUsers.keys()));
-  });
-
-  // 💬 DISCONNECT
-  socket.on("disconnect", () => {
-    console.log("Disconnected:", socket.id);
-
-    for (let [userId, id] of onlineUsers) {
-      if (id === socket.id) {
-        onlineUsers.delete(userId);
-        break;
-      }
-    }
-
-    io.emit("online-users", Array.from(onlineUsers.keys()));
-  });
+// 🔥 IMPORTANT: USE server.listen (NOT app.listen)
+server.listen(5000, () => {
+  console.log("Server running on 5000");
 });
