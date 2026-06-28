@@ -4,7 +4,9 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { Server } from "socket.io";
+import aiRoutes from "./routes/aiRoutes.js";
 
+app.use("/api/ai", aiRoutes);
 dotenv.config();
 
 const app = express();
