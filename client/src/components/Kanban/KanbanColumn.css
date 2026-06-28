@@ -13,10 +13,31 @@ box-shadow:0 8px 20px rgba(0,0,0,.08);
 display:flex;
 justify-content:space-between;
 align-items:center;
+padding:15px;
+border-radius:14px;
 margin-bottom:20px;
-padding-bottom:15px;
-border-bottom:2px solid #e2e8f0;
+color:white;
+font-weight:bold;
 
+}
+
+.kanban-column:nth-child(1) .column-header{
+
+background:#3b82f6;
+
+}
+
+.kanban-column:nth-child(2) .column-header{
+
+background:#f59e0b;
+
+}
+
+.kanban-column:nth-child(3) .column-header{
+
+background:#22c55e;
+
+}
 }
 
 .column-header h2{

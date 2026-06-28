@@ -2,11 +2,19 @@ import { Draggable } from "@hello-pangea/dnd";
 import {
   FaCalendarAlt,
   FaUserCircle,
-  FaFlag
+  FaFlag,
+  FaPaperclip,
+  FaCommentDots,
+  FaStar
 } from "react-icons/fa";
 import "./TaskItem.css";
 
 function TaskItem({ task, index }) {
+
+  const overdue =
+    task.dueDate &&
+    new Date(task.dueDate) < new Date() &&
+    task.status !== "Completed";
 
   return (
 
@@ -18,25 +26,17 @@ function TaskItem({ task, index }) {
       {(provided, snapshot) => (
 
         <div
-          className={`task-item ${
-            snapshot.isDragging ? "dragging" : ""
-          }`}
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
+          className={`task-item ${snapshot.isDragging ? "dragging" : ""} ${overdue ? "overdue" : ""}`}
         >
 
           <div className="task-top">
 
             <h3>{task.title}</h3>
 
-            <span className={`priority ${task.priority}`}>
-
-              <FaFlag />
-
-              {task.priority}
-
-            </span>
+            <FaStar className="star"/>
 
           </div>
 
@@ -46,13 +46,28 @@ function TaskItem({ task, index }) {
 
           </p>
 
+          <div className="badge-row">
+
+            <span className={`priority ${task.priority}`}>
+              <FaFlag/>
+              {task.priority}
+            </span>
+
+            <span className="category">
+
+              {task.category || "General"}
+
+            </span>
+
+          </div>
+
           <div className="progress-wrapper">
 
             <div className="progress-text">
 
               <span>Progress</span>
 
-              <span>{task.progress || 0}%</span>
+              <span>{task.progress}%</span>
 
             </div>
 
@@ -60,10 +75,8 @@ function TaskItem({ task, index }) {
 
               <div
                 className="progress-fill"
-                style={{
-                  width: `${task.progress || 0}%`
-                }}
-              ></div>
+                style={{ width: `${task.progress}%` }}
+              />
 
             </div>
 
@@ -73,7 +86,7 @@ function TaskItem({ task, index }) {
 
             <span>
 
-              <FaCalendarAlt />
+              <FaCalendarAlt/>
 
               {task.dueDate}
 
@@ -81,9 +94,29 @@ function TaskItem({ task, index }) {
 
             <span>
 
-              <FaUserCircle />
+              <FaUserCircle/>
 
               {task.assignee}
+
+            </span>
+
+          </div>
+
+          <div className="task-bottom">
+
+            <span>
+
+              <FaPaperclip/>
+
+              2
+
+            </span>
+
+            <span>
+
+              <FaCommentDots/>
+
+              5
 
             </span>
 

@@ -5,7 +5,7 @@ import TaskModal from "./TaskModal";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/layout/Navbar";
 import { FaPlus, FaSearch } from "react-icons/fa";
-import KanbanBoard from "../../components/kanban/KanbanBoard";
+import KanbanBoard from "./../../components/kanban/KanbanBoard";
 import { FaList, FaColumns } from "react-icons/fa";
 function Tasks() {
 
