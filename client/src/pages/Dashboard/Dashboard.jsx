@@ -1,5 +1,5 @@
 import "./Dashboard.css";
-
+import RightSidebar from "../../components/dashboard/RightSidebar";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/layout/Navbar";
 import ProductivityChart from "../../components/dashboard/ProductivityChart";
@@ -93,6 +93,7 @@ function Dashboard() {
             </div>
 
           </div>
+          <RightSidebar />
 
         </div>
 
