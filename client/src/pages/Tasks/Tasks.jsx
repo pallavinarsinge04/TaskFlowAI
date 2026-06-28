@@ -5,7 +5,8 @@ import TaskModal from "./TaskModal";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/layout/Navbar";
 import { FaPlus, FaSearch } from "react-icons/fa";
-
+import KanbanBoard from "../../components/kanban/KanbanBoard";
+import { FaList, FaColumns } from "react-icons/fa";
 function Tasks() {
 
   const [tasks, setTasks] = useState([]);
@@ -15,6 +16,8 @@ function Tasks() {
   const [status, setStatus] = useState("All");
 
   const [priority, setPriority] = useState("All");
+
+  const [view, setView] = useState("list");
 
   const [openModal, setOpenModal] = useState(false);
 
@@ -164,6 +167,26 @@ function Tasks() {
     );
 
   });
+
+  <div className="view-toggle">
+
+  <button
+    className={view === "list" ? "active" : ""}
+    onClick={() => setView("list")}
+  >
+    <FaList />
+    List View
+  </button>
+
+  <button
+    className={view === "kanban" ? "active" : ""}
+    onClick={() => setView("kanban")}
+  >
+    <FaColumns />
+    Kanban View
+  </button>
+
+</div>
 
   return (
 
@@ -353,36 +376,48 @@ function Tasks() {
 
       {/* Cards */}
 
-      <div className="task-list">
+      {view === "list" ? (
 
-        {
+  <div className="task-list">
 
-          filteredTasks.map((task) => (
+    {filteredTasks.length === 0 ? (
 
-            <TaskCard
+      <div className="empty-task">
 
-              key={task.id}
+        <h2>No Tasks Found</h2>
 
-              task={task}
-
-              onEdit={(task) => {
-
-                setEditTask(task);
-
-                setOpenModal(true);
-
-              }}
-
-              onDelete={handleDelete}
-
-            />
-
-          ))
-
-        }
+        <p>Create your first task.</p>
 
       </div>
 
+    ) : (
+
+      filteredTasks.map((task) => (
+
+        <TaskCard
+          key={task.id}
+          task={task}
+          onEdit={(task) => {
+            setEditTask(task);
+            setOpenModal(true);
+          }}
+          onDelete={handleDelete}
+        />
+
+      ))
+
+    )}
+
+  </div>
+
+) : (
+
+  <KanbanBoard
+    tasks={tasks}
+    setTasks={setTasks}
+  />
+
+)}
       {/* Modal */}
 
       <TaskModal
