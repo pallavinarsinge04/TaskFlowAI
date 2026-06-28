@@ -1,18 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./Tasks.css";
-import TaskModal from "./TaskModal";
 import TaskCard from "./TaskCard";
-import {
-  FaPlus,
-  FaSearch,
-  FaEdit,
-  FaTrash,
-  FaCalendarAlt,
-  FaFlag
-} from "react-icons/fa";
-const [openModal, setOpenModal] = useState(false);
-const [editTask, setEditTask] = useState(null);
+import TaskModal from "./TaskModal";
+import { FaPlus, FaSearch } from "react-icons/fa";
+
 function Tasks() {
+
+  const [tasks, setTasks] = useState([]);
 
   const [search, setSearch] = useState("");
 
@@ -20,51 +14,151 @@ function Tasks() {
 
   const [priority, setPriority] = useState("All");
 
-  const [tasks] = useState([
-    {
-      id: 1,
-      title: "Design Dashboard UI",
-      description: "Create professional dashboard using React.",
-      status: "Completed",
-      priority: "High",
-      dueDate: "2026-07-15",
-      assignee: "Pallavi"
-    },
-    {
-      id: 2,
-      title: "Develop Login API",
-      description: "Create JWT Authentication.",
-      status: "In Progress",
-      priority: "High",
-      dueDate: "2026-07-20",
-      assignee: "Amit"
-    },
-    {
-      id: 3,
-      title: "Team Meeting",
-      description: "Weekly Sprint Planning.",
-      status: "Pending",
-      priority: "Medium",
-      dueDate: "2026-07-21",
-      assignee: "Riya"
-    },
-    {
-      id: 4,
-      title: "Deploy Backend",
-      description: "Deploy Express Server on Render.",
-      status: "Pending",
-      priority: "Low",
-      dueDate: "2026-07-25",
-      assignee: "Karan"
-    }
-  ]);
+  const [openModal, setOpenModal] = useState(false);
 
-  const filteredTasks = tasks.filter(task => {
+  const [editTask, setEditTask] = useState(null);
+
+  /* ==========================
+      LOAD TASKS
+  =========================== */
+
+  useEffect(() => {
+
+    const saved = JSON.parse(localStorage.getItem("tasks"));
+
+    if (saved) {
+
+      setTasks(saved);
+
+    } else {
+
+      const demo = [
+
+        {
+          id: 1,
+          title: "Design Dashboard",
+          description: "Create professional dashboard.",
+          status: "Completed",
+          priority: "High",
+          dueDate: "2026-07-15",
+          assignee: "Pallavi",
+          progress: 100
+        },
+
+        {
+          id: 2,
+          title: "Login API",
+          description: "JWT Authentication",
+          status: "In Progress",
+          priority: "High",
+          dueDate: "2026-07-18",
+          assignee: "Amit",
+          progress: 65
+        }
+
+      ];
+
+      setTasks(demo);
+
+      localStorage.setItem("tasks", JSON.stringify(demo));
+
+    }
+
+  }, []);
+
+  /* ==========================
+      SAVE TASKS
+  =========================== */
+
+  useEffect(() => {
+
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  }, [tasks]);
+
+  /* ==========================
+      SAVE TASK
+  =========================== */
+
+  const handleSaveTask = (task) => {
+
+    if (editTask) {
+
+      const updated = tasks.map((t) =>
+
+        t.id === editTask.id
+
+          ? {
+              ...task,
+              id: editTask.id
+            }
+
+          : t
+
+      );
+
+      setTasks(updated);
+
+      setEditTask(null);
+
+    } else {
+
+      const newTask = {
+
+        ...task,
+
+        id: Date.now(),
+
+        progress: 0
+
+      };
+
+      setTasks([...tasks, newTask]);
+
+    }
+
+  };
+
+  /* ==========================
+      DELETE
+  =========================== */
+
+  const handleDelete = (id) => {
+
+    if (window.confirm("Delete this task?")) {
+
+      const updated = tasks.filter(
+
+        (task) => task.id !== id
+
+      );
+
+      setTasks(updated);
+
+    }
+
+  };
+
+  /* ==========================
+      FILTER
+  =========================== */
+
+  const filteredTasks = tasks.filter((task) => {
 
     return (
-      task.title.toLowerCase().includes(search.toLowerCase()) &&
-      (status === "All" || task.status === status) &&
-      (priority === "All" || task.priority === priority)
+
+      task.title
+        .toLowerCase()
+        .includes(search.toLowerCase()) &&
+
+      (status === "All" ||
+
+        task.status === status) &&
+
+      (priority === "All" ||
+
+        task.priority === priority)
+
     );
 
   });
@@ -73,26 +167,41 @@ function Tasks() {
 
     <div className="tasks-page">
 
+      {/* Header */}
+
       <div className="tasks-header">
 
         <div>
 
           <h1>📝 Task Management</h1>
 
-          <p>Manage all project tasks efficiently.</p>
+          <p>
+
+            Manage project tasks professionally
+
+          </p>
 
         </div>
 
         <button
-    className="add-btn"
-    onClick={()=>{
-        setEditTask(null);
-        setOpenModal(true);
-    }}
->
-    <FaPlus />
-    Add Task
-</button>
+
+          className="add-btn"
+
+          onClick={() => {
+
+            setEditTask(null);
+
+            setOpenModal(true);
+
+          }}
+
+        >
+
+          <FaPlus />
+
+          Add Task
+
+        </button>
 
       </div>
 
@@ -101,34 +210,76 @@ function Tasks() {
       <div className="task-stats">
 
         <div className="stat-card">
+
           <h3>Total Tasks</h3>
+
           <h2>{tasks.length}</h2>
+
         </div>
 
         <div className="stat-card">
+
           <h3>Completed</h3>
+
           <h2>
-            {tasks.filter(t => t.status === "Completed").length}
+
+            {
+
+              tasks.filter(
+
+                (t) => t.status === "Completed"
+
+              ).length
+
+            }
+
           </h2>
+
         </div>
 
         <div className="stat-card">
+
           <h3>In Progress</h3>
+
           <h2>
-            {tasks.filter(t => t.status === "In Progress").length}
+
+            {
+
+              tasks.filter(
+
+                (t) => t.status === "In Progress"
+
+              ).length
+
+            }
+
           </h2>
+
         </div>
 
         <div className="stat-card">
+
           <h3>Pending</h3>
+
           <h2>
-            {tasks.filter(t => t.status === "Pending").length}
+
+            {
+
+              tasks.filter(
+
+                (t) => t.status === "Pending"
+
+              ).length
+
+            }
+
           </h2>
+
         </div>
 
       </div>
 
-      {/* Filters */}
+      {/* Search */}
 
       <div className="task-filters">
 
@@ -137,61 +288,118 @@ function Tasks() {
           <FaSearch />
 
           <input
-            type="text"
-            placeholder="Search Task..."
+
+            placeholder="Search task..."
+
             value={search}
-            onChange={(e)=>setSearch(e.target.value)}
+
+            onChange={(e) =>
+
+              setSearch(e.target.value)
+
+            }
+
           />
 
         </div>
 
         <select
+
           value={status}
-          onChange={(e)=>setStatus(e.target.value)}
+
+          onChange={(e) =>
+
+            setStatus(e.target.value)
+
+          }
+
         >
 
           <option>All</option>
+
           <option>Completed</option>
-          <option>In Progress</option>
+
           <option>Pending</option>
+
+          <option>In Progress</option>
 
         </select>
 
         <select
+
           value={priority}
-          onChange={(e)=>setPriority(e.target.value)}
+
+          onChange={(e) =>
+
+            setPriority(e.target.value)
+
+          }
+
         >
 
           <option>All</option>
+
           <option>High</option>
+
           <option>Medium</option>
+
           <option>Low</option>
 
         </select>
 
       </div>
 
-      {/* Task List */}
+      {/* Cards */}
 
       <div className="task-list">
 
-    {filteredTasks.map(task => (
+        {
 
-        <TaskCard
-            key={task.id}
-            task={task}
-            onEdit={(task)=>{
+          filteredTasks.map((task) => (
+
+            <TaskCard
+
+              key={task.id}
+
+              task={task}
+
+              onEdit={(task) => {
+
                 setEditTask(task);
+
                 setOpenModal(true);
-            }}
-            onDelete={(id)=>{
-                alert("Delete Task : " + id);
-            }}
-        />
 
-    ))}
+              }}
 
-</div>
+              onDelete={handleDelete}
+
+            />
+
+          ))
+
+        }
+
+      </div>
+
+      {/* Modal */}
+
+      <TaskModal
+
+        open={openModal}
+
+        editTask={editTask}
+
+        onClose={() => {
+
+          setOpenModal(false);
+
+          setEditTask(null);
+
+        }}
+
+        onSave={handleSaveTask}
+
+      />
 
     </div>
 
