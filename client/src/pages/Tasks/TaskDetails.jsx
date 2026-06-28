@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 
 import "./TaskDetails.css";
-
+import Comments from "./Comments";
 function TaskDetails() {
 
   const { id } = useParams();
@@ -144,6 +144,7 @@ function TaskDetails() {
           <span>{task.progress || 0}% Completed</span>
 
         </div>
+        <Comments taskId={task.id} />
 
       </div>
 
