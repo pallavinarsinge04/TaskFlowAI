@@ -21,6 +21,7 @@ import VoiceAssistantPage from "./pages/VoiceAssistant/VoiceAssistantPage";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Users from "./pages/Admin/Users";
 import Tasks from "./pages/Tasks/Tasks";
+import TaskDetails from "./pages/Tasks/TaskDetails";
 function App() {
   return (
     <BrowserRouter>
@@ -130,6 +131,10 @@ element={<Users/>}
  <Route
     path="/tasks"
     element={<Tasks />}
+/>
+<Route
+  path="/tasks/:id"
+  element={<TaskDetails />}
 />
       </Routes>
       

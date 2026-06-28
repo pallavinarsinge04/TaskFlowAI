@@ -12,6 +12,7 @@ import AIInsights from "./AIInsights";
 import TaskAnalytics from "./TaskAnalytics";
 import ActivityTimeline from "./ActivityTimeline";
 import NotificationPanel from "./NotificationPanel";
+import { useNavigate } from "react-router-dom";
 function Tasks() {
 
   const [tasks, setTasks] = useState([]);
