@@ -1,0 +1,89 @@
+.notify-container {
+  padding: 30px;
+  background: #f6f8fc;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+.notify-header h1 {
+  font-size: 28px;
+}
+
+.notify-header p {
+  color: gray;
+}
+
+/* GROUP */
+.notify-group {
+  margin-top: 20px;
+}
+
+.notify-group h2 {
+  color: #555;
+  margin-bottom: 10px;
+}
+
+/* CARD */
+.notify-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* ICON */
+.icon {
+  font-size: 20px;
+  color: #4f46e5;
+  margin-right: 10px;
+}
+
+/* CONTENT */
+.content {
+  flex: 1;
+  margin-left: 10px;
+}
+
+.content h3 {
+  margin: 0;
+}
+
+.content p {
+  color: gray;
+  font-size: 14px;
+}
+
+/* BADGE */
+.badge {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: white;
+}
+
+.badge.High {
+  background: red;
+}
+
+.badge.Medium {
+  background: orange;
+}
+
+.badge.Low {
+  background: green;
+}
+
+/* DELETE */
+.delete {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: red;
+}
