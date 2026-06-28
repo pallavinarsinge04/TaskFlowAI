@@ -1,0 +1,36 @@
+.recentTasks{
+    background:#fff;
+    border-radius:18px;
+    padding:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+.recentTasks h2{
+    margin-bottom:20px;
+    color:#1e293b;
+}
+
+.taskRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px 0;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.taskRow:last-child{
+    border:none;
+}
+
+.taskRow h4{
+    margin:0;
+    color:#334155;
+}
+
+.status{
+    color:white;
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:13px;
+    font-weight:600;
+}
