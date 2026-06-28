@@ -1,0 +1,70 @@
+.calendar-container {
+  padding: 30px;
+  background: #f6f8fc;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+.calendar-header h1 {
+  font-size: 28px;
+}
+
+.calendar-header p {
+  color: gray;
+  margin-bottom: 20px;
+}
+
+/* LAYOUT */
+.calendar-layout {
+  display: flex;
+  gap: 20px;
+}
+
+/* CALENDAR BOX */
+.calendar-box {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* TASK PANEL */
+.task-panel {
+  flex: 1;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* TASK CARD */
+.task-card {
+  background: #f1f5f9;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+/* DOT ON CALENDAR */
+.dot {
+  height: 6px;
+  width: 6px;
+  background: #4f46e5;
+  border-radius: 50%;
+  margin: auto;
+  margin-top: 2px;
+}
+
+/* STATUS */
+.status.Completed {
+  color: green;
+}
+
+.status.Pending {
+  color: orange;
+}
+
+.status.In\ Progress {
+  color: blue;
+}

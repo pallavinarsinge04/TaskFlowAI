@@ -5,7 +5,7 @@ import Register from "./pages/Register/Register";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Projects from "./pages/Projects/ProjectPage";
 import Team from "./pages/Team/TeamPage";
-import Calendar from "./pages/Calendar/Calendar";
+import Calendar from "./pages/Calendar/CalendarPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Admin from "./pages/Admin/Admin";
 import Manager from "./pages/Manager/Manager";
