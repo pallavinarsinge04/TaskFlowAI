@@ -1,55 +1,133 @@
 import "./Activity.css";
+import {
+  FaCircle,
+  FaTasks,
+  FaProjectDiagram,
+  FaComments,
+  FaUserPlus,
+  FaRobot
+} from "react-icons/fa";
 
 function Activity() {
+
   const activities = [
     {
-      title: "Completed UI Design",
-      time: "10 minutes ago",
-      icon: "✅",
+      user: "Pallavi",
+      action: "completed task",
+      target: "Dashboard UI",
+      time: "Just now",
+      type: "task",
+      online: true
     },
     {
-      title: "Created New Project",
-      time: "30 minutes ago",
-      icon: "📁",
+      user: "Amit",
+      action: "created project",
+      target: "Smart AI Ecommerce",
+      time: "5 min ago",
+      type: "project",
+      online: true
     },
     {
-      title: "AI analyzed 12 tasks",
-      time: "1 hour ago",
-      icon: "🤖",
+      user: "Riya",
+      action: "sent a message",
+      target: "Development Team",
+      time: "10 min ago",
+      type: "chat",
+      online: false
     },
     {
-      title: "Team Meeting Scheduled",
-      time: "2 hours ago",
-      icon: "📅",
+      user: "AI Assistant",
+      action: "generated",
+      target: "Priority Suggestions",
+      time: "20 min ago",
+      type: "ai",
+      online: true
     },
     {
-      title: "New Team Member Joined",
-      time: "Today",
-      icon: "👤",
-    },
+      user: "Karan",
+      action: "joined",
+      target: "UI Team",
+      time: "30 min ago",
+      type: "member",
+      online: true
+    }
   ];
+
+  const getIcon = (type) => {
+    switch (type) {
+      case "task":
+        return <FaTasks />;
+      case "project":
+        return <FaProjectDiagram />;
+      case "chat":
+        return <FaComments />;
+      case "member":
+        return <FaUserPlus />;
+      case "ai":
+        return <FaRobot />;
+      default:
+        return <FaTasks />;
+    }
+  };
 
   return (
     <div className="activity-card">
 
-      <h2>📈 Recent Activity</h2>
+      <div className="activity-header">
+
+        <div>
+
+          <h2>⚡ Live Team Activity</h2>
+
+          <p>Real-time project updates</p>
+
+        </div>
+
+        <span className="live-status">
+          <FaCircle />
+          LIVE
+        </span>
+
+      </div>
 
       <div className="activity-list">
 
         {activities.map((item, index) => (
 
-          <div
-            className="activity-item"
-            key={index}
-          >
+          <div className="activity-item" key={index}>
+
             <div className="activity-icon">
-              {item.icon}
+
+              {getIcon(item.type)}
+
             </div>
 
-            <div className="activity-content">
-              <h4>{item.title}</h4>
+            <div className="activity-info">
+
+              <h4>
+
+                {item.user}
+
+                <span className="action">
+                  {" "}
+                  {item.action}{" "}
+                </span>
+
+                <strong>{item.target}</strong>
+
+              </h4>
+
               <p>{item.time}</p>
+
             </div>
+
+            <div
+              className={
+                item.online
+                  ? "online"
+                  : "offline"
+              }
+            ></div>
 
           </div>
 

@@ -1,53 +1,169 @@
 .activity-card{
-    background:#fff;
-    border-radius:18px;
-    padding:25px;
-    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+background:white;
+border-radius:20px;
+padding:25px;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+
 }
 
-.activity-card h2{
-    margin-bottom:25px;
-    color:#0f172a;
+.activity-header{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+
+}
+
+.activity-header h2{
+
+color:#0f172a;
+
+}
+
+.activity-header p{
+
+color:#64748b;
+
+}
+
+.live-status{
+
+display:flex;
+align-items:center;
+gap:8px;
+color:#16a34a;
+font-weight:700;
+
+}
+
+.live-status svg{
+
+font-size:10px;
+animation:pulse 1s infinite;
+
 }
 
 .activity-list{
-    display:flex;
-    flex-direction:column;
-    gap:18px;
+
+display:flex;
+flex-direction:column;
+gap:18px;
+
 }
 
 .activity-item{
-    display:flex;
-    align-items:center;
-    gap:18px;
-    padding:15px;
-    border-radius:12px;
-    background:#f8fafc;
-    transition:.3s;
+
+display:flex;
+align-items:center;
+gap:18px;
+padding:18px;
+border-radius:15px;
+background:#f8fafc;
+transition:.3s;
+
 }
 
 .activity-item:hover{
-    background:#eff6ff;
+
+transform:translateX(5px);
+background:#eff6ff;
+
 }
 
 .activity-icon{
-    width:55px;
-    height:55px;
-    border-radius:50%;
-    background:#2563eb;
-    color:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:24px;
+
+width:55px;
+height:55px;
+background:#2563eb;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+border-radius:50%;
+font-size:22px;
+
 }
 
-.activity-content h4{
-    margin-bottom:5px;
-    color:#1e293b;
+.activity-info{
+
+flex:1;
+
 }
 
-.activity-content p{
-    color:#64748b;
-    font-size:14px;
+.activity-info h4{
+
+font-size:16px;
+color:#0f172a;
+margin-bottom:8px;
+
+}
+
+.activity-info .action{
+
+font-weight:400;
+color:#475569;
+
+}
+
+.activity-info p{
+
+font-size:13px;
+color:#94a3b8;
+
+}
+
+.online,
+.offline{
+
+width:14px;
+height:14px;
+border-radius:50%;
+
+}
+
+.online{
+
+background:#16a34a;
+
+}
+
+.offline{
+
+background:#94a3b8;
+
+}
+
+@keyframes pulse{
+
+0%{
+
+transform:scale(1);
+
+}
+
+50%{
+
+transform:scale(1.4);
+
+}
+
+100%{
+
+transform:scale(1);
+
+}
+
+}
+
+@media(max-width:768px){
+
+.activity-item{
+
+flex-direction:column;
+align-items:flex-start;
+
+}
+
 }
