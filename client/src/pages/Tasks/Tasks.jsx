@@ -13,6 +13,7 @@ import TaskAnalytics from "./TaskAnalytics";
 import ActivityTimeline from "./ActivityTimeline";
 import NotificationPanel from "./NotificationPanel";
 import { useNavigate } from "react-router-dom";
+import socket from "../../socket";
 function Tasks() {
   const [showFav, setShowFav] = useState(false);
 
@@ -36,47 +37,29 @@ function Tasks() {
 
   useEffect(() => {
 
-    const saved = JSON.parse(localStorage.getItem("tasks"));
+  socket.on("task_created", (task) => {
+    setTasks(prev => [...prev, task]);
+  });
 
-    if (saved) {
+  socket.on("task_updated", (updatedTask) => {
+    setTasks(prev =>
+      prev.map(t =>
+        t.id === updatedTask.id ? updatedTask : t
+      )
+    );
+  });
 
-      setTasks(saved);
+  socket.on("task_deleted", (id) => {
+    setTasks(prev => prev.filter(t => t.id !== id));
+  });
 
-    } else {
+  return () => {
+    socket.off("task_created");
+    socket.off("task_updated");
+    socket.off("task_deleted");
+  };
 
-      const demo = [
-
-        {
-          id: 1,
-          title: "Design Dashboard",
-          description: "Create professional dashboard.",
-          status: "Completed",
-          priority: "High",
-          dueDate: "2026-07-15",
-          assignee: "Pallavi",
-          progress: 100
-        },
-
-        {
-          id: 2,
-          title: "Login API",
-          description: "JWT Authentication",
-          status: "In Progress",
-          priority: "High",
-          dueDate: "2026-07-18",
-          assignee: "Amit",
-          progress: 65
-        }
-
-      ];
-
-      setTasks(demo);
-
-      localStorage.setItem("tasks", JSON.stringify(demo));
-
-    }
-
-  }, []);
+}, []);
 
   /* ==========================
       SAVE TASKS
@@ -94,63 +77,41 @@ function Tasks() {
 
   const handleSaveTask = (task) => {
 
-    if (editTask) {
+  if (editTask) {
 
-      const updated = tasks.map((t) =>
+    const updated = { ...task, id: editTask.id };
 
-        t.id === editTask.id
+    socket.emit("task_updated", updated);
 
-          ? {
-              ...task,
-              id: editTask.id
-            }
+    setTasks(prev =>
+      prev.map(t =>
+        t.id === editTask.id ? updated : t
+      )
+    );
 
-          : t
+  } else {
 
-      );
+    const newTask = {
+      ...task,
+      id: Date.now()
+    };
 
-      setTasks(updated);
+    socket.emit("task_created", newTask);
 
-      setEditTask(null);
-
-    } else {
-
-      const newTask = {
-
-        ...task,
-
-        id: Date.now(),
-
-        progress: 0
-
-      };
-
-      setTasks([...tasks, newTask]);
-
-    }
-
-  };
-
+    setTasks(prev => [...prev, newTask]);
+  }
+};
   /* ==========================
       DELETE
   =========================== */
 
-  const handleDelete = (id) => {
+const handleDelete = (id) => {
 
-    if (window.confirm("Delete this task?")) {
+  socket.emit("task_deleted", id);
 
-      const updated = tasks.filter(
+  setTasks(prev => prev.filter(t => t.id !== id));
 
-        (task) => task.id !== id
-
-      );
-
-      setTasks(updated);
-
-    }
-
-  };
-
+};
   /* ==========================
       FILTER
   =========================== */
