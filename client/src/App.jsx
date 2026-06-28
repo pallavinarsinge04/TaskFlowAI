@@ -20,7 +20,7 @@ import Meeting from "./pages/Meeting/Meeting";
 import VoiceAssistantPage from "./pages/VoiceAssistant/VoiceAssistantPage";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Users from "./pages/Admin/Users";
-
+import Tasks from "./pages/Tasks/Tasks";
 function App() {
   return (
     <BrowserRouter>
@@ -128,6 +128,10 @@ element={<Users/>}
 
 />
       </Routes>
+      <Route
+    path="/tasks"
+    element={<Tasks />}
+/>
     </BrowserRouter>
   );
 }
