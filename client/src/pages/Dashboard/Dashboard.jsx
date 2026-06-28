@@ -3,7 +3,7 @@ import "./Dashboard.css";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "./Navbar";
 
-import WelcomeBanner from "./../../components/dashboard/WelcomeCard";
+import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
 import StatsCards from "../../components/dashboard/StatsCard";
 import ProjectProgress from "../../components/dashboard/ProjectProgress";
 import RecentTasks from "./../../components/dashboard/RecentTasks";
