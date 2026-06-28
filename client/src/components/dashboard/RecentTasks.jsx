@@ -3,45 +3,115 @@ import "./RecentTasks.css";
 function RecentTasks() {
   const tasks = [
     {
-      title: "Complete Login Authentication",
+      title: "Design Dashboard UI",
+      priority: "High",
       status: "Completed",
-      color: "#22c55e",
+      due: "Today",
+      assignee: "PN",
     },
     {
-      title: "Build Dashboard UI",
+      title: "Develop Authentication",
+      priority: "Medium",
       status: "In Progress",
-      color: "#3b82f6",
+      due: "Tomorrow",
+      assignee: "AS",
     },
     {
-      title: "Integrate Socket.io Chat",
+      title: "Integrate AI Assistant",
+      priority: "High",
       status: "Pending",
-      color: "#f59e0b",
+      due: "29 Jun",
+      assignee: "RK",
     },
     {
-      title: "Deploy Backend on Render",
-      status: "Pending",
-      color: "#ef4444",
+      title: "Fix Project Bugs",
+      priority: "Low",
+      status: "Completed",
+      due: "30 Jun",
+      assignee: "SK",
+    },
+    {
+      title: "Deploy on Render",
+      priority: "High",
+      status: "In Progress",
+      due: "2 Jul",
+      assignee: "PN",
     },
   ];
 
   return (
-    <div className="recentTasks">
-      <h2>📝 Recent Tasks</h2>
+    <div className="recent-tasks">
 
-      {tasks.map((task, index) => (
-        <div className="taskRow" key={index}>
-          <div>
-            <h4>{task.title}</h4>
-          </div>
+      <div className="tasks-header">
 
-          <span
-            className="status"
-            style={{ background: task.color }}
-          >
-            {task.status}
-          </span>
-        </div>
-      ))}
+        <h2>📝 Recent Tasks</h2>
+
+        <button>View All</button>
+
+      </div>
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Task</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Due Date</th>
+            <th>Assignee</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          {tasks.map((task, index) => (
+
+            <tr key={index}>
+
+              <td>{task.title}</td>
+
+              <td>
+
+                <span
+                  className={`priority ${task.priority.toLowerCase()}`}
+                >
+                  {task.priority}
+                </span>
+
+              </td>
+
+              <td>
+
+                <span
+                  className={`status ${task.status
+                    .replace(" ", "")
+                    .toLowerCase()}`}
+                >
+                  {task.status}
+                </span>
+
+              </td>
+
+              <td>{task.due}</td>
+
+              <td>
+
+                <div className="avatar">
+                  {task.assignee}
+                </div>
+
+              </td>
+
+            </tr>
+
+          ))}
+
+        </tbody>
+
+      </table>
+
     </div>
   );
 }
