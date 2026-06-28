@@ -7,6 +7,7 @@ import {
   FaTrash,
   FaCheckCircle
 } from "react-icons/fa";
+import DueDateCountdown from "./DueDateCountdown";
 
 function TaskCard({ task, onEdit, onDelete }) {
 
@@ -87,7 +88,7 @@ function TaskCard({ task, onEdit, onDelete }) {
 
           <FaCalendarAlt />
 
-          {task.dueDate}
+          <DueDateCountdown dueDate={task.dueDate} />
 
         </span>
 
