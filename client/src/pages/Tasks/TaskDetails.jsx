@@ -10,6 +10,7 @@ import {
 
 import "./TaskDetails.css";
 import Comments from "./Comments";
+import Attachments from "./Attachments";
 function TaskDetails() {
 
   const { id } = useParams();
@@ -145,6 +146,7 @@ function TaskDetails() {
 
         </div>
         <Comments taskId={task.id} />
+        <Attachments taskId={task.id}/>
 
       </div>
 
