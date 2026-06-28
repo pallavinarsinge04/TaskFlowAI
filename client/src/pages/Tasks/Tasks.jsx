@@ -7,6 +7,7 @@ import Navbar from "../../components/layout/Navbar";
 import { FaPlus, FaSearch } from "react-icons/fa";
 import KanbanBoard from "./../../components/kanban/KanbanBoard";
 import { FaList, FaColumns } from "react-icons/fa";
+import TaskDashboard from "./TaskDashboard";
 function Tasks() {
 
   const [tasks, setTasks] = useState([]);
@@ -229,6 +230,8 @@ function Tasks() {
         </button>
 
       </div>
+
+      <TaskDashboard tasks={tasks} />
 
       {/* Statistics */}
 

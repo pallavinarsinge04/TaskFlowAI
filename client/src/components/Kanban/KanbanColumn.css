@@ -1,81 +1,70 @@
-.kanban-column{
-
-background:#f8fafc;
-border-radius:18px;
-padding:18px;
-min-height:600px;
-box-shadow:0 8px 20px rgba(0,0,0,.08);
-
+.kanban-column {
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 18px;
+  min-height: 600px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
-.column-header{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-padding:15px;
-border-radius:14px;
-margin-bottom:20px;
-color:white;
-font-weight:bold;
-
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border-radius: 14px;
+  margin-bottom: 20px;
+  color: white;
+  font-weight: bold;
 }
 
-.kanban-column:nth-child(1) .column-header{
-
-background:#3b82f6;
-
+.kanban-column:nth-child(1) .column-header {
+  background: #3b82f6;
 }
 
-.kanban-column:nth-child(2) .column-header{
-
-background:#f59e0b;
-
+.kanban-column:nth-child(2) .column-header {
+  background: #f59e0b;
 }
 
-.kanban-column:nth-child(3) .column-header{
-
-background:#22c55e;
-
-}
+.kanban-column:nth-child(3) .column-header {
+  background: #22c55e;
 }
 
-.column-header h2{
-
-font-size:22px;
-font-weight:700;
-color:#1e293b;
-
+.column-header h2 {
+  font-size: 20px;
+  margin: 0;
 }
 
-.column-header span{
-
-background:#2563eb;
-color:#fff;
-padding:6px 14px;
-border-radius:30px;
-font-weight:600;
-
+.column-header span {
+  background: rgba(255, 255, 255, 0.25);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
 }
 
-.column-body{
-
-min-height:500px;
-display:flex;
-flex-direction:column;
-gap:18px;
-
+.column-body {
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.empty-column{
+.empty-column {
+  height: 120px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #94a3b8;
+  font-weight: 600;
+}
 
-height:120px;
-display:flex;
-justify-content:center;
-align-items:center;
-border:2px dashed #cbd5e1;
-border-radius:14px;
-color:#94a3b8;
-font-weight:600;
+@media (max-width: 992px) {
+  .kanban-column {
+    min-height: auto;
+  }
 
+  .column-body {
+    min-height: 250px;
+  }
 }
