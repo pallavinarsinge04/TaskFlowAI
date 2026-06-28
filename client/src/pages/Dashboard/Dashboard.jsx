@@ -1,8 +1,8 @@
 import "./Dashboard.css";
 
 import Sidebar from "../../components/sidebar/Sidebar";
-import Navbar from "./Navbar";
-
+import Navbar from "../../components/layout/Navbar";
+import ProductivityChart from "../../components/dashboard/ProductivityChart";
 import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
 import StatsCards from "../../components/dashboard/StatsCard";
 import ProjectProgress from "../../components/dashboard/ProjectProgress";
