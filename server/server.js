@@ -6,13 +6,15 @@ import dotenv from "dotenv";
 import { Server } from "socket.io";
 import aiRoutes from "./routes/aiRoutes.js";
 
-app.use("/api/ai", aiRoutes);
 dotenv.config();
 
-const app = express();
+const app = express(); // ✅ MUST BE FIRST
 
 app.use(cors());
 app.use(express.json());
+
+// AI ROUTES
+app.use("/api/ai", aiRoutes);
 
 // HTTP server
 const server = http.createServer(app);
@@ -34,22 +36,18 @@ io.on("connection", (socket) => {
 
   console.log("User connected:", socket.id);
 
-  // Join project room
   socket.on("join_project", (projectId) => {
     socket.join(projectId);
   });
 
-  // Task created
   socket.on("task_created", (data) => {
     io.emit("task_created", data);
   });
 
-  // Task updated
   socket.on("task_updated", (data) => {
     io.emit("task_updated", data);
   });
 
-  // Task deleted
   socket.on("task_deleted", (id) => {
     io.emit("task_deleted", id);
   });
