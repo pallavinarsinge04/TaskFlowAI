@@ -4,7 +4,7 @@ import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Projects from "./pages/Projects/ProjectPage";
-import Team from "./pages/Team/Team";
+import Team from "./pages/Team/TeamPage";
 import Calendar from "./pages/Calendar/Calendar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Admin from "./pages/Admin/Admin";
