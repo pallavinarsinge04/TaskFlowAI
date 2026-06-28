@@ -14,6 +14,7 @@ import Attachments from "./Attachments";
 import Labels from "./Labels";
 import TimeTracker from "./TimeTracker";
 import ActivityLog from "./ActivityLog";
+import Assignees from "./Assignees";
 function TaskDetails() {
 
   const { id } = useParams();
@@ -153,6 +154,7 @@ function TaskDetails() {
         <Labels taskId={task.id} />
         <TimeTracker taskId={task.id} />
         <ActivityLog taskId={task.id} />
+        <Assignees taskId={task.id} />
 
       </div>
 

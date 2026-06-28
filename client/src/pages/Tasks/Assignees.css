@@ -1,0 +1,76 @@
+.assignees{
+
+margin-top:40px;
+background:white;
+padding:30px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+}
+
+.assignee-input{
+
+display:flex;
+gap:10px;
+margin-bottom:20px;
+
+}
+
+.assignee-input input{
+
+flex:1;
+padding:12px;
+border:1px solid #ddd;
+border-radius:10px;
+
+}
+
+.assignee-input button{
+
+background:#2563eb;
+color:white;
+border:none;
+padding:10px 20px;
+border-radius:10px;
+cursor:pointer;
+
+}
+
+.assignee-list{
+
+display:flex;
+flex-wrap:wrap;
+gap:15px;
+
+}
+
+.assignee-card{
+
+display:flex;
+align-items:center;
+gap:10px;
+background:#f8fafc;
+padding:10px 15px;
+border-radius:25px;
+
+}
+
+.assignee-card img{
+
+width:35px;
+height:35px;
+border-radius:50%;
+
+}
+
+.assignee-card button{
+
+border:none;
+background:#fee2e2;
+color:#dc2626;
+border-radius:50%;
+width:25px;
+height:25px;
+cursor:pointer;
+
+}
