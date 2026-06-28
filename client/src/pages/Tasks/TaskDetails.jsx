@@ -11,6 +11,7 @@ import {
 import "./TaskDetails.css";
 import Comments from "./Comments";
 import Attachments from "./Attachments";
+import Labels from "./Labels";
 function TaskDetails() {
 
   const { id } = useParams();
@@ -147,6 +148,7 @@ function TaskDetails() {
         </div>
         <Comments taskId={task.id} />
         <Attachments taskId={task.id}/>
+        <Labels taskId={task.id} />
 
       </div>
 

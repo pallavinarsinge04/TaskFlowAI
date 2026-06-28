@@ -1,0 +1,67 @@
+.labels-container{
+
+margin-top:40px;
+background:white;
+padding:30px;
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+}
+
+.label-input{
+
+display:flex;
+gap:10px;
+margin-bottom:20px;
+
+}
+
+.label-input input{
+
+flex:1;
+padding:12px;
+border:1px solid #ddd;
+border-radius:10px;
+
+}
+
+.label-input button{
+
+background:#2563eb;
+color:white;
+border:none;
+padding:10px 20px;
+border-radius:10px;
+cursor:pointer;
+
+}
+
+.labels-list{
+
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+
+}
+
+.label-item{
+
+display:flex;
+align-items:center;
+gap:10px;
+padding:8px 14px;
+border-radius:20px;
+color:white;
+font-weight:600;
+
+}
+
+.label-item button{
+
+background:transparent;
+border:none;
+color:white;
+cursor:pointer;
+font-size:14px;
+
+}
