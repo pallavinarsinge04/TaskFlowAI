@@ -22,6 +22,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Users from "./pages/Admin/Users";
 import Tasks from "./pages/Tasks/Tasks";
 import TaskDetails from "./pages/Tasks/TaskDetails";
+import ProjectPage from "./pages/Project/ProjectPage";
 function App() {
   return (
     <BrowserRouter>
@@ -136,6 +137,7 @@ element={<Users/>}
   path="/tasks/:id"
   element={<TaskDetails />}
 />
+<Route path="/project" element={<ProjectPage />} />
       </Routes>
       
     </BrowserRouter>
