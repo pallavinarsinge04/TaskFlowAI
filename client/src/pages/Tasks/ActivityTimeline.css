@@ -1,0 +1,45 @@
+.timeline{
+
+background:white;
+padding:30px;
+border-radius:20px;
+margin-top:30px;
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+
+}
+
+.timeline h2{
+
+margin-bottom:20px;
+
+}
+
+.timeline-item{
+
+display:flex;
+align-items:center;
+gap:18px;
+padding:15px 0;
+border-bottom:1px solid #eee;
+
+}
+
+.timeline-icon{
+
+width:45px;
+height:45px;
+border-radius:50%;
+background:#2563eb;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:20px;
+
+}
+
+.timeline-item:last-child{
+
+border-bottom:none;
+
+}

@@ -10,6 +10,8 @@ import { FaList, FaColumns } from "react-icons/fa";
 import TaskDashboard from "./TaskDashboard";
 import AIInsights from "./AIInsights";
 import TaskAnalytics from "./TaskAnalytics";
+import ActivityTimeline from "./ActivityTimeline";
+import NotificationPanel from "./NotificationPanel";
 function Tasks() {
 
   const [tasks, setTasks] = useState([]);
@@ -446,6 +448,9 @@ function Tasks() {
         onSave={handleSaveTask}
 
       />
+      <ActivityTimeline tasks={tasks}/>
+
+<NotificationPanel tasks={tasks}/>
 
     </div>
 
