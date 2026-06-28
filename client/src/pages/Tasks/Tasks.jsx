@@ -8,6 +8,8 @@ import { FaPlus, FaSearch } from "react-icons/fa";
 import KanbanBoard from "./../../components/kanban/KanbanBoard";
 import { FaList, FaColumns } from "react-icons/fa";
 import TaskDashboard from "./TaskDashboard";
+
+import TaskAnalytics from "./TaskAnalytics";
 function Tasks() {
 
   const [tasks, setTasks] = useState([]);
@@ -232,6 +234,9 @@ function Tasks() {
       </div>
 
       <TaskDashboard tasks={tasks} />
+      <TaskDashboard tasks={tasks} />
+
+<TaskAnalytics tasks={tasks} />
 
       {/* Statistics */}
 
