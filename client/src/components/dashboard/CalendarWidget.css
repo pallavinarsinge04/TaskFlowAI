@@ -1,0 +1,111 @@
+.calendar-widget{
+    background:#fff;
+    border-radius:18px;
+    padding:25px;
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+.calendar-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.calendar-header h2{
+    color:#1e293b;
+}
+
+.calendar-header button{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    padding:8px 16px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.calendar-month{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.calendar-month h3{
+    color:#475569;
+}
+
+.calendar-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:10px;
+    text-align:center;
+}
+
+.calendar-grid span{
+    font-weight:bold;
+    color:#64748b;
+}
+
+.day{
+    padding:12px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:.3s;
+    background:#f8fafc;
+}
+
+.day:hover{
+    background:#dbeafe;
+}
+
+.day.active{
+    background:#2563eb;
+    color:white;
+}
+
+.day.event{
+    background:#10b981;
+    color:white;
+}
+
+.day.inactive{
+    opacity:.4;
+}
+
+.upcoming-events{
+    margin-top:30px;
+}
+
+.upcoming-events h3{
+    margin-bottom:15px;
+}
+
+.event-card{
+    display:flex;
+    gap:15px;
+    align-items:center;
+    padding:12px;
+    margin-bottom:12px;
+    border-radius:12px;
+    background:#f8fafc;
+}
+
+.event-icon{
+    font-size:24px;
+}
+
+.event-info h4{
+    margin:0;
+    color:#1e293b;
+}
+
+.event-info p{
+    margin:3px 0;
+    color:#64748b;
+}
+
+.event-info span{
+    color:#2563eb;
+    font-size:14px;
+    font-weight:600;
+}

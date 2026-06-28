@@ -1,32 +1,23 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import {
+  FaHome,
+  FaTasks,
+  FaProjectDiagram,
+  FaUsers,
+  FaComments,
+  FaCalendarAlt,
+  FaRobot,
+  FaChartBar,
+  FaClock,
+  FaBell,
+  FaUserCircle,
+  FaCog,
+  FaSignOutAlt
+} from "react-icons/fa";
+
 import "./Sidebar.css";
 
 function Sidebar() {
-  const navigate = useNavigate();
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/login");
-  };
-
-  const menu = [
-    { icon: "🏠", title: "Dashboard", path: "/dashboard" },
-    { icon: "📝", title: "Tasks", path: "/tasks" },
-    { icon: "📁", title: "Projects", path: "/projects" },
-    { icon: "🤖", title: "AI Task Analyzer", path: "/ai-analyzer" },
-    { icon: "🧠", title: "AI Assistant", path: "/ai-assistant" },
-    { icon: "📊", title: "Analytics", path: "/analytics" },
-    { icon: "⏱", title: "Time Tracker", path: "/time-tracker" },
-    { icon: "💬", title: "Chat", path: "/chat" },
-    { icon: "🎥", title: "Meetings", path: "/meeting" },
-    { icon: "👥", title: "Team", path: "/team" },
-    { icon: "📅", title: "Calendar", path: "/calendar" },
-    { icon: "🔔", title: "Notifications", path: "/notifications" },
-    { icon: "👤", title: "Profile", path: "/profile" },
-    { icon: "⚙️", title: "Settings", path: "/settings" },
-  ];
-
   return (
     <aside className="sidebar">
 
@@ -35,33 +26,76 @@ function Sidebar() {
         <p>Project Management</p>
       </div>
 
-      <nav className="menu">
+      <nav>
 
-        {menu.map((item) => (
-          <NavLink
-            key={item.title}
-            to={item.path}
-            className={({ isActive }) =>
-              isActive ? "menu-item active" : "menu-item"
-            }
-          >
-            <span className="icon">{item.icon}</span>
+        <NavLink to="/dashboard">
+          <FaHome />
+          <span>Dashboard</span>
+        </NavLink>
 
-            <span>{item.title}</span>
+        <NavLink to="/projects">
+          <FaProjectDiagram />
+          <span>Projects</span>
+        </NavLink>
 
-          </NavLink>
-        ))}
+        <NavLink to="/tasks">
+          <FaTasks />
+          <span>Tasks</span>
+        </NavLink>
+
+        <NavLink to="/team">
+          <FaUsers />
+          <span>Team</span>
+        </NavLink>
+
+        <NavLink to="/chat">
+          <FaComments />
+          <span>Team Chat</span>
+        </NavLink>
+
+        <NavLink to="/calendar">
+          <FaCalendarAlt />
+          <span>Calendar</span>
+        </NavLink>
+
+        <NavLink to="/analytics">
+          <FaChartBar />
+          <span>Analytics</span>
+        </NavLink>
+
+        <NavLink to="/time-tracker">
+          <FaClock />
+          <span>Time Tracker</span>
+        </NavLink>
+
+        <NavLink to="/ai-analyzer">
+          <FaRobot />
+          <span>AI Analyzer</span>
+        </NavLink>
+
+        <NavLink to="/notifications">
+          <FaBell />
+          <span>Notifications</span>
+        </NavLink>
+
+        <NavLink to="/profile">
+          <FaUserCircle />
+          <span>Profile</span>
+        </NavLink>
+
+        <NavLink to="/settings">
+          <FaCog />
+          <span>Settings</span>
+        </NavLink>
 
       </nav>
 
-      <div className="sidebar-footer">
+      <div className="logout">
 
-        <button
-          className="logout-btn"
-          onClick={logout}
-        >
-          🚪 Logout
-        </button>
+        <NavLink to="/login">
+          <FaSignOutAlt />
+          <span>Logout</span>
+        </NavLink>
 
       </div>
 

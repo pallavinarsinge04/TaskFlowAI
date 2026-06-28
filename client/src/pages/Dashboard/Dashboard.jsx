@@ -1,19 +1,18 @@
 import "./Dashboard.css";
 
 import Sidebar from "../../components/sidebar/Sidebar";
-import Navbar from "../../components/layout/Navbar";
+import Navbar from "./Navbar";
 
-import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
-import StatsCards from "../../components/dashboard/StatsCards";
-import ProductivityChart from "../../components/dashboard/ProductivityChart";
+import WelcomeBanner from "./../../components/dashboard/WelcomeCard";
+import StatsCards from "../../components/dashboard/StatsCard";
 import ProjectProgress from "../../components/dashboard/ProjectProgress";
-import RecentTasks from "../../components/dashboard/RecentTasks";
+import RecentTasks from "./../../components/dashboard/RecentTasks";
 import AIInsights from "../../components/dashboard/AIInsights";
 import TeamMembers from "../../components/dashboard/TeamMembers";
 import Meetings from "../../components/dashboard/Meetings";
 import Notifications from "../../components/dashboard/Notifications";
 import Activity from "../../components/dashboard/Activity";
-import CalendarWidget from "../../components/dashboard/CalendarWidget";
+import CalendarWidget from "./../../components/dashboard/CalendarWidget";
 import QuickActions from "../../components/dashboard/QuickActions";
 
 function Dashboard() {
