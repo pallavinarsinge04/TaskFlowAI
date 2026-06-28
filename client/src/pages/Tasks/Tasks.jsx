@@ -8,7 +8,7 @@ import { FaPlus, FaSearch } from "react-icons/fa";
 import KanbanBoard from "./../../components/kanban/KanbanBoard";
 import { FaList, FaColumns } from "react-icons/fa";
 import TaskDashboard from "./TaskDashboard";
-
+import AIInsights from "./AIInsights";
 import TaskAnalytics from "./TaskAnalytics";
 function Tasks() {
 
@@ -235,6 +235,7 @@ function Tasks() {
 
       <TaskDashboard tasks={tasks} />
       <TaskDashboard tasks={tasks} />
+      <AIInsights tasks={tasks} />
 
 <TaskAnalytics tasks={tasks} />
 
