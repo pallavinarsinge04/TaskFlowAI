@@ -1,0 +1,107 @@
+.meeting-container {
+  padding: 30px;
+  background: #f6f8fc;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+.meeting-header h1 {
+  font-size: 28px;
+}
+
+.meeting-header p {
+  color: gray;
+}
+
+/* FORM */
+.meeting-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.meeting-form input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.meeting-form button {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* LIST */
+.meeting-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* CARD */
+.meeting-card {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* LEFT */
+.meeting-left h2 {
+  margin: 0;
+}
+
+.meeting-left p {
+  color: gray;
+  margin: 5px 0;
+}
+
+/* STATUS */
+.status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-top: 5px;
+  color: white;
+}
+
+.status.Upcoming {
+  background: orange;
+}
+
+.status.Completed {
+  background: green;
+}
+
+/* RIGHT */
+.meeting-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.join-btn {
+  background: #4f46e5;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.delete-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}

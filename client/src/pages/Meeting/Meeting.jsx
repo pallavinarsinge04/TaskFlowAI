@@ -1,55 +1,190 @@
-import {useEffect,useRef} from "react";
+import "./Meetings.css";
+import { useEffect, useState } from "react";
+import { FaVideo, FaCalendarAlt, FaClock, FaPlus } from "react-icons/fa";
 
-const Meeting=()=>{
+function Meetings() {
 
-const videoRef=useRef();
+  const [meetings, setMeetings] = useState([]);
+  const [form, setForm] = useState({
+    title: "",
+    date: "",
+    time: "",
+    link: ""
+  });
 
-useEffect(()=>{
+  useEffect(() => {
 
-navigator.mediaDevices
+    const saved = JSON.parse(localStorage.getItem("meetings"));
 
-.getUserMedia({
+    if (saved) {
+      setMeetings(saved);
+    } else {
 
-video:true,
+      const demo = [
+        {
+          id: 1,
+          title: "Sprint Planning",
+          date: "2026-07-10",
+          time: "10:00 AM",
+          link: "https://zoom.us/demo",
+          status: "Upcoming"
+        },
+        {
+          id: 2,
+          title: "Team Sync",
+          date: "2026-07-08",
+          time: "02:00 PM",
+          link: "https://zoom.us/demo",
+          status: "Completed"
+        }
+      ];
 
-audio:true
+      setMeetings(demo);
+      localStorage.setItem("meetings", JSON.stringify(demo));
 
-})
+    }
 
-.then(stream=>{
+  }, []);
 
-videoRef.current.srcObject=stream;
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
+  };
 
-});
+  const addMeeting = () => {
 
-},[]);
+    if (!form.title || !form.date || !form.time) return;
 
-return(
+    const newMeeting = {
+      id: Date.now(),
+      ...form,
+      status: "Upcoming"
+    };
 
-<div className="p-8">
+    const updated = [...meetings, newMeeting];
 
-<h1 className="text-4xl font-bold">
+    setMeetings(updated);
+    localStorage.setItem("meetings", JSON.stringify(updated));
 
-🎥 Video Meeting
+    setForm({ title: "", date: "", time: "", link: "" });
 
-</h1>
+  };
 
-<video
+  const deleteMeeting = (id) => {
 
-ref={videoRef}
+    const updated = meetings.filter(m => m.id !== id);
+    setMeetings(updated);
+    localStorage.setItem("meetings", JSON.stringify(updated));
 
-autoPlay
+  };
 
-playsInline
+  return (
 
-className="w-96 rounded-xl mt-5"
+    <div className="meeting-container">
 
-/>
+      {/* HEADER */}
+      <div className="meeting-header">
 
-</div>
+        <div>
+          <h1>📅 Meetings</h1>
+          <p>Schedule and manage team meetings</p>
+        </div>
 
-);
+      </div>
 
-};
+      {/* CREATE MEETING */}
+      <div className="meeting-form">
 
-export default Meeting;
+        <input
+          name="title"
+          value={form.title}
+          onChange={handleChange}
+          placeholder="Meeting Title"
+        />
+
+        <input
+          type="date"
+          name="date"
+          value={form.date}
+          onChange={handleChange}
+        />
+
+        <input
+          type="time"
+          name="time"
+          value={form.time}
+          onChange={handleChange}
+        />
+
+        <input
+          name="link"
+          value={form.link}
+          onChange={handleChange}
+          placeholder="Meeting Link (Zoom/Meet)"
+        />
+
+        <button onClick={addMeeting}>
+          <FaPlus /> Add Meeting
+        </button>
+
+      </div>
+
+      {/* MEETING LIST */}
+      <div className="meeting-list">
+
+        {meetings.map(m => (
+
+          <div className="meeting-card" key={m.id}>
+
+            <div className="meeting-left">
+
+              <h2>{m.title}</h2>
+
+              <p>
+                <FaCalendarAlt /> {m.date}
+              </p>
+
+              <p>
+                <FaClock /> {m.time}
+              </p>
+
+              <span className={`status ${m.status}`}>
+                {m.status}
+              </span>
+
+            </div>
+
+            <div className="meeting-right">
+
+              <a
+                href={m.link}
+                target="_blank"
+                className="join-btn"
+              >
+                <FaVideo /> Join
+              </a>
+
+              <button
+                className="delete-btn"
+                onClick={() => deleteMeeting(m.id)}
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    </div>
+
+  );
+
+}
+
+export default Meetings;
