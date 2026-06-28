@@ -3,7 +3,7 @@ import Landing from "./pages/Landing/Landing";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Dashboard from "./pages/Dashboard/Dashboard";
-import Projects from "./pages/Projects/Projects";
+import Projects from "./pages/Projects/ProjectPage";
 import Team from "./pages/Team/Team";
 import Calendar from "./pages/Calendar/Calendar";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -22,7 +22,9 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import Users from "./pages/Admin/Users";
 import Tasks from "./pages/Tasks/Tasks";
 import TaskDetails from "./pages/Tasks/TaskDetails";
-import Project from "./pages/Projects/Projects";
+import ProjectPage from "./pages/Projects/ProjectPage";
+import KanbanBoard from "./pages/Kanban/KanbanBoard";
+
 function App() {
   return (
     <BrowserRouter>
@@ -137,8 +139,14 @@ element={<Users/>}
   path="/tasks/:id"
   element={<TaskDetails />}
 />
-<Route path="/project" element={<Project/>} />
+
+
+<Route path="/project" element={<ProjectPage />} />
+<Route path="/kanban" element={<KanbanBoard />} />
       </Routes>
+      
+
+
       
     </BrowserRouter>
   );

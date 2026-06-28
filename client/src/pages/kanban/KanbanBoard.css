@@ -1,0 +1,30 @@
+.kanban-container {
+  padding: 30px;
+  background: #f5f7fb;
+  min-height: 100vh;
+}
+
+.kanban-container h1 {
+  margin-bottom: 20px;
+}
+
+.kanban-column {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  width: 300px;
+  min-height: 400px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.kanban-column h2 {
+  margin-bottom: 10px;
+}
+
+.kanban-card {
+  background: #f1f5f9;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  cursor: grab;
+}
