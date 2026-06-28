@@ -1,11 +1,15 @@
-const express = require("express");
+import express from "express";
 
 const router = express.Router();
 
-const authController = require("./../controllers/authController");
-console.log(authController)
-router.post("/register", authController.register);
+router.post("/login", (req, res) => {
+  const { email, password } = req.body;
 
-router.post("/login", authController.login);
+  return res.json({
+    message: "Login success",
+    token: "demo-token",
+    user: { email }
+  });
+});
 
-module.exports = router;
+export default router;

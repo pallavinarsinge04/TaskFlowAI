@@ -1,0 +1,71 @@
+.time-container {
+  padding: 30px;
+  background: #f6f8fc;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+.time-header h1 {
+  font-size: 28px;
+}
+
+.time-header p {
+  color: gray;
+}
+
+/* TIMER BOX */
+.timer-box {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.stop-btn {
+  background: red;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* TASK LIST */
+.task-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.task-card {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.start-btn {
+  background: #4f46e5;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* LOGS */
+.log-section {
+  margin-top: 30px;
+}
+
+.log-card {
+  display: flex;
+  justify-content: space-between;
+  background: white;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+}

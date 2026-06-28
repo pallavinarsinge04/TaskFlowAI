@@ -24,6 +24,7 @@ import Tasks from "./pages/Tasks/Tasks";
 import TaskDetails from "./pages/Tasks/TaskDetails";
 import ProjectPage from "./pages/Projects/ProjectPage";
 import KanbanBoard from "./pages/Kanban/KanbanBoard";
+import AIAssistant from "./pages/AI/AIAssistant";
 
 function App() {
   return (
@@ -143,6 +144,8 @@ element={<Users/>}
 
 <Route path="/project" element={<ProjectPage />} />
 <Route path="/kanban" element={<KanbanBoard />} />
+<Route path="/Ai" element={<AIAssistant />} />
+
       </Routes>
       
 
