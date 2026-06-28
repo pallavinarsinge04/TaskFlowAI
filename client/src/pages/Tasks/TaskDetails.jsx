@@ -13,6 +13,7 @@ import Comments from "./Comments";
 import Attachments from "./Attachments";
 import Labels from "./Labels";
 import TimeTracker from "./TimeTracker";
+import ActivityLog from "./ActivityLog";
 function TaskDetails() {
 
   const { id } = useParams();
@@ -151,6 +152,7 @@ function TaskDetails() {
         <Attachments taskId={task.id}/>
         <Labels taskId={task.id} />
         <TimeTracker taskId={task.id} />
+        <ActivityLog taskId={task.id} />
 
       </div>
 
