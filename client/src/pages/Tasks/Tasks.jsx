@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Tasks.css";
+import TaskModal from "./TaskModal";
 import {
   FaPlus,
   FaSearch,
@@ -8,7 +9,8 @@ import {
   FaCalendarAlt,
   FaFlag
 } from "react-icons/fa";
-
+const [openModal, setOpenModal] = useState(false);
+const [editTask, setEditTask] = useState(null);
 function Tasks() {
 
   const [search, setSearch] = useState("");
@@ -80,13 +82,16 @@ function Tasks() {
 
         </div>
 
-        <button className="add-btn">
-
-          <FaPlus />
-
-          Add Task
-
-        </button>
+        <button
+    className="add-btn"
+    onClick={()=>{
+        setEditTask(null);
+        setOpenModal(true);
+    }}
+>
+    <FaPlus />
+    Add Task
+</button>
 
       </div>
 
