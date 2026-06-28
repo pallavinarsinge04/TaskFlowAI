@@ -1,4 +1,4 @@
-import "./Project.css";
+import "./Projects.css";
 import { useEffect, useState } from "react";
 import {
   FaTasks,
