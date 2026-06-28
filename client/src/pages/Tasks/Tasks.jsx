@@ -14,6 +14,7 @@ import ActivityTimeline from "./ActivityTimeline";
 import NotificationPanel from "./NotificationPanel";
 import { useNavigate } from "react-router-dom";
 function Tasks() {
+  const [showFav, setShowFav] = useState(false);
 
   const [tasks, setTasks] = useState([]);
 
@@ -154,27 +155,25 @@ function Tasks() {
       FILTER
   =========================== */
 
-  const filteredTasks = tasks.filter((task) => {
+ const filteredTasks = tasks.filter((task) => {
 
-    return (
+  const matchBase =
+    task.title.toLowerCase().includes(search.toLowerCase()) &&
+    (status === "All" || task.status === status) &&
+    (priority === "All" || task.priority === priority);
 
-      task.title
-        .toLowerCase()
-        .includes(search.toLowerCase()) &&
+  if (!showFav) return matchBase;
 
-      (status === "All" ||
+  const fav = JSON.parse(localStorage.getItem(`favorite_${task.id}`));
 
-        task.status === status) &&
+  return matchBase && fav;
 
-      (priority === "All" ||
-
-        task.priority === priority)
-
-    );
-
-  });
+});
 
   <div className="view-toggle">
+    <button onClick={() => setShowFav(!showFav)}>
+  ⭐ {showFav ? "Show All" : "Show Favorites"}
+</button>
 
   <button
     className={view === "list" ? "active" : ""}

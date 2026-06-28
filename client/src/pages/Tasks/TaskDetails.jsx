@@ -15,6 +15,7 @@ import Labels from "./Labels";
 import TimeTracker from "./TimeTracker";
 import ActivityLog from "./ActivityLog";
 import Assignees from "./Assignees";
+import Favorites from "./Favorites";
 function TaskDetails() {
 
   const { id } = useParams();
@@ -155,6 +156,7 @@ function TaskDetails() {
         <TimeTracker taskId={task.id} />
         <ActivityLog taskId={task.id} />
         <Assignees taskId={task.id} />
+        <Favorites taskId={task.id} />
 
       </div>
 
