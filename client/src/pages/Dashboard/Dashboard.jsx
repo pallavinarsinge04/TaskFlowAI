@@ -1,16 +1,20 @@
 import "./Dashboard.css";
-import Sidebar from "./../../components/Sidebar/Sidebar"
 
-import Navbar from "./Navbar";
-import StatsCard from "./StatsCard";
-import ProductivityChart from "./ProductivityChart";
-import ProjectProgress from "./ProjectProgress";
-import RecentTasks from "./RecentTasks";
-import AIInsights from "./AIInsights";
-import TeamMembers from "./TeamMembers";
-import Meetings from "./Meetings";
-import Notifications from "./Notifications";
-import Activity from "./Activity";
+import Sidebar from "../../components/sidebar/Sidebar";
+import Navbar from "../../components/layout/Navbar";
+
+import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
+import StatsCards from "../../components/dashboard/StatsCards";
+import ProductivityChart from "../../components/dashboard/ProductivityChart";
+import ProjectProgress from "../../components/dashboard/ProjectProgress";
+import RecentTasks from "../../components/dashboard/RecentTasks";
+import AIInsights from "../../components/dashboard/AIInsights";
+import TeamMembers from "../../components/dashboard/TeamMembers";
+import Meetings from "../../components/dashboard/Meetings";
+import Notifications from "../../components/dashboard/Notifications";
+import Activity from "../../components/dashboard/Activity";
+import CalendarWidget from "../../components/dashboard/CalendarWidget";
+import QuickActions from "../../components/dashboard/QuickActions";
 
 function Dashboard() {
   return (
@@ -22,108 +26,76 @@ function Dashboard() {
       {/* Main Content */}
       <div className="dashboard-main">
 
-        {/* Top Navbar */}
+        {/* Navbar */}
         <Navbar />
 
-        {/* Welcome Section */}
-        <section className="welcome-section">
+        <div className="dashboard-content">
 
-          <div>
-            <h1>Welcome Back 👋</h1>
-            <p>
-              Manage your projects, collaborate with your team and
-              boost productivity using AI.
-            </p>
+          <WelcomeBanner />
+
+          <StatsCards />
+
+          <div className="dashboard-row">
+
+            <div className="dashboard-large">
+              <ProductivityChart />
+            </div>
+
+            <div className="dashboard-small">
+              <AIInsights />
+            </div>
+
           </div>
 
-          <button className="create-btn">
-            + New Project
-          </button>
+          <div className="dashboard-row">
 
-        </section>
+            <div className="dashboard-large">
+              <ProjectProgress />
+            </div>
 
-        {/* Statistics */}
-        <section className="stats-grid">
+            <div className="dashboard-small">
+              <RecentTasks />
+            </div>
 
-          <StatsCard
-            title="Total Tasks"
-            value="128"
-            color="#2563EB"
-            icon="📝"
-          />
+          </div>
 
-          <StatsCard
-            title="Projects"
-            value="14"
-            color="#22C55E"
-            icon="📁"
-          />
+          <div className="dashboard-row">
 
-          <StatsCard
-            title="Completed"
-            value="102"
-            color="#8B5CF6"
-            icon="✅"
-          />
+            <div className="dashboard-large">
+              <TeamMembers />
+            </div>
 
-          <StatsCard
-            title="Team Members"
-            value="21"
-            color="#F59E0B"
-            icon="👥"
-          />
+            <div className="dashboard-small">
+              <Meetings />
+            </div>
 
-          <StatsCard
-            title="Productivity"
-            value="92%"
-            color="#EF4444"
-            icon="🔥"
-          />
+          </div>
 
-          <StatsCard
-            title="AI Score"
-            value="9.4"
-            color="#06B6D4"
-            icon="🤖"
-          />
+          <div className="dashboard-row">
 
-        </section>
+            <div className="dashboard-large">
+              <Activity />
+            </div>
 
-        {/* Charts */}
-        <section className="chart-grid">
+            <div className="dashboard-small">
+              <Notifications />
+            </div>
 
-          <ProductivityChart />
+          </div>
 
-          <ProjectProgress />
+          <div className="dashboard-row">
 
-        </section>
+            <div className="dashboard-large">
+              <CalendarWidget />
+            </div>
 
-        {/* Tasks & AI */}
-        <section className="middle-grid">
+            <div className="dashboard-small">
+              <QuickActions />
+            </div>
 
-          <RecentTasks />
+          </div>
 
-          <AIInsights />
-
-        </section>
-
-        {/* Team */}
-        <section className="middle-grid">
-
-          <TeamMembers />
-
-          <Notifications />
-
-        </section>
-
-        {/* Meetings */}
-        <section className="middle-grid">
-
-          <Meetings />
-
-          <Activity />
-
-        </section>
+        </div>
 
       </div>
 
