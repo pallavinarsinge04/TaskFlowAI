@@ -127,11 +127,12 @@ path="/admin/users"
 element={<Users/>}
 
 />
-      </Routes>
-      <Route
+ <Route
     path="/tasks"
     element={<Tasks />}
 />
+      </Routes>
+      
     </BrowserRouter>
   );
 }

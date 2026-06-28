@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import "./Tasks.css";
 import TaskCard from "./TaskCard";
 import TaskModal from "./TaskModal";
+import Sidebar from "../../components/sidebar/Sidebar";
+import Navbar from "../../components/layout/Navbar";
 import { FaPlus, FaSearch } from "react-icons/fa";
 
 function Tasks() {
