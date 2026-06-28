@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./Tasks.css";
 import TaskModal from "./TaskModal";
+import TaskCard from "./TaskCard";
 import {
   FaPlus,
   FaSearch,
@@ -174,70 +175,23 @@ function Tasks() {
 
       <div className="task-list">
 
-        {filteredTasks.map(task => (
+    {filteredTasks.map(task => (
 
-          <div className="task-card" key={task.id}>
+        <TaskCard
+            key={task.id}
+            task={task}
+            onEdit={(task)=>{
+                setEditTask(task);
+                setOpenModal(true);
+            }}
+            onDelete={(id)=>{
+                alert("Delete Task : " + id);
+            }}
+        />
 
-            <div className="task-top">
+    ))}
 
-              <div>
-
-                <h2>{task.title}</h2>
-
-                <p>{task.description}</p>
-
-              </div>
-
-              <div className="task-actions">
-
-                <button>
-
-                  <FaEdit />
-
-                </button>
-
-                <button>
-
-                  <FaTrash />
-
-                </button>
-
-              </div>
-
-            </div>
-
-            <div className="task-bottom">
-
-              <span className={`status ${task.status.replace(" ","")}`}>
-                {task.status}
-              </span>
-
-              <span className={`priority ${task.priority}`}>
-                <FaFlag />
-                {task.priority}
-              </span>
-
-              <span>
-
-                <FaCalendarAlt />
-
-                {task.dueDate}
-
-              </span>
-
-              <span>
-
-                👤 {task.assignee}
-
-              </span>
-
-            </div>
-
-          </div>
-
-        ))}
-
-      </div>
+</div>
 
     </div>
 
