@@ -1,123 +1,119 @@
 import { useState } from "react";
-import API from "./../../api/axios";
 import { Link, useNavigate } from "react-router-dom";
+import API from "../../api/axios";
 
-function Register() {
-
+const Register = () => {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-
+  const [formData, setFormData] = useState({
     name: "",
-
     email: "",
-
-    password: ""
-
+    password: "",
   });
 
   const handleChange = (e) => {
-
-    setForm({
-
-      ...form,
-
-      [e.target.name]: e.target.value
-
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
     });
-
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
+    try {
+      const res = await API.post("/auth/register", formData);
 
-    const res = await API.post(
-      "/auth/register",
-      form
-    );
+      alert(res.data.message || "Registration Successful");
 
-    console.log(res.data);
-
-    alert("Registration Successful");
-
-    navigate("/login");
-
-  } catch (err) {
-
-    console.log(err);
-
-    alert(
-      err.response?.data?.message ||
-      "Registration Failed"
-    );
-
-  }
-};
+      navigate("/login");
+    } catch (error) {
+      alert(
+        error.response?.data?.message || "Registration Failed"
+      );
+    }
+  };
 
   return (
+  <div className="register-page">
 
-    <div className="flex justify-center items-center h-screen bg-gray-100">
+    <div className="register-card">
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-xl shadow-lg w-96"
-      >
+      <div className="register-header">
 
-        <h2 className="text-3xl font-bold text-center mb-6">
-          Register
-        </h2>
+        <h1>TaskFlow AI</h1>
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          className="border p-3 w-full mb-4 rounded"
-          onChange={handleChange}
-        />
+        <p>Create your workspace account</p>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          className="border p-3 w-full mb-4 rounded"
-          onChange={handleChange}
-        />
+      </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          className="border p-3 w-full mb-4 rounded"
-          onChange={handleChange}
-        />
+      <form onSubmit={handleSubmit}>
+
+        <div className="input-group">
+          <label>Full Name</label>
+
+          <input
+            type="text"
+            name="name"
+            placeholder="Enter Full Name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="input-group">
+          <label>Email Address</label>
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="input-group">
+          <label>Password</label>
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
         <button
-          className="bg-green-600 text-white w-full p-3 rounded"
+          type="submit"
+          className="register-btn"
         >
-          Register
+          Create Account
         </button>
 
-        <p className="mt-4 text-center">
+      </form>
 
+      <div className="register-footer">
+
+        <p>
           Already have an account?
 
-          <Link
-            className="text-blue-600"
-            to="/login"
-          >
-            {" "}Login
+          <Link to="/login">
+            Login
           </Link>
 
         </p>
 
-      </form>
+      </div>
 
     </div>
 
-  );
-
-}
+  </div>
+);
+};
 
 export default Register;

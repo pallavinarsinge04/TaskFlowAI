@@ -1,35 +1,117 @@
-const handleSubmit = async (e) => {
-  e.preventDefault();
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import API from "../../api/axios";
+import "./Login.css";
 
-  try {
+function Login() {
+  const navigate = useNavigate();
 
-    const res = await API.post(
-      "/auth/login",
-      form
-    );
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
 
-    localStorage.setItem(
-      "token",
-      res.data.token
-    );
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify(res.data.user)
-    );
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    alert("Login Successful");
+    try {
+      const res = await API.post("/auth/login", form);
 
-    navigate("/dashboard");
+      localStorage.setItem("token", res.data.token);
 
-  } catch (err) {
+      localStorage.setItem(
+        "user",
+        JSON.stringify(res.data.user)
+      );
 
-    console.log(err);
+      alert("Login Successful");
 
-    alert(
-      err.response?.data?.message ||
-      "Login Failed"
-    );
+      navigate("/dashboard");
+    } catch (err) {
+      console.log(err);
 
-  }
-};
+      alert(
+        err.response?.data?.message ||
+        "Login Failed"
+      );
+    }
+  };
+
+  return (
+    <div className="login-page">
+
+      <div className="login-card">
+
+        <div className="login-header">
+
+          <h1>TaskFlow AI</h1>
+
+          <p>Sign in to your workspace</p>
+
+        </div>
+
+        <form onSubmit={handleSubmit}>
+
+          <div className="input-group">
+
+            <label>Email</label>
+
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+
+          </div>
+
+          <div className="input-group">
+
+            <label>Password</label>
+
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+
+          </div>
+
+          <button type="submit" className="login-btn">
+            Login
+          </button>
+
+        </form>
+
+        <div className="login-footer">
+
+          <Link to="/forgot-password">
+            Forgot Password?
+          </Link>
+
+          <p>
+            Don't have an account?
+            <Link to="/register"> Register</Link>
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+
+export default Login;

@@ -1,18 +1,19 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import API from "../../api/axios";
+import "./Login.css";
 
-const Login = () => {
+function Login() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     email: "",
     password: "",
   });
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
+    setForm({
+      ...form,
       [e.target.name]: e.target.value,
     });
   };
@@ -21,74 +22,96 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const res = await API.post("/auth/login", formData);
+      const res = await API.post("/auth/login", form);
 
       localStorage.setItem("token", res.data.token);
-      localStorage.setItem(
-  "user",
-  JSON.stringify(res.data.user)
-);
 
-localStorage.setItem(
-  "token",
-  res.data.token
-);
+      localStorage.setItem(
+        "user",
+        JSON.stringify(res.data.user)
+      );
+
       alert("Login Successful");
 
       navigate("/dashboard");
-    } catch (error) {
+    } catch (err) {
+      console.log(err);
+
       alert(
-        error.response?.data?.message || "Login Failed"
+        err.response?.data?.message ||
+        "Login Failed"
       );
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-xl shadow-lg w-96"
-      >
-        <h1 className="text-3xl font-bold text-center mb-6">
-          Login
-        </h1>
+    <div className="login-page">
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full border p-3 rounded mb-4"
-          required
-        />
+      <div className="login-card">
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Enter Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full border p-3 rounded mb-4"
-          required
-        />
+        <div className="login-header">
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-3 rounded"
-        >
-          Login
-        </button>
+          <h1>TaskFlow AI</h1>
 
-        <p className="mt-4 text-center">
-          Don't have an account?{" "}
-          <Link to="/register" className="text-blue-600">
-            Register
+          <p>Sign in to your workspace</p>
+
+        </div>
+
+        <form onSubmit={handleSubmit}>
+
+          <div className="input-group">
+
+            <label>Email</label>
+
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter your email"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+
+          </div>
+
+          <div className="input-group">
+
+            <label>Password</label>
+
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter password"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+
+          </div>
+
+          <button type="submit" className="login-btn">
+            Login
+          </button>
+
+        </form>
+
+        <div className="login-footer">
+
+          <Link to="/forgot-password">
+            Forgot Password?
           </Link>
-        </p>
-      </form>
+
+          <p>
+            Don't have an account?
+            <Link to="/register"> Register</Link>
+          </p>
+
+        </div>
+
+      </div>
+
     </div>
   );
-};
+}
 
 export default Login;

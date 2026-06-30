@@ -35,64 +35,85 @@ const Register = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-xl shadow-lg w-96"
-      >
-        <h1 className="text-3xl font-bold text-center mb-6">
-          Register
-        </h1>
+  <div className="register-page">
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Enter Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full border p-3 rounded mb-4"
-          required
-        />
+    <div className="register-card">
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full border p-3 rounded mb-4"
-          required
-        />
+      <div className="register-header">
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Enter Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full border p-3 rounded mb-4"
-          required
-        />
+        <h1>TaskFlow AI</h1>
+
+        <p>Create your workspace account</p>
+
+      </div>
+
+      <form onSubmit={handleSubmit}>
+
+        <div className="input-group">
+          <label>Full Name</label>
+
+          <input
+            type="text"
+            name="name"
+            placeholder="Enter Full Name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="input-group">
+          <label>Email Address</label>
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter Email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <div className="input-group">
+          <label>Password</label>
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter Password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
         <button
           type="submit"
-          className="w-full bg-green-600 text-white p-3 rounded hover:bg-green-700"
+          className="register-btn"
         >
-          Register
+          Create Account
         </button>
 
-        <p className="text-center mt-4">
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            className="text-blue-600 font-semibold"
-          >
+      </form>
+
+      <div className="register-footer">
+
+        <p>
+          Already have an account?
+
+          <Link to="/login">
             Login
           </Link>
+
         </p>
-      </form>
+
+      </div>
+
     </div>
-  );
+
+  </div>
+);
 };
 
 export default Register;
