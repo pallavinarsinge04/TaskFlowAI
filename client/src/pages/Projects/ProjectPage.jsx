@@ -61,7 +61,7 @@ function ProjectPage() {
 
       <div className="main">
 
-        <Navbar />
+        
 
         <div className="projects-page">
 

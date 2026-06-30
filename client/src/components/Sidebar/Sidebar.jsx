@@ -5,6 +5,7 @@ import {
   FaUsers,
   FaBell,
   FaCog,
+  FaSignOutAlt,
 } from "react-icons/fa";
 
 import { useNavigate } from "react-router-dom";
@@ -22,10 +23,17 @@ function Sidebar({ collapsed, setCollapsed }) {
     { icon: <FaCog />, label: "Settings", path: "/settings" },
   ];
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    navigate("/login");
+  };
+
   return (
     <div className={`sidebar ${collapsed ? "collapsed" : ""}`}>
 
-      {/* LOGO */}
+      {/* Logo */}
       <div className="logo">
         {!collapsed && <h2>TaskFlow</h2>}
 
@@ -34,8 +42,8 @@ function Sidebar({ collapsed, setCollapsed }) {
         </button>
       </div>
 
-      {/* MENU */}
-      <nav>
+      {/* Navigation */}
+      <nav className="sidebar-menu">
         {menuItems.map((item, index) => (
           <div
             key={index}
@@ -48,6 +56,18 @@ function Sidebar({ collapsed, setCollapsed }) {
           </div>
         ))}
       </nav>
+
+      {/* Logout Button */}
+      <div className="sidebar-footer">
+        <button
+          className="logout-btn"
+          onClick={handleLogout}
+        >
+          <FaSignOutAlt />
+
+          {!collapsed && <span>Logout</span>}
+        </button>
+      </div>
 
     </div>
   );

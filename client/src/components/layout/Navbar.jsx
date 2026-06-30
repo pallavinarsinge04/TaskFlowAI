@@ -8,7 +8,7 @@ import {
   FaQuestionCircle,
   FaChevronDown,
 } from "react-icons/fa";
-
+import { useEffect, useState } from "react";
 function Navbar() {
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -16,7 +16,9 @@ function Navbar() {
     month: "long",
     year: "numeric",
   });
-
+ const [user, setUser] = useState(
+  JSON.parse(localStorage.getItem("user"))
+);
   return (
     <header className="navbar">
 
@@ -68,9 +70,13 @@ function Navbar() {
         <div className="profile">
 
           <img
-            src="https://i.pravatar.cc/150?img=12"
-            alt=""
-          />
+  src={
+    user?.profilePic ||
+    "https://i.pravatar.cc/150"
+  }
+  alt="Profile"
+  className="navbar-profile"
+/>
 
           <div>
 
@@ -86,8 +92,34 @@ function Navbar() {
 
       </div>
 
+
     </header>
   );
+  useEffect(() => {
+
+  const updateProfile = () => {
+
+    setUser(
+      JSON.parse(localStorage.getItem("user"))
+    );
+
+  };
+
+  window.addEventListener(
+    "profilePicUpdated",
+    updateProfile
+  );
+
+  return () => {
+
+    window.removeEventListener(
+      "profilePicUpdated",
+      updateProfile
+    );
+
+  };
+
+}, []);
 }
 
 export default Navbar;

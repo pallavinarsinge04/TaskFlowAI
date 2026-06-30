@@ -18,6 +18,61 @@ function Settings() {
       {/* Profile Section */}
       <div className="settings-card">
         <h2>👤 Profile Settings</h2>
+        {/* Update Profile Picture */}
+
+<div className="profile-picture-section">
+
+  <h3>Update Profile Picture</h3>
+
+  <img
+    src={
+      JSON.parse(localStorage.getItem("user"))?.profilePic ||
+      "https://i.pravatar.cc/150"
+    }
+    alt="Profile"
+    className="settings-profile-img"
+    id="settingsProfileImage"
+  />
+
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) => {
+
+      const file = e.target.files[0];
+
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+
+        const user =
+          JSON.parse(localStorage.getItem("user")) || {};
+
+        user.profilePic = reader.result;
+
+        localStorage.setItem(
+          "user",
+          JSON.stringify(user)
+        );
+
+        document.getElementById(
+          "settingsProfileImage"
+        ).src = reader.result;
+
+        window.dispatchEvent(
+          new Event("profilePicUpdated")
+        );
+
+      };
+
+      reader.readAsDataURL(file);
+
+    }}
+  />
+
+</div>
 
         <div className="form-group">
           <label>Full Name</label>
