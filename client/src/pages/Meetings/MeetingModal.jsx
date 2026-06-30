@@ -7,7 +7,8 @@ function MeetingModal({ onClose, onSave }) {
     time: "",
     platform: "Google Meet",
     link: "",
-    participants: ""
+    participants: "",
+    status: "Upcoming"
   });
 
   const handleChange = (e) => {
@@ -23,13 +24,13 @@ function MeetingModal({ onClose, onSave }) {
   return (
     <div className="modal-overlay">
 
-      <div className="modal">
+      <div className="meeting-modal">
 
-        <h2>Schedule Meeting</h2>
+        <h2>Schedule New Meeting</h2>
 
         <form onSubmit={handleSubmit}>
 
-          <input name="title" placeholder="Title" onChange={handleChange} />
+          <input name="title" placeholder="Meeting Title" onChange={handleChange} />
           <input type="date" name="date" onChange={handleChange} />
           <input type="time" name="time" onChange={handleChange} />
 
@@ -44,12 +45,13 @@ function MeetingModal({ onClose, onSave }) {
 
           <div className="modal-actions">
             <button type="button" onClick={onClose}>Cancel</button>
-            <button type="submit">Create</button>
+            <button type="submit">Create Meeting</button>
           </div>
 
         </form>
 
       </div>
+
     </div>
   );
 }

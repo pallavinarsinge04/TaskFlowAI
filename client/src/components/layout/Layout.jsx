@@ -1,15 +1,19 @@
-import Sidebar from "../Sidebar/Sidebar";
-import "./Layout.css";
+import Sidebar from "./Sidebar";
+import { useState } from "react";
 
 function Layout({ children }) {
-  return (
-    <>
-      <Sidebar />
+  const [collapsed, setCollapsed] = useState(false);
 
-      <main className="main-content">
+  return (
+    <div className="app-layout">
+
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+
+      <div className={`main-content ${collapsed ? "collapsed" : ""}`}>
         {children}
-      </main>
-    </>
+      </div>
+
+    </div>
   );
 }
 

@@ -1,23 +1,28 @@
-import { FaVideo, FaClock, FaUsers } from "react-icons/fa";
+import { FaVideo, FaClock, FaUsers, FaExternalLinkAlt } from "react-icons/fa";
 
 function MeetingCard({ meeting }) {
   return (
     <div className="meeting-card">
 
-      <h3>{meeting.title}</h3>
+      <div className="meeting-top">
+        <h3>{meeting.title}</h3>
+        <span className={`status ${meeting.status}`}>
+          {meeting.status}
+        </span>
+      </div>
 
       <div className="meeting-info">
-        <span><FaClock /> {meeting.date} • {meeting.time}</span>
-        <span><FaUsers /> {meeting.participants}</span>
-        <span><FaVideo /> {meeting.platform}</span>
+        <p><FaClock /> {meeting.date} • {meeting.time}</p>
+        <p><FaUsers /> {meeting.participants}</p>
+        <p><FaVideo /> {meeting.platform}</p>
       </div>
 
       <a
+        className="join-btn"
         href={meeting.link}
         target="_blank"
-        className="join-btn"
       >
-        Join Meeting
+        Join Meeting <FaExternalLinkAlt />
       </a>
 
     </div>

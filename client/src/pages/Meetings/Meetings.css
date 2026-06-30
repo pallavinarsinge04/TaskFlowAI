@@ -1,58 +1,90 @@
-.meetings-page {
-  padding: 20px;
+.meeting-container {
+  padding: 25px;
   background: #f6f7fb;
   min-height: 100vh;
 }
 
-.meetings-header {
+.meeting-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.add-btn {
+.create-btn {
   background: #4f46e5;
   color: white;
   padding: 10px 15px;
-  border: none;
   border-radius: 8px;
+  border: none;
   cursor: pointer;
 }
 
 .meeting-stats {
-  margin-top: 20px;
   display: flex;
+  gap: 15px;
+  margin-top: 20px;
 }
 
-.stat {
+.stat-box {
   background: white;
   padding: 15px;
   border-radius: 10px;
   display: flex;
   gap: 10px;
+  align-items: center;
+  min-width: 180px;
 }
 
-.meeting-list {
+.meeting-grid {
   margin-top: 20px;
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 15px;
 }
 
 .meeting-card {
   background: white;
   padding: 15px;
-  border-radius: 10px;
+  border-radius: 12px;
+  transition: 0.2s;
 }
 
-.meeting-info {
+.meeting-card:hover {
+  transform: translateY(-3px);
+}
+
+.meeting-top {
   display: flex;
-  gap: 10px;
+  justify-content: space-between;
+}
+
+.status {
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #e5e7eb;
+}
+
+.status.Upcoming {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status.Scheduled {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.meeting-info p {
   font-size: 13px;
-  margin: 10px 0;
+  margin: 5px 0;
+  color: #555;
 }
 
 .join-btn {
-  background: green;
+  display: inline-block;
+  margin-top: 10px;
+  background: #10b981;
   color: white;
   padding: 8px 12px;
   border-radius: 6px;
@@ -63,20 +95,21 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
   height: 100%;
+  width: 100%;
   background: rgba(0,0,0,0.5);
 }
 
-.modal {
+.meeting-modal {
   background: white;
   width: 400px;
-  margin: 100px auto;
+  margin: 80px auto;
   padding: 20px;
   border-radius: 10px;
 }
 
-.modal input, .modal select {
+.meeting-modal input,
+.meeting-modal select {
   width: 100%;
   margin: 8px 0;
   padding: 10px;

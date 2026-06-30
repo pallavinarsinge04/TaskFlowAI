@@ -27,6 +27,7 @@ import AIAssistant from "./pages/AI/AIAssistant";
 import Notifications from "./pages/Notifications/Notifications";
 import Meetings from "./pages/Meetings/Meetings";
 import Settings from "./pages/Settings/Settings";
+import AppLayout from "./layouts/AppLayout";
 
 
 
@@ -35,128 +36,42 @@ import Settings from "./pages/Settings/Settings";
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
+   
 
-        {/* Landing Page */}
-        <Route
-          path="/"
-          element={<Landing />}
-        />
+<Routes>
 
-        {/* Authentication */}
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+    {/* Login */}
+    <Route path="/login" element={<Login />} />
 
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+    {/* Register */}
+    <Route path="/register" element={<Register />} />
 
-        {/* Dashboard */}
-        <Route
-          path="/dashboard"
-          element={<Dashboard />}
-        />
+    {/* Protected Layout */}
+    <Route element={<AppLayout />}>
 
-        {/* Projects */}
-        <Route
-          path="/projects"
-          element={<Projects />}
-        />
+        <Route path="/dashboard" element={<Dashboard />} />
 
-        <Route
-  path="/team"
-  element={<Team />}
-/>
+        <Route path="/projects" element={<Projects />} />
 
-<Route
-  path="/calendar"
-  element={<Calendar />}
-/>
+        <Route path="/tasks" element={<Tasks />} />
 
+        <Route path="/team" element={<Team />} />
 
-<Route
-  path="/manager"
-  element={
-    <ProtectedRoute role="Manager">
-      <Manager />
-    </ProtectedRoute>
-  }
-/>
+        <Route path="/calendar" element={<Calendar />} />
 
-<Route
-  path="/member"
-  element={
-    <ProtectedRoute role="Member">
-      <Member />
-    </ProtectedRoute>
-  }
-/>
-<Route
-  path="/profile"
-  element={<Profile />}
-/>
-<Route
-  path="/forgot-password"
-  element={<ForgotPassword />}
-/>
-<Route
-  path="/ai-analyzer"
-  element={<AITaskAnalyzer />}
-/>
-<Route
-  path="/time-tracker"
-  element={<TimeTracker />}
-/>
-<Route
-  path="/analytics"
-  element={<Analytics />}
-/>
-<Route
-  path="/chat"
-  element={<Chat />}
-/>
+        <Route path="/analytics" element={<Analytics />} />
 
-<Route
-  path="/voice"
-  element={<VoiceAssistantPage />}
-/>
+        <Route path="/notifications" element={<Notifications />} />
 
+        <Route path="/settings" element={<Settings />} />
 
-<Route
+        <Route path="/meetings" element={<Meetings />} />
 
-path="/admin/users"
+        <Route path="/profile" element={<Profile />} />
 
-element={<Users/>}
+    </Route>
 
-/>
- <Route
-    path="/tasks"
-    element={<Tasks />}
-/>
-<Route
-  path="/tasks/:id"
-  element={<TaskDetails />}
-/>
-
-
-<Route path="/project" element={<ProjectPage />} />
-<Route path="/kanban" element={<KanbanBoard />} />
-<Route path="/ai-assistant" element={<AIAssistant />} />
-
-
-<Route path="/notifications" element={<Notifications />} />
-
-
-<Route path="/meetings" element={<Meetings />} />
-<Route path="/settings" element={<Settings />} />
-
-      </Routes>
-      
-
-
+</Routes>
       
     </BrowserRouter>
   );

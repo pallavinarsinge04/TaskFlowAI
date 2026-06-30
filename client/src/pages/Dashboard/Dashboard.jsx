@@ -19,14 +19,13 @@ function Dashboard() {
   return (
     <div className="dashboard">
 
-      {/* Sidebar */}
-      <Sidebar />
+      
 
       {/* Main Content */}
       <div className="dashboard-main">
 
         {/* Navbar */}
-        <Navbar />
+        
 
         <div className="dashboard-content">
 

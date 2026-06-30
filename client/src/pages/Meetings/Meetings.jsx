@@ -2,55 +2,78 @@ import { useState } from "react";
 import "./Meetings.css";
 import MeetingCard from "./MeetingCard";
 import MeetingModal from "./MeetingModal";
-import { FaPlus, FaCalendarAlt } from "react-icons/fa";
+import { FaPlus, FaVideo, FaCalendarAlt } from "react-icons/fa";
 
 function Meetings() {
+  const [open, setOpen] = useState(false);
+
   const [meetings, setMeetings] = useState([
     {
       id: 1,
-      title: "Sprint Planning",
+      title: "Sprint Planning Meeting",
       date: "2026-07-15",
       time: "10:00 AM",
       platform: "Google Meet",
       link: "https://meet.google.com/demo",
-      participants: "Team A"
+      participants: "Team Alpha",
+      status: "Upcoming"
+    },
+    {
+      id: 2,
+      title: "Daily Standup",
+      date: "2026-07-16",
+      time: "09:00 AM",
+      platform: "Zoom",
+      link: "https://zoom.us/demo",
+      participants: "Dev Team",
+      status: "Scheduled"
     }
   ]);
-
-  const [open, setOpen] = useState(false);
 
   const addMeeting = (meeting) => {
     setMeetings([...meetings, { ...meeting, id: Date.now() }]);
   };
 
   return (
-    <div className="meetings-page">
+    <div className="meeting-container">
 
       {/* HEADER */}
-      <div className="meetings-header">
+      <div className="meeting-header">
         <div>
-          <h1>📅 Meetings</h1>
-          <p>Schedule and manage team meetings efficiently</p>
+          <h1>📅 Meetings Hub</h1>
+          <p>Schedule, manage and join team meetings</p>
         </div>
 
-        <button onClick={() => setOpen(true)} className="add-btn">
-          <FaPlus /> Schedule Meeting
+        <button className="create-btn" onClick={() => setOpen(true)}>
+          <FaPlus /> New Meeting
         </button>
       </div>
 
       {/* STATS */}
       <div className="meeting-stats">
-        <div className="stat">
+
+        <div className="stat-box">
           <FaCalendarAlt />
           <div>
             <h3>{meetings.length}</h3>
             <p>Total Meetings</p>
           </div>
         </div>
+
+        <div className="stat-box">
+          <FaVideo />
+          <div>
+            <h3>
+              {meetings.filter(m => m.status === "Upcoming").length}
+            </h3>
+            <p>Upcoming</p>
+          </div>
+        </div>
+
       </div>
 
-      {/* LIST */}
-      <div className="meeting-list">
+      {/* MEETING LIST */}
+      <div className="meeting-grid">
         {meetings.map((m) => (
           <MeetingCard key={m.id} meeting={m} />
         ))}

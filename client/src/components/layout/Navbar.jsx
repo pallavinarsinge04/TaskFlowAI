@@ -1,9 +1,16 @@
 import "./Navbar.css";
+import {
+  FaBell,
+  FaEnvelope,
+  FaMoon,
+  FaPlus,
+  FaSearch,
+  FaQuestionCircle,
+  FaChevronDown,
+} from "react-icons/fa";
 
 function Navbar() {
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  const today = new Date().toLocaleDateString("en-IN", {
+  const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -16,50 +23,64 @@ function Navbar() {
       <div className="navbar-left">
 
         <div className="search-box">
-
+          <FaSearch />
           <input
             type="text"
-            placeholder="Search projects, tasks..."
+            placeholder="Search projects, tasks, members..."
           />
-
         </div>
 
       </div>
 
       <div className="navbar-right">
 
-        <div className="nav-icon">
-          🔔
-          <span className="badge">5</span>
-        </div>
+        <button className="create-btn">
+          <FaPlus />
+          Create
+        </button>
 
-        <div className="nav-icon">
-          💬
-          <span className="badge">3</span>
-        </div>
+        <button className="icon-btn">
+          <FaMoon />
+        </button>
 
-        <div className="nav-icon">
-          📅
-        </div>
+        <button className="icon-btn notification">
+
+          <FaBell />
+
+          <span className="badge">
+            3
+          </span>
+
+        </button>
+
+        <button className="icon-btn">
+          <FaEnvelope />
+        </button>
+
+        <button className="icon-btn">
+          <FaQuestionCircle />
+        </button>
 
         <div className="date">
           {today}
         </div>
 
-        <div className="user-info">
+        <div className="profile">
 
           <img
-            src="https://i.pravatar.cc/150?img=8"
-            alt="profile"
+            src="https://i.pravatar.cc/150?img=12"
+            alt=""
           />
 
           <div>
 
-            <h4>{user?.name || "User"}</h4>
+            <h4>Pallavi</h4>
 
-            <p>{user?.role || "Member"}</p>
+            <p>Project Manager</p>
 
           </div>
+
+          <FaChevronDown />
 
         </div>
 

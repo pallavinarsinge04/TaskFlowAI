@@ -1,90 +1,55 @@
-import { NavLink } from "react-router-dom";
-import "./Sidebar.css";
+import {
+  FaHome,
+  FaTasks,
+  FaProjectDiagram,
+  FaUsers,
+  FaBell,
+  FaCog,
+} from "react-icons/fa";
 
-function Sidebar() {
-  const menu = [
-    {
-      category: "MAIN",
-      items: [
-        { icon: "🏠", title: "Dashboard", path: "/dashboard" },
-        { icon: "📝", title: "Tasks", path: "/tasks" },
-        { icon: "📁", title: "Projects", path: "/projects" },
-        { icon: "👥", title: "Team", path: "/team" },
-        { icon: "📅", title: "Calendar", path: "/calendar" },
-      ],
-    },
+import { useNavigate } from "react-router-dom";
+import "./sidebar.css";
 
-    {
-      category: "AI TOOLS",
-      items: [
-        { icon: "🤖", title: "AI Task Analyzer", path: "/ai-analyzer" },
-        { icon: "🧠", title: "AI Assistant", path: "/ai-assistant" },
-      ],
-    },
+function Sidebar({ collapsed, setCollapsed }) {
+  const navigate = useNavigate();
 
-    {
-      category: "PRODUCTIVITY",
-      items: [
-        { icon: "📊", title: "Analytics", path: "/analytics" },
-        { icon: "⏱", title: "Time Tracker", path: "/time-tracker" },
-        { icon: "🔔", title: "Notifications", path: "/notifications" },
-      ],
-    },
-
-    {
-      category: "COMMUNICATION",
-      items: [
-        { icon: "💬", title: "Team Chat", path: "/chat" },
-        { icon: "🎥", title: "Meeting", path: "/meeting" },
-      ],
-    },
-
-    {
-      category: "ACCOUNT",
-      items: [
-        { icon: "👤", title: "Profile", path: "/profile" },
-        { icon: "⚙️", title: "Settings", path: "/settings" },
-        { icon: "🚪", title: "Logout", path: "/login" },
-      ],
-    },
+  const menuItems = [
+    { icon: <FaHome />, label: "Dashboard", path: "/dashboard" },
+    { icon: <FaTasks />, label: "Tasks", path: "/tasks" },
+    { icon: <FaProjectDiagram />, label: "Projects", path: "/projects" },
+    { icon: <FaUsers />, label: "Team", path: "/team" },
+    { icon: <FaBell />, label: "Notifications", path: "/notifications" },
+    { icon: <FaCog />, label: "Settings", path: "/settings" },
   ];
 
   return (
-    <aside className="sidebar">
+    <div className={`sidebar ${collapsed ? "collapsed" : ""}`}>
 
+      {/* LOGO */}
       <div className="logo">
-        🚀
-        <div>
-          <h2>TaskFlow AI</h2>
-          <small>Project Manager</small>
-        </div>
+        {!collapsed && <h2>TaskFlow</h2>}
+
+        <button onClick={() => setCollapsed(!collapsed)}>
+          ☰
+        </button>
       </div>
 
-      {menu.map((section) => (
-        <div key={section.category} className="menu-section">
+      {/* MENU */}
+      <nav>
+        {menuItems.map((item, index) => (
+          <div
+            key={index}
+            className="nav-item"
+            onClick={() => navigate(item.path)}
+          >
+            <span>{item.icon}</span>
 
-          <p className="menu-title">
-            {section.category}
-          </p>
+            {!collapsed && <span>{item.label}</span>}
+          </div>
+        ))}
+      </nav>
 
-          {section.items.map((item) => (
-            <NavLink
-              key={item.title}
-              to={item.path}
-              className={({ isActive }) =>
-                isActive ? "menu-item active" : "menu-item"
-              }
-            >
-              <span className="menu-icon">{item.icon}</span>
-
-              <span>{item.title}</span>
-            </NavLink>
-          ))}
-
-        </div>
-      ))}
-
-    </aside>
+    </div>
   );
 }
 

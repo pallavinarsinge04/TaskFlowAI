@@ -1,13 +1,10 @@
-.sidebar{
-    width:270px;
-    min-height:100vh;
-    background:linear-gradient(180deg,#0f172a,#1e293b);
-    color:white;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    position:sticky;
-    top:0;
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  background: #0f172a;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
 }
 
 .logo{
