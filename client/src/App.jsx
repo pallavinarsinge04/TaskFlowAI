@@ -28,7 +28,7 @@ import Notifications from "./pages/Notifications/Notifications";
 import Meetings from "./pages/Meetings/Meetings";
 import Settings from "./pages/Settings/Settings";
 import AppLayout from "./layouts/AppLayout";
-
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 
 
 
@@ -68,6 +68,10 @@ function App() {
         <Route path="/meetings" element={<Meetings />} />
 
         <Route path="/profile" element={<Profile />} />
+        <Route
+    path="/forgot-password"
+    element={<ForgotPassword />}
+/>
 
     </Route>
 
