@@ -1,20 +1,24 @@
-const express = require("express");
+import express from "express";
+import Project from "../models/Project.js";
 
 const router = express.Router();
 
-const {
-  getProjects,
-  createProject,
-  updateProject,
-  deleteProject,
-} = require("../controllers/projectController");
+router.get("/",async(req,res)=>{
 
-router.get("/", getProjects);
+const projects=await Project.find().sort({createdAt:-1});
 
-router.post("/", createProject);
+res.json(projects);
 
-router.put("/:id", updateProject);
+});
 
-router.delete("/:id", deleteProject);
+router.post("/",async(req,res)=>{
 
-module.exports = router;
+const project=await Project.create(req.body);
+
+req.io.emit("projectCreated",project);
+
+res.json(project);
+
+});
+
+export default router;

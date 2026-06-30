@@ -1,111 +1,126 @@
-import "./ProjectPage.css";
 import { useEffect, useState } from "react";
+import axios from "axios";
+import socket from "./../../socket/socket";
+
+import Sidebar from "../../components/sidebar/Sidebar";
+import Navbar from "../../components/layout/Navbar";
+
+import ProjectCard from "./ProjectCard";
+import CreateProjectModal from "./CreateProjectModal";
+
+import "./Project.css";
 
 function ProjectPage() {
-
-  const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("tasks")) || [];
-    setTasks(data);
+    loadProjects();
+
+    socket.on("projectCreated", (project) => {
+      setProjects((prev) => [project, ...prev]);
+    });
+
+    socket.on("projectUpdated", (updatedProject) => {
+      setProjects((prev) =>
+        prev.map((p) =>
+          p._id === updatedProject._id ? updatedProject : p
+        )
+      );
+    });
+
+    socket.on("projectDeleted", (id) => {
+      setProjects((prev) =>
+        prev.filter((p) => p._id !== id)
+      );
+    });
+
+    return () => {
+      socket.off("projectCreated");
+      socket.off("projectUpdated");
+      socket.off("projectDeleted");
+    };
   }, []);
 
-  const completed = tasks.filter(t => t.status === "Completed").length;
-  const total = tasks.length;
-  const progress = total ? Math.round((completed / total) * 100) : 0;
+  const loadProjects = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/projects"
+      );
+
+      setProjects(res.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
+    <div className="layout">
 
-    <div className="project-container">
+      <Sidebar />
 
-      {/* HEADER */}
-      <div className="project-header">
+      <div className="main">
 
-        <div>
-          <h1>🚀 TaskFlowAI Project</h1>
-          <p>Manage your project like a professional SaaS tool</p>
-        </div>
+        <Navbar />
 
-        <button className="btn-primary">
-          + New Task
-        </button>
+        <div className="projects-page">
 
-      </div>
+          <div className="projects-header">
 
-      {/* STATS */}
-      <div className="stats-grid">
+            <div>
 
-        <div className="card">
-          <h2>{total}</h2>
-          <p>Total Tasks</p>
-        </div>
+              <h1>Projects</h1>
 
-        <div className="card">
-          <h2>{completed}</h2>
-          <p>Completed</p>
-        </div>
-
-        <div className="card">
-          <h2>{progress}%</h2>
-          <p>Progress</p>
-        </div>
-
-      </div>
-
-      {/* PROGRESS BAR */}
-      <div className="progress-box">
-
-        <h3>Project Progress</h3>
-
-        <div className="progress-bar">
-          <div
-            className="progress-fill"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        <p>{progress}% Completed</p>
-
-      </div>
-
-      {/* TASK LIST */}
-      <div className="task-section">
-
-        <h2>📌 Project Tasks</h2>
-
-        <div className="task-grid">
-
-          {tasks.map(task => (
-
-            <div className="task-card" key={task.id}>
-
-              <h3>{task.title}</h3>
-              <p>{task.description}</p>
-
-              <div className="meta">
-
-                <span className={`status ${task.status}`}>
-                  {task.status}
-                </span>
-
-                <span className={`priority ${task.priority}`}>
-                  {task.priority}
-                </span>
-
-              </div>
+              <p>
+                Manage all your projects in one place.
+              </p>
 
             </div>
 
-          ))}
+            <button
+              className="create-project-btn"
+              onClick={() => setShowModal(true)}
+            >
+              + Create Project
+            </button>
+
+          </div>
+
+          <div className="project-grid">
+
+            {projects.length === 0 ? (
+              <div className="empty-projects">
+
+                <h2>No Projects Found</h2>
+
+                <p>
+                  Create your first project to start managing work.
+                </p>
+
+              </div>
+            ) : (
+              projects.map((project) => (
+                <ProjectCard
+                  key={project._id}
+                  project={project}
+                />
+              ))
+            )}
+
+          </div>
 
         </div>
+
+        {showModal && (
+          <CreateProjectModal
+            close={() => setShowModal(false)}
+          />
+        )}
 
       </div>
 
     </div>
-
   );
-
 }
 
 export default ProjectPage;

@@ -7,7 +7,19 @@ import { Server } from "socket.io";
 
 import aiRoutes from "./routes/aiRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js";
 
+app.use("/api/projects", projectRoutes);
+app.use((req,res,next)=>{
+
+req.io=io;
+
+next();
+
+});
+
+app.use("/api/projects",projectRoutes);
 dotenv.config();
 
 const app = express();
