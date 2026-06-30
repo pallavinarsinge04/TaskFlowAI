@@ -1,92 +1,75 @@
-.team-container {
-  padding: 30px;
-  background: #f6f8fc;
-  min-height: 100vh;
-  font-family: Arial, sans-serif;
+.team-page{
+  padding:20px;
+  background:#f4f6fb;
+  min-height:100vh;
 }
 
-/* HEADER */
-.team-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
+.team-header h2{
+  font-size:24px;
+  margin-bottom:20px;
+  color:#1e293b;
 }
 
-.team-header h1 {
-  font-size: 28px;
+/* ADD BOX */
+.add-member-box{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
 }
 
-.team-header p {
-  color: gray;
+.add-member-box input{
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  outline:none;
+  flex:1;
 }
 
-.add-member {
-  background: #4f46e5;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+.add-member-box button{
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:10px 15px;
+  border-radius:10px;
+  cursor:pointer;
 }
 
-/* GRID */
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 15px;
+.add-member-box button:hover{
+  background:#1d4ed8;
 }
 
-/* CARD */
-.team-card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+/* MEMBER CARD */
+.member-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+  gap:15px;
 }
 
-.avatar {
-  font-size: 50px;
-  color: #4f46e5;
-  margin-bottom: 10px;
+.member-card{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.08);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-/* ROLE */
-.role {
-  display: block;
-  margin: 8px 0;
-  font-weight: bold;
+.member-card h3{
+  margin:0;
+  font-size:16px;
 }
 
-.role.Admin {
-  color: red;
+.member-card p{
+  margin:5px 0 0;
+  color:#64748b;
 }
 
-.role.Developer {
-  color: blue;
-}
-
-.role.Designer {
-  color: green;
-}
-
-/* STATUS */
-.status {
-  display: block;
-  margin-bottom: 8px;
-}
-
-.status.Online {
-  color: green;
-}
-
-.status.Offline {
-  color: gray;
-}
-
-/* TASK INFO */
-.task-info {
-  margin-top: 10px;
-  font-weight: bold;
+.delete{
+  background:red;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
 }

@@ -1,98 +1,95 @@
+import { useState } from "react";
 import "./TeamPage.css";
-import { useEffect, useState } from "react";
-import { FaUserCircle, FaPlus } from "react-icons/fa";
 
 function TeamPage() {
+  const [members, setMembers] = useState([
+    { id: 1, name: "John Doe", role: "Developer" },
+    { id: 2, name: "Jane Smith", role: "Designer" },
+  ]);
 
-  const [tasks, setTasks] = useState([]);
-  const [team, setTeam] = useState([]);
+  const [form, setForm] = useState({
+    name: "",
+    role: "",
+  });
 
-  useEffect(() => {
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-    const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    setTasks(storedTasks);
+  const addMember = () => {
+    if (!form.name || !form.role) return;
 
-    // demo team data
-    const demoTeam = [
-      {
-        id: 1,
-        name: "Pallavi",
-        role: "Admin",
-        status: "Online"
-      },
-      {
-        id: 2,
-        name: "Amit",
-        role: "Developer",
-        status: "Offline"
-      },
-      {
-        id: 3,
-        name: "Neha",
-        role: "Designer",
-        status: "Online"
-      }
-    ];
+    const newMember = {
+      id: Date.now(),
+      name: form.name,
+      role: form.role,
+    };
 
-    setTeam(demoTeam);
+    setMembers([newMember, ...members]);
 
-  }, []);
+    setForm({ name: "", role: "" });
+  };
 
-  const getTaskCount = (name) => {
-    return tasks.filter(t => t.assignee === name).length;
+  const removeMember = (id) => {
+    setMembers(members.filter((m) => m.id !== id));
   };
 
   return (
-
-    <div className="team-container">
+    <div className="team-page">
 
       {/* HEADER */}
       <div className="team-header">
+        <h2>Team Members</h2>
+      </div>
 
-        <div>
-          <h1>👥 Team Management</h1>
-          <p>Manage your project team & workload</p>
-        </div>
+      {/* ADD MEMBER BOX */}
+      <div className="add-member-box">
 
-        <button className="add-member">
-          <FaPlus /> Add Member
+        <input
+          name="name"
+          placeholder="Member Name"
+          value={form.name}
+          onChange={handleChange}
+        />
+
+        <input
+          name="role"
+          placeholder="Role (e.g Developer)"
+          value={form.role}
+          onChange={handleChange}
+        />
+
+        <button onClick={addMember}>
+          + Add Member
         </button>
 
       </div>
 
-      {/* TEAM GRID */}
-      <div className="team-grid">
+      {/* MEMBERS LIST */}
+      <div className="member-list">
 
-        {team.map(member => (
+        {members.map((m) => (
+          <div key={m.id} className="member-card">
 
-          <div className="team-card" key={member.id}>
-
-            <FaUserCircle className="avatar" />
-
-            <h2>{member.name}</h2>
-
-            <span className={`role ${member.role}`}>
-              {member.role}
-            </span>
-
-            <span className={`status ${member.status}`}>
-              {member.status}
-            </span>
-
-            <div className="task-info">
-              Tasks: {getTaskCount(member.name)}
+            <div>
+              <h3>{m.name}</h3>
+              <p>{m.role}</p>
             </div>
 
-          </div>
+            <button
+              className="delete"
+              onClick={() => removeMember(m.id)}
+            >
+              Remove
+            </button>
 
+          </div>
         ))}
 
       </div>
 
     </div>
-
   );
-
 }
 
 export default TeamPage;

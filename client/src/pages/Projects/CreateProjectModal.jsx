@@ -1,178 +1,120 @@
 import { useState } from "react";
-import axios from "axios";
-import "./Project.css";
+import "./CreateProjectModal.css";
 
 function CreateProjectModal({ close }) {
-  const [project, setProject] = useState({
-    title: "",
+  const [form, setForm] = useState({
+    name: "",
     description: "",
+    startDate: "",
+    endDate: "",
+    status: "Active",
     priority: "Medium",
-    status: "Planning",
-    dueDate: "",
-    members: "",
-    color: "#2563eb",
+    owner: "",
+    budget: "",
+    tags: "",
   });
 
   const handleChange = (e) => {
-    setProject({
-      ...project,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleCreate = async () => {
-    if (!project.title) {
-      alert("Project name is required");
-      return;
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    try {
-      await axios.post("http://localhost:5000/api/projects", project);
+    console.log("Project Created:", form);
 
-      close();
-    } catch (err) {
-      console.log(err);
-      alert("Unable to create project");
-    }
+    close();
   };
 
   return (
     <div className="modal-overlay">
 
-      <div className="project-modal">
+      <div className="modal-box">
 
+        {/* HEADER */}
         <div className="modal-header">
-
-          <h2>Create New Project</h2>
-
-          <button
-            className="close-btn"
-            onClick={close}
-          >
-            ✕
-          </button>
-
+          <h2>Create Project</h2>
+          <button onClick={close}>✕</button>
         </div>
 
-        <div className="modal-body">
-
-          <label>Project Name</label>
+        {/* SCROLLABLE BODY */}
+        <form className="modal-body" onSubmit={handleSubmit}>
 
           <input
-            type="text"
-            name="title"
-            placeholder="Enter project name"
-            value={project.title}
+            name="name"
+            placeholder="Project Name"
             onChange={handleChange}
           />
-
-          <label>Description</label>
 
           <textarea
-            rows="4"
             name="description"
-            placeholder="Project description..."
-            value={project.description}
+            placeholder="Project Description"
             onChange={handleChange}
           />
-
-          <div className="form-row">
-
-            <div>
-
-              <label>Priority</label>
-
-              <select
-                name="priority"
-                value={project.priority}
-                onChange={handleChange}
-              >
-                <option>Low</option>
-                <option>Medium</option>
-                <option>High</option>
-                <option>Critical</option>
-              </select>
-
-            </div>
-
-            <div>
-
-              <label>Status</label>
-
-              <select
-                name="status"
-                value={project.status}
-                onChange={handleChange}
-              >
-                <option>Planning</option>
-                <option>In Progress</option>
-                <option>Review</option>
-                <option>Completed</option>
-              </select>
-
-            </div>
-
-          </div>
-
-          <div className="form-row">
-
-            <div>
-
-              <label>Due Date</label>
-
-              <input
-                type="date"
-                name="dueDate"
-                value={project.dueDate}
-                onChange={handleChange}
-              />
-
-            </div>
-
-            <div>
-
-              <label>Theme Color</label>
-
-              <input
-                type="color"
-                name="color"
-                value={project.color}
-                onChange={handleChange}
-              />
-
-            </div>
-
-          </div>
-
-          <label>Team Members</label>
 
           <input
-            type="text"
-            name="members"
-            placeholder="Rahul, Pallavi, Amit..."
-            value={project.members}
+            type="date"
+            name="startDate"
             onChange={handleChange}
           />
 
-        </div>
+          <input
+            type="date"
+            name="endDate"
+            onChange={handleChange}
+          />
 
-        <div className="modal-footer">
+          <select name="status" onChange={handleChange}>
+            <option>Active</option>
+            <option>Completed</option>
+            <option>On Hold</option>
+          </select>
 
-          <button
-            className="cancel-btn"
-            onClick={close}
-          >
-            Cancel
-          </button>
+          <select name="priority" onChange={handleChange}>
+            <option>Low</option>
+            <option>Medium</option>
+            <option>High</option>
+          </select>
 
-          <button
-            className="create-btn"
-            onClick={handleCreate}
-          >
-            🚀 Create Project
-          </button>
+          <input
+            name="owner"
+            placeholder="Project Owner"
+            onChange={handleChange}
+          />
 
-        </div>
+          <input
+            name="budget"
+            placeholder="Budget"
+            onChange={handleChange}
+          />
+
+          <input
+            name="tags"
+            placeholder="Tags (comma separated)"
+            onChange={handleChange}
+          />
+
+          {/* EXTRA FIELDS (makes scroll needed) */}
+          <input placeholder="Client Name" />
+          <input placeholder="Department" />
+          <input placeholder="Technology Stack" />
+          <input placeholder="Repository URL" />
+          <input placeholder="Deployment URL" />
+
+          {/* FOOTER BUTTONS */}
+          <div className="modal-footer">
+
+            <button type="button" onClick={close}>
+              Cancel
+            </button>
+
+            <button type="submit">
+              Create Project
+            </button>
+
+          </div>
+
+        </form>
 
       </div>
 

@@ -1,123 +1,68 @@
+import { useState } from "react";
 import "./Notifications.css";
-import { useEffect, useState } from "react";
-import { FaBell, FaTrash } from "react-icons/fa";
 
 function Notifications() {
+  const [notifications, setNotifications] = useState([
+    { id: 1, message: "New task assigned to you", time: "Just now" },
+    { id: 2, message: "Project deadline updated", time: "2 min ago" },
+  ]);
 
-  const [notifications, setNotifications] = useState([]);
+  const [text, setText] = useState("");
 
-  useEffect(() => {
+  const sendNotification = () => {
+    if (!text.trim()) return;
 
-    const demo = [
-      {
-        id: 1,
-        title: "Task Assigned",
-        message: "You were assigned to 'Design Dashboard'",
-        type: "High",
-        date: "Today"
-      },
-      {
-        id: 2,
-        title: "Task Completed",
-        message: "Login API marked as completed",
-        type: "Medium",
-        date: "Today"
-      },
-      {
-        id: 3,
-        title: "New Comment",
-        message: "Amit commented on your task",
-        type: "Low",
-        date: "Yesterday"
-      }
-    ];
+    const newNotification = {
+      id: Date.now(),
+      message: text,
+      time: "Just now",
+    };
 
-    const saved = JSON.parse(localStorage.getItem("notifications"));
-
-    if (saved) setNotifications(saved);
-    else {
-      setNotifications(demo);
-      localStorage.setItem("notifications", JSON.stringify(demo));
-    }
-
-  }, []);
-
-  const deleteNotification = (id) => {
-
-    const updated = notifications.filter(n => n.id !== id);
-    setNotifications(updated);
-    localStorage.setItem("notifications", JSON.stringify(updated));
-
+    setNotifications([newNotification, ...notifications]);
+    setText("");
   };
 
-  const grouped = notifications.reduce((acc, item) => {
-
-    if (!acc[item.date]) acc[item.date] = [];
-    acc[item.date].push(item);
-
-    return acc;
-
-  }, {});
-
   return (
-
-    <div className="notify-container">
+    <div className="notification-page">
 
       {/* HEADER */}
-      <div className="notify-header">
+      <div className="notification-header">
+        <h2>Notifications</h2>
+      </div>
 
-        <h1>🔔 Notifications</h1>
-        <p>Stay updated with project activities</p>
+      {/* SEND NOTIFICATION */}
+      <div className="send-box">
+
+        <input
+          type="text"
+          placeholder="Send notification..."
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+
+        <button onClick={sendNotification}>
+          Send
+        </button>
 
       </div>
 
-      {/* NOTIFICATIONS */}
-      <div className="notify-list">
+      {/* LIST */}
+      <div className="notification-list">
 
-        {Object.keys(grouped).map(date => (
+        {notifications.map((n) => (
+          <div key={n.id} className="notification-card">
 
-          <div key={date} className="notify-group">
+            <div className="msg">{n.message}</div>
 
-            <h2>{date}</h2>
-
-            {grouped[date].map(n => (
-
-              <div className="notify-card" key={n.id}>
-
-                <FaBell className="icon" />
-
-                <div className="content">
-
-                  <h3>{n.title}</h3>
-                  <p>{n.message}</p>
-
-                  <span className={`badge ${n.type}`}>
-                    {n.type}
-                  </span>
-
-                </div>
-
-                <button
-                  className="delete"
-                  onClick={() => deleteNotification(n.id)}
-                >
-                  <FaTrash />
-                </button>
-
-              </div>
-
-            ))}
+            <div className="time">{n.time}</div>
 
           </div>
-
         ))}
 
       </div>
 
     </div>
-
   );
-
 }
 
 export default Notifications;

@@ -7,78 +7,68 @@ import Projects from "./pages/Projects/ProjectPage";
 import Team from "./pages/Team/TeamPage";
 import Calendar from "./pages/Calendar/CalendarPage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Admin from "./pages/Admin/Admin";
-import Manager from "./pages/Manager/Manager";
-import Member from "./pages/Member/Member";
 import Profile from "./pages/Profile/Profile";
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
-import AITaskAnalyzer from "./pages/AITaskAnalyzer/AITaskAnalyzer";
-import TimeTracker from "./pages/TimeTracker/TimeTracker";
 import Analytics from "./pages/Analytics/Analytics";
 import Chat from "./pages/Chat/Chat";
-import VoiceAssistantPage from "./pages/VoiceAssistant/VoiceAssistantPage";
-import AdminDashboard from "./pages/Admin/AdminDashboard";
-import Users from "./pages/Admin/Users";
 import Tasks from "./pages/Tasks/Tasks";
 import TaskDetails from "./pages/Tasks/TaskDetails";
-import ProjectPage from "./pages/Projects/ProjectPage";
 import KanbanBoard from "./pages/Kanban/KanbanBoard";
 import AIAssistant from "./pages/AI/AIAssistant";
+import AITaskAnalyzer from "./pages/AITaskAnalyzer/AITaskAnalyzer";
+import TimeTracker from "./pages/TimeTracker/TimeTracker";
 import Notifications from "./pages/Notifications/Notifications";
 import Meetings from "./pages/Meetings/Meetings";
 import Settings from "./pages/Settings/Settings";
+import VoiceAssistantPage from "./pages/VoiceAssistant/VoiceAssistantPage";
 import AppLayout from "./layouts/AppLayout";
-import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
-
-
-
+import { Navigate } from "react-router-dom";
 
 function App() {
   return (
     <BrowserRouter>
-   
 
-<Routes>
+      <Routes>
 
-    {/* Login */}
-    <Route path="/login" element={<Login />} />
+        {/* PUBLIC ROUTES */}
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-    {/* Register */}
-    <Route path="/register" element={<Register />} />
+        {/* PROTECTED APP */}
+        <Route element={<AppLayout />}>
 
-    {/* Protected Layout */}
-    <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/tasks" element={<Tasks />} />
+          <Route path="/tasks/:id" element={<TaskDetails />} />
 
-        <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/analytics" element={<Analytics />} />
 
-        <Route path="/projects" element={<Projects />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/time-tracker" element={<TimeTracker />} />
 
-        <Route path="/tasks" element={<Tasks />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/meetings" element={<Meetings />} />
+          <Route path="/settings" element={<Settings />} />
 
-        <Route path="/team" element={<Team />} />
+          <Route path="/profile" element={<Profile />} />
 
-        <Route path="/calendar" element={<Calendar />} />
+          <Route path="/ai-assistant" element={<AIAssistant />} />
+          <Route path="/ai-analyzer" element={<AITaskAnalyzer />} />
 
-        <Route path="/analytics" element={<Analytics />} />
+          <Route path="/voice" element={<VoiceAssistantPage />} />
 
-        <Route path="/notifications" element={<Notifications />} />
+          <Route path="/kanban" element={<KanbanBoard />} />
 
-        <Route path="/settings" element={<Settings />} />
+        </Route>
 
-        <Route path="/meetings" element={<Meetings />} />
+      </Routes>
 
-        <Route path="/profile" element={<Profile />} />
-        <Route
-    path="/forgot-password"
-    element={<ForgotPassword />}
-/>
-
-    </Route>
-
-</Routes>
-      
     </BrowserRouter>
   );
 }
-
 export default App;
