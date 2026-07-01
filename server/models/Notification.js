@@ -1,28 +1,19 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const notificationSchema = new mongoose.Schema(
   {
-    title: {
+    userId: String,
+    message: String,
+    type: {
       type: String,
-      required: true,
+      default: "info",
     },
-
-    message: {
-      type: String,
-      required: true,
-    },
-
     read: {
       type: Boolean,
       default: false,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-module.exports = mongoose.model(
-  "Notification",
-  notificationSchema
-);
+export default mongoose.model("Notification", notificationSchema);

@@ -1,62 +1,122 @@
-import { useState } from "react";
 import "./Notifications.css";
+import {
+  FaBell,
+  FaTasks,
+  FaProjectDiagram,
+  FaUsers,
+  FaRobot,
+  FaCheckCircle,
+} from "react-icons/fa";
+
+const notifications = [
+  {
+    id: 1,
+    icon: <FaProjectDiagram />,
+    title: "New Project Created",
+    message: "AI Based Attendance Management System",
+    time: "2 min ago",
+    type: "project",
+    unread: true,
+  },
+  {
+    id: 2,
+    icon: <FaTasks />,
+    title: "Task Assigned",
+    message: "Design Login Page",
+    time: "10 min ago",
+    type: "task",
+    unread: true,
+  },
+  {
+    id: 3,
+    icon: <FaCheckCircle />,
+    title: "Task Completed",
+    message: "Authentication Module",
+    time: "25 min ago",
+    type: "completed",
+    unread: false,
+  },
+  {
+    id: 4,
+    icon: <FaUsers />,
+    title: "New Team Member",
+    message: "Rahul joined your project",
+    time: "1 hour ago",
+    type: "team",
+    unread: false,
+  },
+  {
+    id: 5,
+    icon: <FaRobot />,
+    title: "AI Suggestion",
+    message: "Project deadline is close. Assign more members.",
+    time: "2 hours ago",
+    type: "ai",
+    unread: true,
+  },
+];
 
 function Notifications() {
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: "New task assigned to you", time: "Just now" },
-    { id: 2, message: "Project deadline updated", time: "2 min ago" },
-  ]);
-
-  const [text, setText] = useState("");
-
-  const sendNotification = () => {
-    if (!text.trim()) return;
-
-    const newNotification = {
-      id: Date.now(),
-      message: text,
-      time: "Just now",
-    };
-
-    setNotifications([newNotification, ...notifications]);
-    setText("");
-  };
-
   return (
-    <div className="notification-page">
+    <div className="notifications-page">
 
-      {/* HEADER */}
       <div className="notification-header">
-        <h2>Notifications</h2>
-      </div>
+        <div>
+          <h1>
+            <FaBell /> Notifications
+          </h1>
+          <p>Stay updated with your projects and tasks</p>
+        </div>
 
-      {/* SEND NOTIFICATION */}
-      <div className="send-box">
-
-        <input
-          type="text"
-          placeholder="Send notification..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
-
-        <button onClick={sendNotification}>
-          Send
+        <button className="mark-btn">
+          Mark All Read
         </button>
-
       </div>
 
-      {/* LIST */}
+      <div className="notification-tabs">
+        <button className="active">All</button>
+        <button>Unread</button>
+        <button>Projects</button>
+        <button>Tasks</button>
+        <button>Team</button>
+        <button>AI</button>
+      </div>
+
       <div className="notification-list">
 
-        {notifications.map((n) => (
-          <div key={n.id} className="notification-card">
+        {notifications.map((item) => (
 
-            <div className="msg">{n.message}</div>
+          <div
+            className={`notification-card ${
+              item.unread ? "unread" : ""
+            }`}
+            key={item.id}
+          >
 
-            <div className="time">{n.time}</div>
+            <div className="notification-icon">
+              {item.icon}
+            </div>
+
+            <div className="notification-content">
+
+              <h3>{item.title}</h3>
+
+              <p>{item.message}</p>
+
+              <span>{item.time}</span>
+
+            </div>
+
+            <div className="notification-actions">
+
+              <button>View</button>
+
+              <button>Delete</button>
+
+            </div>
 
           </div>
+
         ))}
 
       </div>

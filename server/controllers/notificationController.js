@@ -1,66 +1,17 @@
-const Notification = require("../models/Notification");
+import Notification from "../models/Notification.js";
+import { getIO } from "../config/socket.js";
 
-// Get all notifications
+export const sendNotification = async (userId, message, type = "info") => {
+  const notification = await Notification.create({
+    userId,
+    message,
+    type,
+  });
 
-exports.getNotifications = async (req, res) => {
-  try {
-    const notifications = await Notification.find().sort({
-      createdAt: -1,
-    });
+  const io = getIO();
 
-    res.json({
-      success: true,
-      notifications,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+  // 🔥 REAL TIME SEND
+  io.to(userId).emit("notification", notification);
 
-// Create notification
-
-exports.createNotification = async (req, res) => {
-  try {
-    const notification = await Notification.create(req.body);
-
-    res.status(201).json({
-      success: true,
-      notification,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-// Mark as read
-
-exports.markRead = async (req, res) => {
-  try {
-    const notification =
-      await Notification.findByIdAndUpdate(
-        req.params.id,
-        {
-          read: true,
-        },
-        {
-          new: true,
-        }
-      );
-
-    res.json({
-      success: true,
-      notification,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
+  return notification;
 };

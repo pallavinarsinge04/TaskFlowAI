@@ -1,125 +1,200 @@
 import { useState } from "react";
+import axios from "axios";
 import "./CreateProjectModal.css";
 
-function CreateProjectModal({ close }) {
-  const [form, setForm] = useState({
-    name: "",
-    description: "",
-    startDate: "",
-    endDate: "",
-    status: "Active",
-    priority: "Medium",
-    owner: "",
-    budget: "",
-    tags: "",
-  });
+function CreateProjectModal({ close, addProject }) {
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+const [form,setForm]=useState({
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+name:"",
+description:"",
+status:"Planning",
+priority:"Medium",
+startDate:"",
+endDate:"",
+teamMembers:1,
+progress:0
 
-    console.log("Project Created:", form);
+});
 
-    close();
-  };
+const handleChange=(e)=>{
 
-  return (
-    <div className="modal-overlay">
+setForm({
 
-      <div className="modal-box">
+...form,
+[e.target.name]:e.target.value
 
-        {/* HEADER */}
-        <div className="modal-header">
-          <h2>Create Project</h2>
-          <button onClick={close}>✕</button>
-        </div>
+});
 
-        {/* SCROLLABLE BODY */}
-        <form className="modal-body" onSubmit={handleSubmit}>
+};
+console.log(form);
+const handleSubmit=async(e)=>{
 
-          <input
-            name="name"
-            placeholder="Project Name"
-            onChange={handleChange}
-          />
+e.preventDefault();
 
-          <textarea
-            name="description"
-            placeholder="Project Description"
-            onChange={handleChange}
-          />
+const res=await axios.post(
+"http://localhost:5000/api/projects",
+form
+);
 
-          <input
-            type="date"
-            name="startDate"
-            onChange={handleChange}
-          />
+addProject(res.data);
 
-          <input
-            type="date"
-            name="endDate"
-            onChange={handleChange}
-          />
+close();
 
-          <select name="status" onChange={handleChange}>
-            <option>Active</option>
-            <option>Completed</option>
-            <option>On Hold</option>
-          </select>
+};
 
-          <select name="priority" onChange={handleChange}>
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
-          </select>
+return(
 
-          <input
-            name="owner"
-            placeholder="Project Owner"
-            onChange={handleChange}
-          />
+<div className="modal-overlay">
 
-          <input
-            name="budget"
-            placeholder="Budget"
-            onChange={handleChange}
-          />
+<div className="modal-box">
 
-          <input
-            name="tags"
-            placeholder="Tags (comma separated)"
-            onChange={handleChange}
-          />
+<h2>Create New Project</h2>
 
-          {/* EXTRA FIELDS (makes scroll needed) */}
-          <input placeholder="Client Name" />
-          <input placeholder="Department" />
-          <input placeholder="Technology Stack" />
-          <input placeholder="Repository URL" />
-          <input placeholder="Deployment URL" />
+<form
+className="project-form"
+onSubmit={handleSubmit}
+>
 
-          {/* FOOTER BUTTONS */}
-          <div className="modal-footer">
+<div className="full">
 
-            <button type="button" onClick={close}>
-              Cancel
-            </button>
+<label>Project Name</label>
 
-            <button type="submit">
-              Create Project
-            </button>
+<input
+name="name"
+onChange={handleChange}
+required
+/>
 
-          </div>
+</div>
 
-        </form>
+<div className="full">
 
-      </div>
+<label>Description</label>
 
-    </div>
-  );
+<textarea
+name="description"
+onChange={handleChange}
+/>
+
+</div>
+
+<div>
+
+<label>Status</label>
+
+<select
+name="status"
+onChange={handleChange}
+>
+
+<option>Planning</option>
+<option>Active</option>
+<option>Completed</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Priority</label>
+
+<select
+name="priority"
+onChange={handleChange}
+>
+
+<option>Low</option>
+<option>Medium</option>
+<option>High</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Start Date</label>
+
+<input
+type="date"
+name="startDate"
+onChange={handleChange}
+/>
+
+</div>
+
+<div>
+
+<label>End Date</label>
+
+<input
+type="date"
+name="endDate"
+onChange={handleChange}
+/>
+
+</div>
+
+<div>
+
+<label>Team Members</label>
+
+<input
+type="number"
+name="teamMembers"
+min="1"
+onChange={handleChange}
+/>
+
+</div>
+
+<div>
+
+<label>Progress</label>
+
+<input
+type="number"
+name="progress"
+min="0"
+max="100"
+onChange={handleChange}
+/>
+
+</div>
+
+<div className="modal-buttons full">
+
+<button
+type="button"
+className="cancel-btn"
+onClick={close}
+>
+
+Cancel
+
+</button>
+
+<button
+type="submit"
+className="create-btn"
+>
+
+Create Project
+
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+);
+
 }
 
 export default CreateProjectModal;
