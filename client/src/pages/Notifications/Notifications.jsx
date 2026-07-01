@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import socket from "../../socket/socket";
 import "./Notifications.css";
-
+import useNotification from "./../../hooks/useNotification";
 import {
   FaBell,
   FaSearch,
