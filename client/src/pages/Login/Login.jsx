@@ -32,6 +32,25 @@ function Login() {
       );
 
       alert("Login Successful");
+      localStorage.setItem(
+  "token",
+  res.data.token
+);
+
+localStorage.setItem(
+  "user",
+  JSON.stringify(res.data.user)
+);
+
+localStorage.setItem(
+  "userId",
+  res.data.user._id
+);
+
+localStorage.setItem(
+  "role",
+  res.data.user.role
+);
 
       navigate("/dashboard");
     } catch (err) {

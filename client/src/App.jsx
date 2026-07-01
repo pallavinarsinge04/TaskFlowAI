@@ -23,11 +23,12 @@ import Settings from "./pages/Settings/Settings";
 import VoiceAssistantPage from "./pages/VoiceAssistant/VoiceAssistantPage";
 import AppLayout from "./layouts/AppLayout";
 import { Navigate } from "react-router-dom";
-
+import SocketInitializer
+from "./components/SocketInitializer";
 function App() {
   return (
     <BrowserRouter>
-
+  <SocketInitializer />
       <Routes>
 
         {/* PUBLIC ROUTES */}
