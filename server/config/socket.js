@@ -14,6 +14,13 @@ export const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
+    socket.on("joinRole", (role) => {
+
+  socket.join(role);
+
+  console.log(`${socket.id} joined ${role}`);
+
+});
 
     console.log("User Connected:", socket.id);
 

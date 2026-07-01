@@ -24,7 +24,9 @@ export const createProject = async (req, res) => {
 
 });
 
-getIO().emit("notification", notification);
+getIO()
+  .to(notification.role)
+  .emit("notification", notification);
 
     getIO().emit("projectCreated", project);
 

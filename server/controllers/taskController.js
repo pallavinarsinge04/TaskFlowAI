@@ -48,7 +48,9 @@ exports.createTask = async (req, res) => {
 
 });
 
-getIO().emit("notification", notification);
+getIO()
+  .to(notification.role)
+  .emit("notification", notification);
 
     res.status(201).json({
       success: true,

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import socket from "../../socket/socket";
 import "./Notifications.css";
-import useNotification from "./../../hooks/useNotification";
+import useNotification from "../../hooks/useNotification";
 import {
   FaBell,
   FaSearch,
@@ -21,7 +21,18 @@ function Notifications() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
+  // Current user's role
+  const role = localStorage.getItem("role");
+
+  // Browser desktop notifications
+  useNotification(socket);
+
   useEffect(() => {
+
+    // Join Socket.IO room based on role
+    if (role) {
+      socket.emit("joinRole", role);
+    }
 
     loadNotifications();
 
@@ -46,7 +57,9 @@ function Notifications() {
 
     try {
 
-      const res = await axios.get(API);
+      const res = await axios.get(
+        `${API}?role=${role}`
+      );
 
       setNotifications(res.data);
 
@@ -64,7 +77,9 @@ function Notifications() {
 
   const unreadCount = useMemo(() => {
 
-    return notifications.filter(n => !n.read).length;
+    return notifications.filter(
+      n => !n.read
+    ).length;
 
   }, [notifications]);
 
@@ -73,8 +88,16 @@ function Notifications() {
     return notifications.filter((item) => {
 
       const matchesSearch =
-        item.title?.toLowerCase().includes(search.toLowerCase()) ||
-        item.message?.toLowerCase().includes(search.toLowerCase());
+
+        item.title
+          ?.toLowerCase()
+          .includes(search.toLowerCase())
+
+        ||
+
+        item.message
+          ?.toLowerCase()
+          .includes(search.toLowerCase());
 
       if (filter === "unread")
         return !item.read && matchesSearch;
@@ -114,7 +137,9 @@ function Notifications() {
       await axios.delete(`${API}/${id}`);
 
       setNotifications(prev =>
-        prev.filter(item => item._id !== id)
+        prev.filter(
+          item => item._id !== id
+        )
       );
 
     } catch (err) {
@@ -129,7 +154,9 @@ function Notifications() {
 
     try {
 
-      await axios.put(`${API}/read-all`);
+      await axios.put(
+        `${API}/read-all`
+      );
 
       setNotifications(prev =>
         prev.map(item => ({
@@ -150,7 +177,7 @@ function Notifications() {
 
     <div className="notifications-page">
 
-      {/* Header */}
+      {/* HEADER */}
 
       <div className="notifications-header">
 
@@ -166,8 +193,18 @@ function Notifications() {
 
           <p>
 
-            Stay updated with projects,
-            tasks and AI alerts.
+            Role :
+            <strong>
+              {" "}
+              {role || "Guest"}
+            </strong>
+
+          </p>
+
+          <p>
+
+            Stay updated with Projects,
+            Tasks, Meetings & AI Alerts.
 
           </p>
 
@@ -181,7 +218,7 @@ function Notifications() {
 
       </div>
 
-      {/* Toolbar */}
+      {/* TOOLBAR */}
 
       <div className="notification-toolbar">
 
@@ -190,24 +227,33 @@ function Notifications() {
           <FaSearch />
 
           <input
-            placeholder="Search notification..."
+
+            placeholder="Search Notification..."
+
             value={search}
+
             onChange={(e) =>
-              setSearch(e.target.value)
+              setSearch(
+                e.target.value
+              )
             }
+
           />
 
         </div>
 
         <button
+
           className={
             filter === "all"
               ? "active"
               : ""
           }
+
           onClick={() =>
             setFilter("all")
           }
+
         >
 
           <FaFilter />
@@ -217,14 +263,17 @@ function Notifications() {
         </button>
 
         <button
+
           className={
             filter === "unread"
               ? "active"
               : ""
           }
+
           onClick={() =>
             setFilter("unread")
           }
+
         >
 
           Unread
@@ -232,8 +281,11 @@ function Notifications() {
         </button>
 
         <button
+
           className="mark-all"
+
           onClick={markAllRead}
+
         >
 
           <FaCheckDouble />
@@ -244,7 +296,7 @@ function Notifications() {
 
       </div>
 
-      {/* List */}
+      {/* LIST */}
 
       <div className="notification-list">
 
@@ -269,12 +321,11 @@ function Notifications() {
           filteredNotifications.map(item => (
 
             <div
-              className={`notification-card ${
-                item.read
-                  ? ""
-                  : "unread"
-              }`}
+
               key={item._id}
+
+              className={`notification-card ${item.read ? "" : "unread"}`}
+
             >
 
               <div className="notification-body">
@@ -306,10 +357,13 @@ function Notifications() {
                 {!item.read && (
 
                   <button
+
                     className="read-btn"
+
                     onClick={() =>
                       markRead(item._id)
                     }
+
                   >
 
                     <FaCheck />
@@ -319,10 +373,13 @@ function Notifications() {
                 )}
 
                 <button
+
                   className="delete-btn"
+
                   onClick={() =>
                     deleteNotification(item._id)
                   }
+
                 >
 
                   <FaTrash />

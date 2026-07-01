@@ -4,6 +4,20 @@ import Navbar from "./Navbar";
 import { useState } from "react";
 import "./layout.css";
 
+import { useEffect } from "react";
+import socket from "./../socket/socket";
+
+useEffect(() => {
+
+  const role = localStorage.getItem("role");
+
+  if (role) {
+
+    socket.emit("joinRole", role);
+
+  }
+
+}, []);
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
 
