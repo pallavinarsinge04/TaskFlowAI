@@ -1,67 +1,16 @@
-export const emailTemplate=(
+import { emailTemplate } from "../templates/emailTemplate.js";
 
-title,
-
-message
-
-)=>
-
-<div style="
-
-padding:40px;
-
-font-family:Arial;
-
-background:#f4f7fb;
-
-">
-
-<div style="
-
-background:white;
-
-padding:30px;
-
-border-radius:10px;
-
-">
-
-<h1 style="color:#2563eb">
-
-${title}
-
-</h1>
-
-<p>
-
-${message}
-
-</p>
-
-<hr>
-
-<p>
-
-TaskFlow AI
-
-</p>
-
-</div>
-
-</div>
-
-;
-sendEmail(
+await sendEmail(
 
 user.email,
 
-"Task Assigned",
+"Project Created",
 
 emailTemplate(
 
-"Task Assigned",
+"Project Created",
 
-"You received a new task."
+"Your project has been created successfully."
 
 )
 

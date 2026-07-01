@@ -1,7 +1,8 @@
 import Project from "../models/Project.js";
+import Notification from "../models/Notification.js";
 import { getIO } from "../config/socket.js";
-import Notification from "./../models/Notification.js";
-const project=await Project.create(req.body);
+import { sendEmail } from "../services/emailService.js";
+
 export const getProjects = async (req, res) => {
   try {
     const projects = await Project.find().sort({ createdAt: -1 });
@@ -13,23 +14,35 @@ export const getProjects = async (req, res) => {
 
 export const createProject = async (req, res) => {
   try {
+    // 1. Create Project
     const project = await Project.create(req.body);
+
+    // 2. Create Notification
     const notification = await Notification.create({
+      title: "New Project",
+      message: `${project.name} has been created.`,
+      type: "project",
+      role: "Manager"
+    });
 
-  title:"New Project",
-
-  message:`${project.name} has been created.`,
-
-  type:"project"
-
-});
-
-getIO()
-  .to(notification.role)
-  .emit("notification", notification);
+    // 3. Socket Emit (Role-based)
+    getIO()
+      .to("Manager")
+      .emit("notification", notification);
 
     getIO().emit("projectCreated", project);
 
+    // 4. Email Notification (NO JSX HERE!)
+    await sendEmail(
+      req.user?.email || "admin@taskflow.com",
+      "Project Created",
+      `
+        <h1>Project Created</h1>
+        <p><b>${project.name}</b> was created successfully.</p>
+      `
+    );
+
+    // 5. Response
     res.status(201).json(project);
 
   } catch (err) {
@@ -38,49 +51,3 @@ getIO()
     });
   }
 };
-const notification=await Notification.create({
-
-title:"New Project",
-
-message:`${project.name} created successfully.`,
-
-type:"project",
-
-role:"Manager"
-
-});
-await sendEmail(
-
-req.user.email,
-
-"Project Created",
-
-<div>
-
-<h2>${project.name}</h2>
-
-<p>
-
-Your project has been created successfully.
-
-</p>
-</div>
-
-
-);
-
-getIO()
-
-.to("Manager")
-
-.emit(
-
-"notification",
-
-notification
-
-);
-getIO().emit(
-"notification",
-notification
-);
