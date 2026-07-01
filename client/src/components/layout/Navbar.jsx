@@ -19,6 +19,13 @@ function Navbar() {
  const [user, setUser] = useState(
   JSON.parse(localStorage.getItem("user"))
 );
+const notifications = JSON.parse(
+  localStorage.getItem("notifications") || "[]"
+);
+
+const unreadCount = notifications.filter(
+  (n) => !n.read
+).length;
   return (
     <header className="navbar">
 
@@ -34,64 +41,21 @@ function Navbar() {
 
       </div>
 
-      <div className="navbar-right">
+      <div className="notification-icon">
 
-        <button className="create-btn">
-          <FaPlus />
-          Create
-        </button>
+  <FaBell />
 
-        <button className="icon-btn">
-          <FaMoon />
-        </button>
+  {unreadCount > 0 && (
 
-        <button className="icon-btn notification">
+    <span className="badge">
 
-          <FaBell />
+      {unreadCount}
 
-          <span className="badge">
-            3
-          </span>
+    </span>
 
-        </button>
+  )}
 
-        <button className="icon-btn">
-          <FaEnvelope />
-        </button>
-
-        <button className="icon-btn">
-          <FaQuestionCircle />
-        </button>
-
-        <div className="date">
-          {today}
-        </div>
-
-        <div className="profile">
-
-          <img
-  src={
-    user?.profilePic ||
-    "https://i.pravatar.cc/150"
-  }
-  alt="Profile"
-  className="navbar-profile"
-/>
-
-          <div>
-
-            <h4>Pallavi</h4>
-
-            <p>Project Manager</p>
-
-          </div>
-
-          <FaChevronDown />
-
-        </div>
-
-      </div>
-
+</div>
 
     </header>
   );

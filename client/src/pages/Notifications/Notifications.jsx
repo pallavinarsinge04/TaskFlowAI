@@ -15,7 +15,7 @@ import {
 const API = "http://localhost:5000/api/notifications";
 
 function Notifications() {
-
+useNotification();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -36,15 +36,14 @@ function Notifications() {
 
     loadNotifications();
 
-    socket.on("notification", (notification) => {
+   socket.on("notification",(notification)=>{
 
-      setNotifications((prev) => [
-        notification,
-        ...prev,
-      ]);
+setNotifications(prev=>[
+notification,
+...prev
+]);
 
-    });
-
+});
     return () => {
 
       socket.off("notification");
@@ -75,14 +74,15 @@ function Notifications() {
 
   };
 
-  const unreadCount = useMemo(() => {
+ const unreadCount = notifications.reduce(
 
-    return notifications.filter(
-      n => !n.read
-    ).length;
+(count,item)=>
 
-  }, [notifications]);
+item.read ? count : count + 1
 
+,0
+
+);
   const filteredNotifications = useMemo(() => {
 
     return notifications.filter((item) => {
@@ -321,12 +321,11 @@ function Notifications() {
           filteredNotifications.map(item => (
 
             <div
-
-              key={item._id}
-
-              className={`notification-card ${item.read ? "" : "unread"}`}
-
-            >
+className={`notification-card ${item.type} ${
+item.read ? "" : "unread"
+}`}
+key={item._id}
+>
 
               <div className="notification-body">
 

@@ -274,3 +274,22 @@
 }
 
 }
+.notification-card.project{
+    border-left:6px solid #2563eb;
+}
+
+.notification-card.task{
+    border-left:6px solid #22c55e;
+}
+
+.notification-card.meeting{
+    border-left:6px solid #f59e0b;
+}
+
+.notification-card.ai{
+    border-left:6px solid #8b5cf6;
+}
+
+.notification-card.warning{
+    border-left:6px solid #ef4444;
+}
