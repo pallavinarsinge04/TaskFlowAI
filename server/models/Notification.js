@@ -1,24 +1,47 @@
 import mongoose from "mongoose";
 
 const notificationSchema = new mongoose.Schema(
-{
-    title:String,
+  {
+    title: {
+      type: String,
+      required: true,
+    },
 
-    message:String,
+    message: {
+      type: String,
+      required: true,
+    },
 
-    type:String,
+    type: {
+      type: String,
+      enum: [
+        "project",
+        "task",
+        "team",
+        "meeting",
+        "ai",
+        "system",
+      ],
+      default: "system",
+    },
 
-    read:{
-        type:Boolean,
-        default:false
-    }
+    read: {
+      type: Boolean,
+      default: false,
+    },
 
-},
-{
-    timestamps:true
-});
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
 export default mongoose.model(
-    "Notification",
-    notificationSchema
+  "Notification",
+  notificationSchema
 );
