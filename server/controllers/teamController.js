@@ -21,6 +21,17 @@ exports.getMembers = async (req, res) => {
 exports.addMember = async (req, res) => {
   try {
     const member = await Team.create(req.body);
+    const notification = await Notification.create({
+
+title:"New Team Member",
+
+message:`${member.name} joined the team.`,
+
+type:"team"
+
+});
+
+getIO().emit("notification",notification);
 
     res.status(201).json({
       success: true,

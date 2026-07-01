@@ -14,6 +14,17 @@ export const getProjects = async (req, res) => {
 export const createProject = async (req, res) => {
   try {
     const project = await Project.create(req.body);
+    const notification = await Notification.create({
+
+  title:"New Project",
+
+  message:`${project.name} has been created.`,
+
+  type:"project"
+
+});
+
+getIO().emit("notification", notification);
 
     getIO().emit("projectCreated", project);
 

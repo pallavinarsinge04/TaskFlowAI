@@ -1,4 +1,5 @@
 import Notification from "../models/Notification.js";
+import { getIO } from "./../config/socket.js";
 
 /* ============================
    Get All Notifications
@@ -33,18 +34,21 @@ export const createNotification = async (req, res) => {
 
     const notification = await Notification.create(req.body);
 
+    getIO().emit("notification", notification);
+
     res.status(201).json(notification);
 
-  } catch (err) {
+  }
+
+  catch(err){
 
     res.status(500).json({
-      message: err.message,
+      message:err.message
     });
 
   }
 
 };
-
 /* ============================
    Mark One Notification Read
 ============================ */

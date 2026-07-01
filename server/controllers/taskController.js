@@ -1,4 +1,4 @@
-const Task = require("../models/Task");
+const Task = require("./../models/Task");
 
 // Get all tasks
 exports.getTasks = async (req, res) => {
@@ -38,6 +38,17 @@ exports.getTaskById = async (req, res) => {
 exports.createTask = async (req, res) => {
   try {
     const task = await Task.create(req.body);
+    const notification = await Notification.create({
+
+  title:"New Task",
+
+  message:`${task.title} assigned.`,
+
+  type:"task"
+
+});
+
+getIO().emit("notification", notification);
 
     res.status(201).json({
       success: true,
