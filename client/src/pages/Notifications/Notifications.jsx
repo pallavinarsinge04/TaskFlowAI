@@ -150,6 +150,29 @@ item.read ? count : count + 1
 
   };
 
+  const archiveNotification = async (id) => {
+
+  try {
+
+    await axios.put(
+
+      `${API}/archive/${id}`
+
+    );
+
+    setNotifications(prev =>
+
+      prev.filter(item => item._id !== id)
+
+    );
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+
+};
   const markAllRead = async () => {
 
     try {
@@ -172,6 +195,23 @@ item.read ? count : count + 1
     }
 
   };
+  const archiveNotification = async (id) => {
+
+  try {
+
+    await axios.put(`${API}/archive/${id}`);
+
+    setNotifications(prev =>
+      prev.filter(item => item._id !== id)
+    );
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+
+};
 
   return (
 
@@ -320,74 +360,34 @@ item.read ? count : count + 1
 
           filteredNotifications.map(item => (
 
-            <div
-className={`notification-card ${item.type} ${
-item.read ? "" : "unread"
-}`}
-key={item._id}
->
+            <div className="notification-actions">
 
-              <div className="notification-body">
+  {!item.read && (
 
-                <h3>
+    <button
+      className="read-btn"
+      onClick={() => markRead(item._id)}
+    >
+      Mark Read
+    </button>
 
-                  {item.title}
+  )}
 
-                </h3>
+  <button
+    className="archive-btn"
+    onClick={() => archiveNotification(item._id)}
+  >
+    Archive
+  </button>
 
-                <p>
+  <button
+    className="delete-btn"
+    onClick={() => deleteNotification(item._id)}
+  >
+    Delete
+  </button>
 
-                  {item.message}
-
-                </p>
-
-                <span>
-
-                  {new Date(
-                    item.createdAt
-                  ).toLocaleString()}
-
-                </span>
-
-              </div>
-
-              <div className="notification-actions">
-
-                {!item.read && (
-
-                  <button
-
-                    className="read-btn"
-
-                    onClick={() =>
-                      markRead(item._id)
-                    }
-
-                  >
-
-                    <FaCheck />
-
-                  </button>
-
-                )}
-
-                <button
-
-                  className="delete-btn"
-
-                  onClick={() =>
-                    deleteNotification(item._id)
-                  }
-
-                >
-
-                  <FaTrash />
-
-                </button>
-
-              </div>
-
-            </div>
+</div>
 
           ))
 

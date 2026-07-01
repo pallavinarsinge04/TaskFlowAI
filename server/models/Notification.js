@@ -1,5 +1,29 @@
 import mongoose from "mongoose";
+const notificationSchema = new mongoose.Schema({
 
+  title: String,
+
+  message: String,
+
+  type: String,
+
+  receiver: String,
+
+  role: String,
+
+  read: {
+    type: Boolean,
+    default: false
+  },
+
+  archived: {
+    type: Boolean,
+    default: false
+  }
+
+}, {
+  timestamps: true
+});
 const notificationSchema = new mongoose.Schema({
 
   title:{

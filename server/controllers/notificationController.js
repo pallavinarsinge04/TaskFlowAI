@@ -144,7 +144,36 @@ new:true
 res.json(notification);
 
 };
+export const archiveNotification = async (req, res) => {
 
+  try {
+
+    const notification =
+      await Notification.findByIdAndUpdate(
+
+        req.params.id,
+
+        {
+          archived: true
+        },
+
+        {
+          new: true
+        }
+
+      );
+
+    res.json(notification);
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message
+    });
+
+  }
+
+};
 /* Mark All */
 
 export const markAllRead=async(req,res)=>{

@@ -293,3 +293,26 @@
 .notification-card.warning{
     border-left:6px solid #ef4444;
 }
+.archive-btn{
+
+background:#f59e0b;
+
+color:white;
+
+border:none;
+
+padding:8px 14px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+transition:.3s;
+
+}
+
+.archive-btn:hover{
+
+background:#d97706;
+
+}
