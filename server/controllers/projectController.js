@@ -1,6 +1,7 @@
 import Project from "../models/Project.js";
 import { getIO } from "../config/socket.js";
-
+import Notification from "./../models/Notification.js";
+const project=await Project.create(req.body);
 export const getProjects = async (req, res) => {
   try {
     const projects = await Project.find().sort({ createdAt: -1 });
@@ -24,3 +25,17 @@ export const createProject = async (req, res) => {
     });
   }
 };
+const notification=await Notification.create({
+
+title:"New Project",
+
+message:`${project.name} created successfully`,
+
+type:"project"
+
+});
+
+getIO().emit(
+"notification",
+notification
+);

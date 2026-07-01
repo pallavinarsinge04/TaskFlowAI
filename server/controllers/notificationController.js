@@ -1,17 +1,25 @@
 import Notification from "../models/Notification.js";
-import { getIO } from "../config/socket.js";
 
-export const sendNotification = async (userId, message, type = "info") => {
-  const notification = await Notification.create({
-    userId,
-    message,
-    type,
-  });
+export const getNotifications = async(req,res)=>{
 
-  const io = getIO();
+const notifications=await Notification.find()
+.sort({createdAt:-1});
 
-  // 🔥 REAL TIME SEND
-  io.to(userId).emit("notification", notification);
+res.json(notifications);
 
-  return notification;
+};
+
+export const markRead=async(req,res)=>{
+
+await Notification.findByIdAndUpdate(
+req.params.id,
+{
+read:true
+}
+);
+
+res.json({
+message:"Updated"
+});
+
 };

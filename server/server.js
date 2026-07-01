@@ -23,7 +23,12 @@ app.use(express.json());
 
 // DB
 connectDB();
+import notificationRoutes from "./routes/notificationRoutes.js";
 
+app.use(
+"/api/notifications",
+notificationRoutes
+);
 // ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);

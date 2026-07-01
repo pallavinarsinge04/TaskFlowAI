@@ -1,128 +1,348 @@
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import socket from "../../socket/socket";
 import "./Notifications.css";
+
 import {
   FaBell,
-  FaTasks,
-  FaProjectDiagram,
-  FaUsers,
-  FaRobot,
-  FaCheckCircle,
+  FaSearch,
+  FaCheck,
+  FaTrash,
+  FaFilter,
+  FaCheckDouble,
 } from "react-icons/fa";
 
-const notifications = [
-  {
-    id: 1,
-    icon: <FaProjectDiagram />,
-    title: "New Project Created",
-    message: "AI Based Attendance Management System",
-    time: "2 min ago",
-    type: "project",
-    unread: true,
-  },
-  {
-    id: 2,
-    icon: <FaTasks />,
-    title: "Task Assigned",
-    message: "Design Login Page",
-    time: "10 min ago",
-    type: "task",
-    unread: true,
-  },
-  {
-    id: 3,
-    icon: <FaCheckCircle />,
-    title: "Task Completed",
-    message: "Authentication Module",
-    time: "25 min ago",
-    type: "completed",
-    unread: false,
-  },
-  {
-    id: 4,
-    icon: <FaUsers />,
-    title: "New Team Member",
-    message: "Rahul joined your project",
-    time: "1 hour ago",
-    type: "team",
-    unread: false,
-  },
-  {
-    id: 5,
-    icon: <FaRobot />,
-    title: "AI Suggestion",
-    message: "Project deadline is close. Assign more members.",
-    time: "2 hours ago",
-    type: "ai",
-    unread: true,
-  },
-];
+const API = "http://localhost:5000/api/notifications";
 
 function Notifications() {
+
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+
+    loadNotifications();
+
+    socket.on("notification", (notification) => {
+
+      setNotifications((prev) => [
+        notification,
+        ...prev,
+      ]);
+
+    });
+
+    return () => {
+
+      socket.off("notification");
+
+    };
+
+  }, []);
+
+  const loadNotifications = async () => {
+
+    try {
+
+      const res = await axios.get(API);
+
+      setNotifications(res.data);
+
+    } catch (err) {
+
+      console.log(err);
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+  const unreadCount = useMemo(() => {
+
+    return notifications.filter(n => !n.read).length;
+
+  }, [notifications]);
+
+  const filteredNotifications = useMemo(() => {
+
+    return notifications.filter((item) => {
+
+      const matchesSearch =
+        item.title?.toLowerCase().includes(search.toLowerCase()) ||
+        item.message?.toLowerCase().includes(search.toLowerCase());
+
+      if (filter === "unread")
+        return !item.read && matchesSearch;
+
+      return matchesSearch;
+
+    });
+
+  }, [notifications, filter, search]);
+
+  const markRead = async (id) => {
+
+    try {
+
+      await axios.put(`${API}/${id}`);
+
+      setNotifications(prev =>
+        prev.map(item =>
+          item._id === id
+            ? { ...item, read: true }
+            : item
+        )
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
+
+  const deleteNotification = async (id) => {
+
+    try {
+
+      await axios.delete(`${API}/${id}`);
+
+      setNotifications(prev =>
+        prev.filter(item => item._id !== id)
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
+
+  const markAllRead = async () => {
+
+    try {
+
+      await axios.put(`${API}/read-all`);
+
+      setNotifications(prev =>
+        prev.map(item => ({
+          ...item,
+          read: true,
+        }))
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+    }
+
+  };
+
   return (
+
     <div className="notifications-page">
 
-      <div className="notification-header">
+      {/* Header */}
+
+      <div className="notifications-header">
+
         <div>
+
           <h1>
-            <FaBell /> Notifications
+
+            <FaBell />
+
+            Notifications
+
           </h1>
-          <p>Stay updated with your projects and tasks</p>
+
+          <p>
+
+            Stay updated with projects,
+            tasks and AI alerts.
+
+          </p>
+
         </div>
 
-        <button className="mark-btn">
-          Mark All Read
-        </button>
+        <div className="notification-counter">
+
+          {unreadCount}
+
+        </div>
+
       </div>
 
-      <div className="notification-tabs">
-        <button className="active">All</button>
-        <button>Unread</button>
-        <button>Projects</button>
-        <button>Tasks</button>
-        <button>Team</button>
-        <button>AI</button>
+      {/* Toolbar */}
+
+      <div className="notification-toolbar">
+
+        <div className="search-box">
+
+          <FaSearch />
+
+          <input
+            placeholder="Search notification..."
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+          />
+
+        </div>
+
+        <button
+          className={
+            filter === "all"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setFilter("all")
+          }
+        >
+
+          <FaFilter />
+
+          All
+
+        </button>
+
+        <button
+          className={
+            filter === "unread"
+              ? "active"
+              : ""
+          }
+          onClick={() =>
+            setFilter("unread")
+          }
+        >
+
+          Unread
+
+        </button>
+
+        <button
+          className="mark-all"
+          onClick={markAllRead}
+        >
+
+          <FaCheckDouble />
+
+          Mark All Read
+
+        </button>
+
       </div>
+
+      {/* List */}
 
       <div className="notification-list">
 
-        {notifications.map((item) => (
+        {loading ? (
 
-          <div
-            className={`notification-card ${
-              item.unread ? "unread" : ""
-            }`}
-            key={item.id}
-          >
+          <div className="empty-state">
 
-            <div className="notification-icon">
-              {item.icon}
-            </div>
-
-            <div className="notification-content">
-
-              <h3>{item.title}</h3>
-
-              <p>{item.message}</p>
-
-              <span>{item.time}</span>
-
-            </div>
-
-            <div className="notification-actions">
-
-              <button>View</button>
-
-              <button>Delete</button>
-
-            </div>
+            Loading Notifications...
 
           </div>
 
-        ))}
+        ) : filteredNotifications.length === 0 ? (
+
+          <div className="empty-state">
+
+            No Notifications Found
+
+          </div>
+
+        ) : (
+
+          filteredNotifications.map(item => (
+
+            <div
+              className={`notification-card ${
+                item.read
+                  ? ""
+                  : "unread"
+              }`}
+              key={item._id}
+            >
+
+              <div className="notification-body">
+
+                <h3>
+
+                  {item.title}
+
+                </h3>
+
+                <p>
+
+                  {item.message}
+
+                </p>
+
+                <span>
+
+                  {new Date(
+                    item.createdAt
+                  ).toLocaleString()}
+
+                </span>
+
+              </div>
+
+              <div className="notification-actions">
+
+                {!item.read && (
+
+                  <button
+                    className="read-btn"
+                    onClick={() =>
+                      markRead(item._id)
+                    }
+                  >
+
+                    <FaCheck />
+
+                  </button>
+
+                )}
+
+                <button
+                  className="delete-btn"
+                  onClick={() =>
+                    deleteNotification(item._id)
+                  }
+                >
+
+                  <FaTrash />
+
+                </button>
+
+              </div>
+
+            </div>
+
+          ))
+
+        )}
 
       </div>
 
     </div>
+
   );
+
 }
 
 export default Notifications;
