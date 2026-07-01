@@ -42,12 +42,25 @@ const notification=await Notification.create({
 
 title:"New Project",
 
-message:`${project.name} created successfully`,
+message:`${project.name} created successfully.`,
 
-type:"project"
+type:"project",
+
+role:"Manager"
 
 });
 
+getIO()
+
+.to("Manager")
+
+.emit(
+
+"notification",
+
+notification
+
+);
 getIO().emit(
 "notification",
 notification

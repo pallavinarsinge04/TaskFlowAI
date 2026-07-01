@@ -63,7 +63,33 @@ getIO()
     });
   }
 };
+const notification=await Notification.create({
 
+title:"Task Assigned",
+
+message:`${task.title} assigned.`,
+
+type:"task",
+
+receiver:task.assignedTo
+
+});
+
+getIO()
+
+.to(
+
+task.assignedTo.toString()
+
+)
+
+.emit(
+
+"notification",
+
+notification
+
+);
 // Update task
 exports.updateTask = async (req, res) => {
   try {

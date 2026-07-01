@@ -1,164 +1,202 @@
 import Notification from "../models/Notification.js";
-import { getIO } from "./../config/socket.js";
+import { getIO } from "../config/socket.js";
 
-/* ============================
-   Get All Notifications
-============================ */
+/* Get Notifications */
 
-export const getNotifications = async (req, res) => {
+export const getNotifications=async(req,res)=>{
 
-  try {
+try{
 
-    const notifications = await Notification.find()
-      .sort({ createdAt: -1 });
+const {role,userId}=req.query;
 
-    res.status(200).json(notifications);
+const notifications=await Notification.find({
 
-  } catch (err) {
+$or:[
 
-    res.status(500).json({
-      message: err.message,
-    });
+{role:"All"},
 
-  }
+{role},
 
-};
+{receiver:userId}
 
-/* ============================
-   Create Notification
-============================ */
+]
 
-export const createNotification = async (req, res) => {
+}).sort({
 
-  try {
+createdAt:-1
 
-    const notification = await Notification.create(req.body);
+});
 
-    getIO().emit("notification", notification);
+res.json(notifications);
 
-    res.status(201).json(notification);
+}catch(err){
 
-  }
+res.status(500).json({
 
-  catch(err){
+message:err.message
 
-    res.status(500).json({
-      message:err.message
-    });
+});
 
-  }
-
-};
-/* ============================
-   Mark One Notification Read
-============================ */
-
-export const markRead = async (req, res) => {
-
-  try {
-
-    const notification =
-      await Notification.findByIdAndUpdate(
-
-        req.params.id,
-
-        {
-          read: true,
-        },
-
-        {
-          new: true,
-        }
-
-      );
-
-    res.json(notification);
-
-  } catch (err) {
-
-    res.status(500).json({
-      message: err.message,
-    });
-
-  }
+}
 
 };
 
-/* ============================
-   Mark All Notifications Read
-============================ */
+/* Create */
 
-export const markAllRead = async (req, res) => {
+export const createNotification=async(req,res)=>{
 
-  try {
+try{
 
-    await Notification.updateMany(
-      {},
-      {
-        read: true,
-      }
-    );
+const notification=await Notification.create(req.body);
 
-    res.json({
-      message: "All notifications marked as read",
-    });
+const io=getIO();
 
-  } catch (err) {
+/* User Notification */
 
-    res.status(500).json({
-      message: err.message,
-    });
+if(notification.receiver){
 
-  }
+io.to(
+
+notification.receiver.toString()
+
+).emit(
+
+"notification",
+
+notification
+
+);
+
+}
+
+/* Role Notification */
+
+else if(notification.role!=="All"){
+
+io.to(notification.role)
+
+.emit(
+
+"notification",
+
+notification
+
+);
+
+}
+
+/* Global */
+
+else{
+
+io.emit(
+
+"notification",
+
+notification
+
+);
+
+}
+
+res.status(201)
+
+.json(notification);
+
+}catch(err){
+
+res.status(500)
+
+.json({
+
+message:err.message
+
+});
+
+}
 
 };
 
-/* ============================
-   Delete Notification
-============================ */
+/* Mark Read */
 
-export const deleteNotification = async (req, res) => {
+export const markRead=async(req,res)=>{
 
-  try {
+const notification=
 
-    await Notification.findByIdAndDelete(
-      req.params.id
-    );
+await Notification.findByIdAndUpdate(
 
-    res.json({
-      message: "Notification deleted",
-    });
+req.params.id,
 
-  } catch (err) {
+{
 
-    res.status(500).json({
-      message: err.message,
-    });
+read:true
 
-  }
+},
+
+{
+
+new:true
+
+}
+
+);
+
+res.json(notification);
 
 };
 
-/* ============================
-   Delete All Notifications
-============================ */
+/* Mark All */
 
-export const deleteAllNotifications = async (req, res) => {
+export const markAllRead=async(req,res)=>{
 
-  try {
+await Notification.updateMany(
 
-    await Notification.deleteMany({});
+{},
 
-    res.json({
-      message: "All notifications deleted",
-    });
+{
 
-  } catch (err) {
+read:true
 
-    res.status(500).json({
-      message: err.message,
-    });
+}
 
-  }
+);
+
+res.json({
+
+message:"Done"
+
+});
+
+};
+
+/* Delete */
+
+export const deleteNotification=async(req,res)=>{
+
+await Notification.findByIdAndDelete(
+
+req.params.id
+
+);
+
+res.json({
+
+message:"Deleted"
+
+});
+
+};
+
+/* Delete All */
+
+export const deleteAllNotifications=async(req,res)=>{
+
+await Notification.deleteMany({});
+
+res.json({
+
+message:"Deleted"
+
+});
 
 };

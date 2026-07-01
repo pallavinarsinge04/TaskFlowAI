@@ -30,6 +30,27 @@ message:`${member.name} joined the team.`,
 type:"team"
 
 });
+const notification=await Notification.create({
+
+title:"New Team Member",
+
+message:`${member.name} joined.`,
+
+role:"Manager"
+
+});
+
+getIO()
+
+.to("Manager")
+
+.emit(
+
+"notification",
+
+notification
+
+);
 
 getIO().emit("notification",notification);
 

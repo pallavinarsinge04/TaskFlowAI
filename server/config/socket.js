@@ -14,15 +14,28 @@ export const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    socket.on("joinRole", (role) => {
-
-  socket.join(role);
-
-  console.log(`${socket.id} joined ${role}`);
-
-});
 
     console.log("User Connected:", socket.id);
+
+    /* Join User Room */
+
+    socket.on("joinUser", (userId) => {
+
+      socket.join(userId);
+
+      console.log(`User ${userId} joined room`);
+
+    });
+
+    /* Join Role Room */
+
+    socket.on("joinRole", (role) => {
+
+      socket.join(role);
+
+      console.log(`${socket.id} joined role ${role}`);
+
+    });
 
     socket.on("disconnect", () => {
 
