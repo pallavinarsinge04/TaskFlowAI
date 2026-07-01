@@ -49,6 +49,25 @@ type:"project",
 role:"Manager"
 
 });
+await sendEmail(
+
+req.user.email,
+
+"Project Created",
+
+<div>
+
+<h2>${project.name}</h2>
+
+<p>
+
+Your project has been created successfully.
+
+</p>
+</div>
+
+
+);
 
 getIO()
 

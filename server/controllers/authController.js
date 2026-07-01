@@ -60,6 +60,25 @@ exports.register = async (req, res) => {
 
   }
 };
+await sendEmail(
+
+user.email,
+
+"Welcome to TaskFlow AI",
+
+`
+
+<h1>Welcome ${user.name}</h1>
+
+<p>
+
+Your account has been created successfully.
+
+</p>
+
+`
+
+);
 
 // Login
 exports.login = async (req, res) => {

@@ -17,3 +17,18 @@ getIO()
 notification
 
 );
+await sendEmail(
+
+member.email,
+
+"Meeting Scheduled",
+
+
+
+Meeting Date:
+
+${meeting.date}
+
+
+
+);

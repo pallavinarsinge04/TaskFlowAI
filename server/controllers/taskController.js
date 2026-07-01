@@ -1,5 +1,25 @@
 const Task = require("./../models/Task");
+await sendEmail(
 
+assignedUser.email,
+
+"New Task Assigned",
+
+
+<div>
+<h2>${task.title}</h2>
+
+<p>
+
+Deadline:
+
+${task.deadline}
+
+</p>
+</div>
+
+
+);
 // Get all tasks
 exports.getTasks = async (req, res) => {
   try {
