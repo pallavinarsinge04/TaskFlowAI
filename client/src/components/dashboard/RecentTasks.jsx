@@ -1,8 +1,11 @@
+import { useEffect, useState } from "react";
 import "./RecentTasks.css";
 
 function RecentTasks() {
-  const tasks = [
+
+  const defaultTasks = [
     {
+      id: 1,
       title: "Design Dashboard UI",
       priority: "High",
       status: "Completed",
@@ -10,6 +13,7 @@ function RecentTasks() {
       assignee: "PN",
     },
     {
+      id: 2,
       title: "Develop Authentication",
       priority: "Medium",
       status: "In Progress",
@@ -17,100 +21,317 @@ function RecentTasks() {
       assignee: "AS",
     },
     {
+      id: 3,
       title: "Integrate AI Assistant",
       priority: "High",
       status: "Pending",
       due: "29 Jun",
       assignee: "RK",
     },
-    {
-      title: "Fix Project Bugs",
-      priority: "Low",
-      status: "Completed",
-      due: "30 Jun",
-      assignee: "SK",
-    },
-    {
-      title: "Deploy on Render",
-      priority: "High",
-      status: "In Progress",
-      due: "2 Jul",
-      assignee: "PN",
-    },
   ];
+
+  const [tasks, setTasks] = useState(() => {
+    return JSON.parse(localStorage.getItem("tasks")) || defaultTasks;
+  });
+
+  const [search, setSearch] = useState("");
+
+  const [filter, setFilter] = useState("All");
+
+  const [showForm, setShowForm] = useState(false);
+
+  const [time, setTime] = useState(
+    new Date().toLocaleTimeString()
+  );
+
+  const [newTask, setNewTask] = useState({
+    title: "",
+    priority: "Medium",
+    status: "Pending",
+    due: "",
+    assignee: "",
+  });
+
+  useEffect(() => {
+
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+
+  }, [tasks]);
+
+  useEffect(() => {
+
+    const interval = setInterval(() => {
+      setTime(new Date().toLocaleTimeString());
+    }, 1000);
+
+    return () => clearInterval(interval);
+
+  }, []);
+
+  const addTask = () => {
+
+    if (!newTask.title) return;
+
+    setTasks([
+      ...tasks,
+      {
+        id: Date.now(),
+        ...newTask,
+      },
+    ]);
+
+    setNewTask({
+      title: "",
+      priority: "Medium",
+      status: "Pending",
+      due: "",
+      assignee: "",
+    });
+
+    setShowForm(false);
+
+  };
+
+  const deleteTask = (id) => {
+
+    setTasks(tasks.filter((t) => t.id !== id));
+
+  };
+
+  const completeTask = (id) => {
+
+    setTasks(
+      tasks.map((t) =>
+        t.id === id
+          ? { ...t, status: "Completed" }
+          : t
+      )
+    );
+
+  };
+
+  const filteredTasks = tasks.filter((task) => {
+
+    const matchSearch = task.title
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+    const matchFilter =
+      filter === "All"
+        ? true
+        : task.status === filter;
+
+    return matchSearch && matchFilter;
+
+  });
 
   return (
     <div className="recent-tasks">
 
       <div className="tasks-header">
 
-        <h2>📝 Recent Tasks</h2>
+        <div>
 
-        <button>View All</button>
+          <h2>📝 Recent Tasks</h2>
+
+          <p>{time}</p>
+
+        </div>
+
+        <div className="task-buttons">
+
+          <button
+            onClick={() => setShowForm(!showForm)}
+          >
+            + Add Task
+          </button>
+
+          <button>
+            View All
+          </button>
+
+        </div>
 
       </div>
 
-      <table>
+      <div className="task-toolbar">
 
-        <thead>
+        <input
+          placeholder="Search task..."
+          value={search}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
+        />
 
-          <tr>
-            <th>Task</th>
-            <th>Priority</th>
-            <th>Status</th>
-            <th>Due Date</th>
-            <th>Assignee</th>
-          </tr>
+        <select
+          value={filter}
+          onChange={(e) =>
+            setFilter(e.target.value)
+          }
+        >
+          <option>All</option>
+          <option>Pending</option>
+          <option>Completed</option>
+          <option>In Progress</option>
+        </select>
 
-        </thead>
+      </div>
 
-        <tbody>
+      {showForm && (
 
-          {tasks.map((task, index) => (
+        <div className="task-form">
 
-            <tr key={index}>
+          <input
+            placeholder="Task title"
+            value={newTask.title}
+            onChange={(e) =>
+              setNewTask({
+                ...newTask,
+                title: e.target.value,
+              })
+            }
+          />
 
-              <td>{task.title}</td>
+          <input
+            placeholder="Due Date"
+            value={newTask.due}
+            onChange={(e) =>
+              setNewTask({
+                ...newTask,
+                due: e.target.value,
+              })
+            }
+          />
 
-              <td>
+          <input
+            placeholder="Assignee"
+            value={newTask.assignee}
+            onChange={(e) =>
+              setNewTask({
+                ...newTask,
+                assignee: e.target.value,
+              })
+            }
+          />
 
-                <span
-                  className={`priority ${task.priority.toLowerCase()}`}
-                >
-                  {task.priority}
-                </span>
+          <select
+            value={newTask.priority}
+            onChange={(e) =>
+              setNewTask({
+                ...newTask,
+                priority: e.target.value,
+              })
+            }
+          >
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
+          </select>
 
-              </td>
+          <button onClick={addTask}>
+            Save Task
+          </button>
 
-              <td>
+        </div>
 
-                <span
-                  className={`status ${task.status
-                    .replace(" ", "")
-                    .toLowerCase()}`}
-                >
-                  {task.status}
-                </span>
+      )}
 
-              </td>
+      <div className="table-wrapper">
 
-              <td>{task.due}</td>
+        <table>
 
-              <td>
+          <thead>
 
-                <div className="avatar">
-                  {task.assignee}
-                </div>
+            <tr>
 
-              </td>
+              <th>Task</th>
+
+              <th>Priority</th>
+
+              <th>Status</th>
+
+              <th>Due</th>
+
+              <th>Assignee</th>
+
+              <th>Actions</th>
 
             </tr>
 
-          ))}
+          </thead>
 
-        </tbody>
+          <tbody>
 
-      </table>
+            {filteredTasks.map((task) => (
+
+              <tr key={task.id}>
+
+                <td>{task.title}</td>
+
+                <td>
+                  <span className={`priority ${task.priority.toLowerCase()}`}>
+                    {task.priority}
+                  </span>
+                </td>
+
+                <td>
+                  <span className={`status ${task.status.replace(" ","").toLowerCase()}`}>
+                    {task.status}
+                  </span>
+                </td>
+
+                <td>{task.due}</td>
+
+                <td>
+
+                  <div className="avatar">
+                    {task.assignee}
+                  </div>
+
+                </td>
+
+                <td>
+
+                  <button
+                    className="complete-btn"
+                    onClick={() =>
+                      completeTask(task.id)
+                    }
+                  >
+                    ✓
+                  </button>
+
+                  <button
+                    className="delete-btn"
+                    onClick={() =>
+                      deleteTask(task.id)
+                    }
+                  >
+                    🗑
+                  </button>
+
+                </td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <div className="task-footer">
+
+        <strong>
+
+          Total Tasks : {tasks.length}
+
+        </strong>
+
+      </div>
 
     </div>
   );
