@@ -1,200 +1,124 @@
+/* ===========================
+   TEAM MEMBERS
+=========================== */
+
 .team-members{
-    background:#fff;
-    border-radius:20px;
-    padding:25px;
-    box-shadow:0 10px 25px rgba(0,0,0,.08);
+padding:30px;
+background:#f4f8ff;
+border-radius:20px;
 }
 
+/* ===========================
+HEADER
+=========================== */
+
 .team-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:25px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+flex-wrap:wrap;
+gap:20px;
 }
 
 .team-header h2{
-    color:#0f172a;
+font-size:30px;
+color:#1e3a8a;
+margin-bottom:5px;
 }
 
 .team-header p{
-    color:#64748b;
+color:#64748b;
 }
 
 .team-header button{
-    border:none;
-    background:#2563eb;
-    color:white;
-    padding:12px 22px;
-    border-radius:10px;
-    cursor:pointer;
+display:flex;
+align-items:center;
+gap:8px;
+padding:12px 22px;
+background:linear-gradient(135deg,#2563eb,#1d4ed8);
+color:white;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-size:15px;
+font-weight:600;
+transition:.3s;
 }
 
-.team-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-    gap:25px;
+.team-header button:hover{
+transform:translateY(-3px);
+box-shadow:0 12px 25px rgba(37,99,235,.3);
 }
 
-.member-card{
-    background:#f8fafc;
-    border-radius:18px;
-    padding:25px;
-    text-align:center;
-    transition:.3s;
+/* ===========================
+SEARCH BAR
+=========================== */
+
+.team-toolbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:15px;
+margin-bottom:25px;
+flex-wrap:wrap;
 }
 
-.member-card:hover{
-    transform:translateY(-8px);
-    box-shadow:0 15px 30px rgba(37,99,235,.15);
+.team-toolbar input,
+.team-toolbar select{
+padding:12px 16px;
+border-radius:10px;
+border:1px solid #dbeafe;
+font-size:15px;
+outline:none;
 }
 
-.member-top{
-    position:relative;
+.live-clock{
+font-weight:700;
+color:#2563eb;
 }
 
-.member-top img{
-    width:95px;
-    height:95px;
-    border-radius:50%;
-}
+/* ===========================
+FORM
+=========================== */
 
-.online-dot,
-.offline-dot{
-    position:absolute;
-    right:95px;
-    bottom:5px;
-    font-size:14px;
-}
-
-.online-dot{
-    color:#10b981;
-}
-
-.offline-dot{
-    color:#94a3b8;
-}
-
-.member-card h3{
-    margin-top:15px;
-    color:#0f172a;
-}
-
-.role{
-    display:inline-block;
-    margin-top:8px;
-    background:#dbeafe;
-    color:#2563eb;
-    padding:6px 15px;
-    border-radius:30px;
-    font-size:13px;
-}
-
-.contact{
-    margin:20px 0;
-    text-align:left;
-}
-
-.contact p{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    color:#475569;
-    margin:10px 0;
-    font-size:14px;
-}
-
-.member-stats{
-    display:flex;
-    justify-content:space-between;
-    margin:20px 0;
-}
-
-.member-stats div{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-}
-
-.member-stats strong{
-    font-size:22px;
-    color:#2563eb;
-}
-
-.member-stats span{
-    font-size:13px;
-    color:#64748b;
-}
-
-.progress{
-    width:100%;
-    height:10px;
-    background:#e2e8f0;
-    border-radius:20px;
-    overflow:hidden;
-    margin:20px 0;
-}
-
-.progress-fill{
-    height:100%;
-    background:linear-gradient(90deg,#2563eb,#3b82f6);
-}
-
-.profile-btn{
-    width:100%;
-    border:none;
-    background:#2563eb;
-    color:white;
-    padding:12px;
-    border-radius:10px;
-    cursor:pointer;
-    font-weight:600;
-}
-
-.profile-btn:hover{
-    background:#1d4ed8;
-}
-
-@media(max-width:768px){
-    .team-grid{
-        grid-template-columns:1fr;
-    }
-
-    .team-header{
-        flex-direction:column;
-        gap:15px;
-        align-items:flex-start;
-    }
-}
 .add-member-card{
-background:#fff;
+background:white;
 padding:25px;
-border-radius:15px;
-margin:20px 0;
-box-shadow:0 10px 30px rgba(0,0,0,.1);
+border-radius:20px;
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+margin-bottom:30px;
+animation:fade .3s;
+}
+
+.add-member-card h3{
+margin-bottom:20px;
+color:#1e3a8a;
 }
 
 .add-member-card form{
 display:grid;
-grid-template-columns:repeat(2,1fr);
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:15px;
 }
 
 .add-member-card input{
 padding:12px;
-border:1px solid #ddd;
 border-radius:10px;
+border:1px solid #dbeafe;
+font-size:15px;
 outline:none;
 }
 
 .form-buttons{
-grid-column:span 2;
+grid-column:1/-1;
 display:flex;
-gap:10px;
+gap:15px;
 margin-top:10px;
 }
 
 .form-buttons button{
-padding:12px 20px;
+padding:12px 18px;
 border:none;
 border-radius:10px;
 cursor:pointer;
@@ -211,10 +135,291 @@ background:#ef4444;
 color:white;
 }
 
-.empty-members{
+/* ===========================
+GRID
+=========================== */
+
+.team-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+gap:25px;
+}
+
+/* ===========================
+CARD
+=========================== */
+
+.member-card{
 background:white;
-padding:60px;
+padding:25px;
+border-radius:20px;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+transition:.3s;
+position:relative;
+overflow:hidden;
+}
+
+.member-card:hover{
+transform:translateY(-6px);
+}
+
+.member-card::before{
+content:"";
+position:absolute;
+left:0;
+top:0;
+height:100%;
+width:6px;
+background:linear-gradient(#2563eb,#60a5fa);
+}
+
+.member-top{
+display:flex;
+justify-content:center;
+position:relative;
+}
+
+.member-top img{
+width:95px;
+height:95px;
+border-radius:50%;
+object-fit:cover;
+}
+
+.online-dot,
+.offline-dot{
+position:absolute;
+bottom:5px;
+right:35%;
+font-size:15px;
+}
+
+.online-dot{
+color:#16a34a;
+}
+
+.offline-dot{
+color:#ef4444;
+}
+
+.member-card h3{
+margin-top:15px;
 text-align:center;
-border-radius:15px;
+color:#1e293b;
+}
+
+.role{
+display:block;
+text-align:center;
+color:#2563eb;
+font-weight:600;
+margin-bottom:15px;
+}
+
+/* ===========================
+CONTACT
+=========================== */
+
+.contact p{
+display:flex;
+align-items:center;
+gap:10px;
+margin:10px 0;
+color:#475569;
+}
+
+/* ===========================
+STATS
+=========================== */
+
+.member-stats{
+display:flex;
+justify-content:space-around;
+margin:20px 0;
+}
+
+.member-stats div{
+text-align:center;
+display:flex;
+flex-direction:column;
+gap:5px;
+}
+
+/* ===========================
+PROGRESS
+=========================== */
+
+.progress{
+height:10px;
+background:#dbeafe;
+border-radius:30px;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+.progress-fill{
+height:100%;
+background:linear-gradient(90deg,#2563eb,#60a5fa);
+border-radius:30px;
+}
+
+/* ===========================
+BUTTONS
+=========================== */
+
+.member-buttons{
+display:flex;
+gap:10px;
+}
+
+.member-buttons button{
+flex:1;
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:600;
+transition:.3s;
+}
+
+.profile-btn{
+background:#2563eb;
+color:white;
+}
+
+.profile-btn:hover{
+background:#1d4ed8;
+}
+
+.status-btn{
+background:#facc15;
+}
+
+.status-btn:hover{
+background:#eab308;
+}
+
+.delete-btn{
+background:#ef4444;
+color:white;
+}
+
+.delete-btn:hover{
+background:#dc2626;
+}
+
+/* ===========================
+EMPTY
+=========================== */
+
+.empty-members{
+text-align:center;
+padding:60px;
+background:white;
+border-radius:20px;
+}
+
+/* ===========================
+PROFILE MODAL
+=========================== */
+
+.profile-modal{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.5);
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+.profile-card{
+background:white;
+padding:30px;
+border-radius:20px;
+width:420px;
+max-width:90%;
+text-align:center;
+animation:fade .3s;
+}
+
+.profile-card img{
+width:120px;
+height:120px;
+border-radius:50%;
+margin-bottom:15px;
+}
+
+.profile-card h2{
+color:#1e3a8a;
+}
+
+.profile-card h4{
+color:#64748b;
+margin-bottom:20px;
+}
+
+.profile-card p{
+margin:10px 0;
+}
+
+.close-btn{
 margin-top:20px;
+background:#2563eb;
+color:white;
+border:none;
+padding:12px 22px;
+border-radius:10px;
+cursor:pointer;
+}
+
+.close-btn:hover{
+background:#1d4ed8;
+}
+
+/* ===========================
+ANIMATION
+=========================== */
+
+@keyframes fade{
+
+from{
+opacity:0;
+transform:scale(.9);
+}
+
+to{
+opacity:1;
+transform:scale(1);
+}
+
+}
+
+/* ===========================
+RESPONSIVE
+=========================== */
+
+@media(max-width:768px){
+
+.team-header{
+flex-direction:column;
+align-items:flex-start;
+}
+
+.team-toolbar{
+flex-direction:column;
+}
+
+.team-grid{
+grid-template-columns:1fr;
+}
+
+.member-buttons{
+flex-direction:column;
+}
+
+.form-buttons{
+flex-direction:column;
+}
+
 }
