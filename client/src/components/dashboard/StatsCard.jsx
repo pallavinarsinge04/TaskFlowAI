@@ -1,91 +1,212 @@
+import { useState, useEffect } from "react";
 import {
-  FaTasks,
-  FaProjectDiagram,
-  FaCheckCircle,
-  FaChartLine,
-  FaUsers,
-  FaClock
+  FaArrowUp,
+  FaArrowDown,
+  FaSyncAlt,
+  FaEye,
 } from "react-icons/fa";
 
-import "./StatsCards.css";
+const StatCard = ({
+  title,
+  value,
+  color = "#2563eb",
+}) => {
 
-function StatsCards() {
+  const [count, setCount] = useState(0);
+  const [updated, setUpdated] = useState(
+    new Date().toLocaleTimeString()
+  );
 
-  const stats = [
-    {
-      title: "Total Tasks",
-      value: 124,
-      change: "+12%",
-      icon: <FaTasks />,
-      color: "#2563eb",
-    },
-    {
-      title: "Projects",
-      value: 18,
-      change: "+4",
-      icon: <FaProjectDiagram />,
-      color: "#10b981",
-    },
-    {
-      title: "Completed",
-      value: 96,
-      change: "78%",
-      icon: <FaCheckCircle />,
-      color: "#8b5cf6",
-    },
-    {
-      title: "Productivity",
-      value: "92%",
-      change: "+8%",
-      icon: <FaChartLine />,
-      color: "#f59e0b",
-    },
-    {
-      title: "Team Members",
-      value: 14,
-      change: "8 Online",
-      icon: <FaUsers />,
-      color: "#06b6d4",
-    },
-    {
-      title: "Hours Tracked",
-      value: "142h",
-      change: "This Week",
-      icon: <FaClock />,
-      color: "#ef4444",
-    },
-  ];
+  // Animated Counter
+  useEffect(() => {
+    let start = 0;
+
+    const end =
+      typeof value === "number"
+        ? value
+        : parseInt(value) || 0;
+
+    if (start === end) return;
+
+    let duration = 800;
+    let increment = end / (duration / 20);
+
+    const timer = setInterval(() => {
+      start += increment;
+
+      if (start >= end) {
+        start = end;
+        clearInterval(timer);
+      }
+
+      setCount(Math.floor(start));
+    }, 20);
+
+    return () => clearInterval(timer);
+
+  }, [value]);
+
+  // Refresh Card
+  const handleRefresh = () => {
+    setUpdated(new Date().toLocaleTimeString());
+
+    alert(`${title} refreshed successfully.`);
+  };
+
+  const trendUp = Math.random() > 0.5;
 
   return (
-    <div className="stats-grid">
 
-      {stats.map((item, index) => (
+    <div
+      style={{
+        background: "white",
+        borderRadius: "20px",
+        padding: "25px",
+        boxShadow: "0 15px 35px rgba(0,0,0,.08)",
+        borderTop: `6px solid ${color}`,
+        transition: ".3s",
+        cursor: "pointer",
+      }}
+    >
 
-        <div className="stats-card" key={index}>
+      {/* Top */}
 
-          <div
-            className="stats-icon"
-            style={{ background: item.color }}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+
+        <h3
+          style={{
+            color: "#64748b",
+            fontWeight: 600,
+          }}
+        >
+          {title}
+        </h3>
+
+        <button
+          onClick={handleRefresh}
+          style={{
+            border: "none",
+            background: "#eef4ff",
+            padding: "8px",
+            borderRadius: "8px",
+            cursor: "pointer",
+          }}
+        >
+          <FaSyncAlt color={color} />
+        </button>
+
+      </div>
+
+      {/* Number */}
+
+      <h1
+        style={{
+          fontSize: "42px",
+          margin: "18px 0",
+          color,
+        }}
+      >
+        {count}
+      </h1>
+
+      {/* Progress */}
+
+      <div
+        style={{
+          height: "10px",
+          background: "#e5e7eb",
+          borderRadius: "20px",
+          overflow: "hidden",
+        }}
+      >
+
+        <div
+          style={{
+            width: `${Math.min(count,100)}%`,
+            background: color,
+            height: "100%",
+          }}
+        />
+
+      </div>
+
+      {/* Footer */}
+
+      <div
+        style={{
+          marginTop: "18px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+
+        <div>
+
+          <span
+            style={{
+              color: trendUp
+                ? "#22c55e"
+                : "#ef4444",
+              fontWeight: 700,
+            }}
           >
-            {item.icon}
-          </div>
 
-          <div className="stats-info">
+            {trendUp ? (
+              <FaArrowUp />
+            ) : (
+              <FaArrowDown />
+            )}
 
-            <h4>{item.title}</h4>
+            {trendUp ? " +12%" : " -4%"}
 
-            <h2>{item.value}</h2>
-
-            <span>{item.change}</span>
-
-          </div>
+          </span>
 
         </div>
 
-      ))}
+        <button
+          style={{
+            border: "none",
+            background: color,
+            color: "white",
+            padding: "8px 15px",
+            borderRadius: "8px",
+            cursor: "pointer",
+          }}
+          onClick={() =>
+            alert(`${title} Details`)
+          }
+        >
+
+          <FaEye />
+
+          {" "}View
+
+        </button>
+
+      </div>
+
+      <p
+        style={{
+          marginTop: "15px",
+          color: "#94a3b8",
+          fontSize: "13px",
+        }}
+      >
+
+        Updated: {updated}
+
+      </p>
 
     </div>
-  );
-}
 
-export default StatsCards;
+  );
+};
+
+export default StatCard;
