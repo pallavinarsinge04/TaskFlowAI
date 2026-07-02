@@ -1,10 +1,18 @@
 import "./WelcomeBanner.css";
-import { FaPlus, FaTasks, FaProjectDiagram } from "react-icons/fa";
+import {
+  FaPlus,
+  FaTasks,
+  FaProjectDiagram,
+} from "react-icons/fa";
 
-function WelcomeBanner() {
-  const user = JSON.parse(localStorage.getItem("user")) || {
-    name: "Pallavi",
-  };
+function WelcomeBanner({
+  onCreateProject,
+  onAddTask,
+}) {
+  const user =
+    JSON.parse(localStorage.getItem("user")) || {
+      name: "Pallavi",
+    };
 
   return (
     <div className="welcome-banner">
@@ -12,22 +20,30 @@ function WelcomeBanner() {
       <div className="welcome-left">
 
         <h1>
-          Welcome Back, <span>{user.name}</span> 👋
+          Welcome Back,
+          <span> {user.name}</span> 👋
         </h1>
 
         <p>
-          Manage your projects smarter with AI-powered insights and
-          collaborate with your team in real time.
+          Manage your projects smarter with AI-powered
+          insights and collaborate with your team in
+          real time.
         </p>
 
         <div className="welcome-buttons">
 
-          <button className="primary-btn">
+          <button
+            className="primary-btn"
+            onClick={onCreateProject}
+          >
             <FaPlus />
             Create Project
           </button>
 
-          <button className="secondary-btn">
+          <button
+            className="secondary-btn"
+            onClick={onAddTask}
+          >
             <FaTasks />
             Add Task
           </button>
@@ -39,6 +55,7 @@ function WelcomeBanner() {
       <div className="welcome-right">
 
         <div className="summary-card">
+
           <FaProjectDiagram className="summary-icon" />
 
           <h2>Today's Summary</h2>

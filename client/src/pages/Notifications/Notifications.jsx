@@ -195,23 +195,6 @@ item.read ? count : count + 1
     }
 
   };
-  const archiveNotification = async (id) => {
-
-  try {
-
-    await axios.put(`${API}/archive/${id}`);
-
-    setNotifications(prev =>
-      prev.filter(item => item._id !== id)
-    );
-
-  } catch (err) {
-
-    console.log(err);
-
-  }
-
-};
 
   return (
 
