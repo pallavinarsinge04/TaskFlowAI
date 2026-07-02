@@ -2,10 +2,9 @@ import { useState } from "react";
 import "./TeamPage.css";
 
 function TeamPage() {
-  const [members, setMembers] = useState([
-    { id: 1, name: "John Doe", role: "Developer" },
-    { id: 2, name: "Jane Smith", role: "Designer" },
-  ]);
+  const [members, setMembers] = useState([]);
+
+  const [showForm, setShowForm] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -13,11 +12,19 @@ function TeamPage() {
   });
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  const addMember = () => {
-    if (!form.name || !form.role) return;
+  const addMember = (e) => {
+    e.preventDefault();
+
+    if (!form.name || !form.role) {
+      alert("Please fill all fields.");
+      return;
+    }
 
     const newMember = {
       id: Date.now(),
@@ -25,9 +32,14 @@ function TeamPage() {
       role: form.role,
     };
 
-    setMembers([newMember, ...members]);
+    setMembers([...members, newMember]);
 
-    setForm({ name: "", role: "" });
+    setForm({
+      name: "",
+      role: "",
+    });
+
+    setShowForm(false);
   };
 
   const removeMember = (id) => {
@@ -38,55 +50,112 @@ function TeamPage() {
     <div className="team-page">
 
       {/* HEADER */}
+
       <div className="team-header">
-        <h2>Team Members</h2>
-      </div>
 
-      {/* ADD MEMBER BOX */}
-      <div className="add-member-box">
+        <h2>👥 Team Members</h2>
 
-        <input
-          name="name"
-          placeholder="Member Name"
-          value={form.name}
-          onChange={handleChange}
-        />
-
-        <input
-          name="role"
-          placeholder="Role (e.g Developer)"
-          value={form.role}
-          onChange={handleChange}
-        />
-
-        <button onClick={addMember}>
+        <button
+          className="add-btn"
+          onClick={() => setShowForm(true)}
+        >
           + Add Member
         </button>
 
       </div>
 
-      {/* MEMBERS LIST */}
-      <div className="member-list">
+      {/* ADD MEMBER FORM */}
 
-        {members.map((m) => (
-          <div key={m.id} className="member-card">
+      {showForm && (
 
-            <div>
-              <h3>{m.name}</h3>
-              <p>{m.role}</p>
+        <div className="add-member-card">
+
+          <h3>Add Team Member</h3>
+
+          <form onSubmit={addMember}>
+
+            <input
+              type="text"
+              name="name"
+              placeholder="Member Name"
+              value={form.name}
+              onChange={handleChange}
+            />
+
+            <input
+              type="text"
+              name="role"
+              placeholder="Role"
+              value={form.role}
+              onChange={handleChange}
+            />
+
+            <div className="form-buttons">
+
+              <button type="submit">
+                Save Member
+              </button>
+
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={() => setShowForm(false)}
+              >
+                Cancel
+              </button>
+
             </div>
 
-            <button
-              className="delete"
-              onClick={() => removeMember(m.id)}
-            >
-              Remove
-            </button>
+          </form>
 
-          </div>
-        ))}
+        </div>
 
-      </div>
+      )}
+
+      {/* MEMBER LIST */}
+
+      {members.length === 0 ? (
+
+        <div className="empty-card">
+
+          <h2>No Team Members</h2>
+
+          <p>
+            Click the <b>Add Member</b> button to create your first team member.
+          </p>
+
+        </div>
+
+      ) : (
+
+        <div className="member-list">
+
+          {members.map((m) => (
+
+            <div className="member-card" key={m.id}>
+
+              <div>
+
+                <h3>{m.name}</h3>
+
+                <p>{m.role}</p>
+
+              </div>
+
+              <button
+                className="delete-btn"
+                onClick={() => removeMember(m.id)}
+              >
+                Remove
+              </button>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
 
     </div>
   );

@@ -1,55 +1,68 @@
+import { useState } from "react";
 import "./TeamMembers.css";
 import {
   FaCircle,
   FaEnvelope,
   FaPhone,
-  FaTasks
+  FaTasks,
+  FaPlus,
 } from "react-icons/fa";
 
 function TeamMembers() {
+  const [members, setMembers] = useState([]);
 
-  const members = [
-    {
-      name: "Pallavi Narsinge",
-      role: "Project Manager",
-      email: "pallavi@gmail.com",
-      phone: "+91 9876543210",
-      tasks: 18,
-      productivity: 95,
-      online: true,
-      image: "https://i.pravatar.cc/150?img=1"
-    },
-    {
-      name: "Amit Sharma",
-      role: "Frontend Developer",
-      email: "amit@gmail.com",
-      phone: "+91 9876543211",
-      tasks: 14,
-      productivity: 88,
-      online: true,
-      image: "https://i.pravatar.cc/150?img=2"
-    },
-    {
-      name: "Riya Patel",
-      role: "Backend Developer",
-      email: "riya@gmail.com",
-      phone: "+91 9876543212",
-      tasks: 12,
-      productivity: 82,
-      online: false,
-      image: "https://i.pravatar.cc/150?img=3"
-    },
-    {
-      name: "Karan Singh",
-      role: "UI/UX Designer",
-      email: "karan@gmail.com",
-      phone: "+91 9876543213",
-      tasks: 15,
-      productivity: 91,
-      online: true,
-      image: "https://i.pravatar.cc/150?img=4"
+  const [showForm, setShowForm] = useState(false);
+
+  const [member, setMember] = useState({
+    name: "",
+    role: "",
+    email: "",
+    phone: "",
+    tasks: "",
+    productivity: "",
+    image: "",
+  });
+
+  const handleChange = (e) => {
+    setMember({
+      ...member,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const addMember = (e) => {
+    e.preventDefault();
+
+    if (
+      !member.name ||
+      !member.role ||
+      !member.email ||
+      !member.phone
+    ) {
+      alert("Please fill all required fields.");
+      return;
     }
-  ];
+
+    setMembers([
+      ...members,
+      {
+        ...member,
+        online: true,
+      },
+    ]);
+
+    setMember({
+      name: "",
+      role: "",
+      email: "",
+      phone: "",
+      tasks: "",
+      productivity: "",
+      image: "",
+    });
+
+    setShowForm(false);
+  };
 
   return (
     <div className="team-members">
@@ -58,90 +71,210 @@ function TeamMembers() {
 
         <div>
           <h2>👥 Team Members</h2>
-          <p>Manage your project team</p>
+          <p>Add and manage your project team</p>
         </div>
 
-        <button>Add Member</button>
+        <button
+          onClick={() => setShowForm(true)}
+        >
+          <FaPlus />
+          Add Member
+        </button>
 
       </div>
 
-      <div className="team-grid">
+      {/* ADD MEMBER CARD */}
 
-        {members.map((member, index) => (
+      {showForm && (
 
-          <div className="member-card" key={index}>
+        <div className="add-member-card">
 
-            <div className="member-top">
+          <h3>Add New Member</h3>
 
-              <img src={member.image} alt={member.name} />
+          <form onSubmit={addMember}>
 
-              <span
-                className={
-                  member.online
-                    ? "online-dot"
-                    : "offline-dot"
-                }
+            <input
+              type="text"
+              name="name"
+              placeholder="Full Name"
+              value={member.name}
+              onChange={handleChange}
+            />
+
+            <input
+              type="text"
+              name="role"
+              placeholder="Role"
+              value={member.role}
+              onChange={handleChange}
+            />
+
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={member.email}
+              onChange={handleChange}
+            />
+
+            <input
+              type="text"
+              name="phone"
+              placeholder="Phone"
+              value={member.phone}
+              onChange={handleChange}
+            />
+
+            <input
+              type="number"
+              name="tasks"
+              placeholder="Assigned Tasks"
+              value={member.tasks}
+              onChange={handleChange}
+            />
+
+            <input
+              type="number"
+              name="productivity"
+              placeholder="Productivity %"
+              value={member.productivity}
+              onChange={handleChange}
+            />
+
+            <input
+              type="text"
+              name="image"
+              placeholder="Image URL"
+              value={member.image}
+              onChange={handleChange}
+            />
+
+            <div className="form-buttons">
+
+              <button type="submit">
+                Save Member
+              </button>
+
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={() => setShowForm(false)}
               >
-                <FaCircle />
+                Cancel
+              </button>
+
+            </div>
+
+          </form>
+
+        </div>
+
+      )}
+
+      {/* MEMBERS */}
+
+      {members.length === 0 ? (
+
+        <div className="empty-members">
+
+          <h2>No Team Members</h2>
+
+          <p>
+            Click <b>Add Member</b> to create your team.
+          </p>
+
+        </div>
+
+      ) : (
+
+        <div className="team-grid">
+
+          {members.map((member, index) => (
+
+            <div className="member-card" key={index}>
+
+              <div className="member-top">
+
+                <img
+                  src={
+                    member.image ||
+                    "https://i.pravatar.cc/150"
+                  }
+                  alt={member.name}
+                />
+
+                <span className="online-dot">
+                  <FaCircle />
+                </span>
+
+              </div>
+
+              <h3>{member.name}</h3>
+
+              <span className="role">
+                {member.role}
               </span>
 
-            </div>
+              <div className="contact">
 
-            <h3>{member.name}</h3>
+                <p>
+                  <FaEnvelope />
+                  {member.email}
+                </p>
 
-            <span className="role">
-              {member.role}
-            </span>
+                <p>
+                  <FaPhone />
+                  {member.phone}
+                </p>
 
-            <div className="contact">
-
-              <p>
-                <FaEnvelope />
-                {member.email}
-              </p>
-
-              <p>
-                <FaPhone />
-                {member.phone}
-              </p>
-
-            </div>
-
-            <div className="member-stats">
-
-              <div>
-                <FaTasks />
-                <strong>{member.tasks}</strong>
-                <span>Tasks</span>
               </div>
 
-              <div>
-                <strong>{member.productivity}%</strong>
-                <span>Productivity</span>
+              <div className="member-stats">
+
+                <div>
+
+                  <FaTasks />
+
+                  <strong>{member.tasks}</strong>
+
+                  <span>Tasks</span>
+
+                </div>
+
+                <div>
+
+                  <strong>
+                    {member.productivity}%
+                  </strong>
+
+                  <span>Productivity</span>
+
+                </div>
+
               </div>
 
+              <div className="progress">
+
+                <div
+                  className="progress-fill"
+                  style={{
+                    width: `${member.productivity}%`,
+                  }}
+                ></div>
+
+              </div>
+
+              <button className="profile-btn">
+                View Profile
+              </button>
+
             </div>
 
-            <div className="progress">
+          ))}
 
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${member.productivity}%`
-                }}
-              ></div>
+        </div>
 
-            </div>
-
-            <button className="profile-btn">
-              View Profile
-            </button>
-
-          </div>
-
-        ))}
-
-      </div>
+      )}
 
     </div>
   );
