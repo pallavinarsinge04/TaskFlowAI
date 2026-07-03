@@ -1,425 +1,311 @@
-/* ===========================
+/* ==========================================
    TEAM MEMBERS
-=========================== */
+========================================== */
 
 .team-members{
-padding:30px;
-background:#f4f8ff;
-border-radius:20px;
+    background:#ffffff;
+    border-radius:20px;
+    padding:28px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+    transition:.35s;
+    overflow:hidden;
 }
 
-/* ===========================
-HEADER
-=========================== */
+.team-members:hover{
+    transform:translateY(-5px);
+    box-shadow:0 20px 45px rgba(0,0,0,.12);
+}
+
+/* ==========================================
+   HEADER
+========================================== */
 
 .team-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:25px;
-flex-wrap:wrap;
-gap:20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:25px;
+    gap:20px;
 }
 
 .team-header h2{
-font-size:30px;
-color:#1e3a8a;
-margin-bottom:5px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#1e293b;
+    font-size:24px;
 }
 
 .team-header p{
-color:#64748b;
+    color:#64748b;
+    font-size:14px;
+    margin-top:5px;
 }
 
-.team-header button{
-display:flex;
-align-items:center;
-gap:8px;
-padding:12px 22px;
-background:linear-gradient(135deg,#2563eb,#1d4ed8);
-color:white;
-border:none;
-border-radius:12px;
-cursor:pointer;
-font-size:15px;
-font-weight:600;
-transition:.3s;
+.view-btn{
+    padding:10px 18px;
+    border:none;
+    border-radius:10px;
+    background:#2563eb;
+    color:#fff;
+    cursor:pointer;
+    transition:.3s;
+    font-weight:600;
 }
 
-.team-header button:hover{
-transform:translateY(-3px);
-box-shadow:0 12px 25px rgba(37,99,235,.3);
+.view-btn:hover{
+    background:#1d4ed8;
+    transform:translateY(-2px);
 }
 
-/* ===========================
-SEARCH BAR
-=========================== */
+/* ==========================================
+   MEMBER LIST
+========================================== */
 
-.team-toolbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:15px;
-margin-bottom:25px;
-flex-wrap:wrap;
+.team-list{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
 }
 
-.team-toolbar input,
-.team-toolbar select{
-padding:12px 16px;
-border-radius:10px;
-border:1px solid #dbeafe;
-font-size:15px;
-outline:none;
+/* ==========================================
+   MEMBER CARD
+========================================== */
+
+.team-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    background:#f8fafc;
+    padding:18px;
+    border-radius:16px;
+    transition:.35s;
 }
 
-.live-clock{
-font-weight:700;
-color:#2563eb;
+.team-card:hover{
+    background:#eef5ff;
+    transform:translateX(6px);
 }
 
-/* ===========================
-FORM
-=========================== */
-
-.add-member-card{
-background:white;
-padding:25px;
-border-radius:20px;
-box-shadow:0 10px 30px rgba(0,0,0,.08);
-margin-bottom:30px;
-animation:fade .3s;
+.team-card img{
+    width:65px;
+    height:65px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #2563eb;
+    transition:.35s;
 }
 
-.add-member-card h3{
-margin-bottom:20px;
-color:#1e3a8a;
+.team-card:hover img{
+    transform:scale(1.08);
 }
 
-.add-member-card form{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:15px;
+/* ==========================================
+   INFO
+========================================== */
+
+.member-info{
+    flex:1;
 }
 
-.add-member-card input{
-padding:12px;
-border-radius:10px;
-border:1px solid #dbeafe;
-font-size:15px;
-outline:none;
+.member-info h3{
+    color:#1e293b;
+    margin-bottom:5px;
+    font-size:18px;
 }
 
-.form-buttons{
-grid-column:1/-1;
-display:flex;
-gap:15px;
-margin-top:10px;
+.member-info p{
+    color:#64748b;
+    margin-bottom:10px;
+    font-size:14px;
 }
 
-.form-buttons button{
-padding:12px 18px;
-border:none;
-border-radius:10px;
-cursor:pointer;
-font-weight:600;
+/* ==========================================
+   STATUS
+========================================== */
+
+.member-info span{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:600;
 }
 
-.form-buttons button:first-child{
-background:#2563eb;
-color:white;
+.member-info span svg{
+    font-size:10px;
 }
 
-.cancel-btn{
-background:#ef4444;
-color:white;
+.online{
+    color:#16a34a;
 }
 
-/* ===========================
-GRID
-=========================== */
-
-.team-grid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-gap:25px;
+.away{
+    color:#f59e0b;
 }
 
-/* ===========================
-CARD
-=========================== */
-
-.member-card{
-background:white;
-padding:25px;
-border-radius:20px;
-box-shadow:0 10px 25px rgba(0,0,0,.08);
-transition:.3s;
-position:relative;
-overflow:hidden;
+.offline{
+    color:#94a3b8;
 }
 
-.member-card:hover{
-transform:translateY(-6px);
+/* ==========================================
+   ACTIONS
+========================================== */
+
+.member-actions{
+    display:flex;
+    gap:10px;
 }
 
-.member-card::before{
-content:"";
-position:absolute;
-left:0;
-top:0;
-height:100%;
-width:6px;
-background:linear-gradient(#2563eb,#60a5fa);
+.member-actions button{
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:12px;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+    transition:.3s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:17px;
 }
 
-.member-top{
-display:flex;
-justify-content:center;
-position:relative;
+.member-actions button:hover{
+    transform:translateY(-3px);
+    background:#1d4ed8;
 }
 
-.member-top img{
-width:95px;
-height:95px;
-border-radius:50%;
-object-fit:cover;
+/* ==========================================
+   FOOTER
+========================================== */
+
+.team-footer{
+    margin-top:30px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
 }
 
-.online-dot,
-.offline-dot{
-position:absolute;
-bottom:5px;
-right:35%;
-font-size:15px;
+.team-footer div{
+    background:#f8fafc;
+    border-radius:15px;
+    padding:18px;
+    text-align:center;
+    transition:.3s;
 }
 
-.online-dot{
-color:#16a34a;
+.team-footer div:hover{
+    background:#eef5ff;
 }
 
-.offline-dot{
-color:#ef4444;
+.team-footer h3{
+    color:#2563eb;
+    font-size:28px;
+    margin-bottom:8px;
 }
 
-.member-card h3{
-margin-top:15px;
-text-align:center;
-color:#1e293b;
+.team-footer p{
+    color:#64748b;
+    font-size:14px;
 }
 
-.role{
-display:block;
-text-align:center;
-color:#2563eb;
-font-weight:600;
-margin-bottom:15px;
+/* ==========================================
+   ANIMATION
+========================================== */
+
+.team-card{
+    animation:fadeUp .45s ease;
 }
 
-/* ===========================
-CONTACT
-=========================== */
-
-.contact p{
-display:flex;
-align-items:center;
-gap:10px;
-margin:10px 0;
-color:#475569;
-}
-
-/* ===========================
-STATS
-=========================== */
-
-.member-stats{
-display:flex;
-justify-content:space-around;
-margin:20px 0;
-}
-
-.member-stats div{
-text-align:center;
-display:flex;
-flex-direction:column;
-gap:5px;
-}
-
-/* ===========================
-PROGRESS
-=========================== */
-
-.progress{
-height:10px;
-background:#dbeafe;
-border-radius:30px;
-overflow:hidden;
-margin-bottom:20px;
-}
-
-.progress-fill{
-height:100%;
-background:linear-gradient(90deg,#2563eb,#60a5fa);
-border-radius:30px;
-}
-
-/* ===========================
-BUTTONS
-=========================== */
-
-.member-buttons{
-display:flex;
-gap:10px;
-}
-
-.member-buttons button{
-flex:1;
-padding:10px;
-border:none;
-border-radius:10px;
-cursor:pointer;
-font-weight:600;
-transition:.3s;
-}
-
-.profile-btn{
-background:#2563eb;
-color:white;
-}
-
-.profile-btn:hover{
-background:#1d4ed8;
-}
-
-.status-btn{
-background:#facc15;
-}
-
-.status-btn:hover{
-background:#eab308;
-}
-
-.delete-btn{
-background:#ef4444;
-color:white;
-}
-
-.delete-btn:hover{
-background:#dc2626;
-}
-
-/* ===========================
-EMPTY
-=========================== */
-
-.empty-members{
-text-align:center;
-padding:60px;
-background:white;
-border-radius:20px;
-}
-
-/* ===========================
-PROFILE MODAL
-=========================== */
-
-.profile-modal{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.5);
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:999;
-}
-
-.profile-card{
-background:white;
-padding:30px;
-border-radius:20px;
-width:420px;
-max-width:90%;
-text-align:center;
-animation:fade .3s;
-}
-
-.profile-card img{
-width:120px;
-height:120px;
-border-radius:50%;
-margin-bottom:15px;
-}
-
-.profile-card h2{
-color:#1e3a8a;
-}
-
-.profile-card h4{
-color:#64748b;
-margin-bottom:20px;
-}
-
-.profile-card p{
-margin:10px 0;
-}
-
-.close-btn{
-margin-top:20px;
-background:#2563eb;
-color:white;
-border:none;
-padding:12px 22px;
-border-radius:10px;
-cursor:pointer;
-}
-
-.close-btn:hover{
-background:#1d4ed8;
-}
-
-/* ===========================
-ANIMATION
-=========================== */
-
-@keyframes fade{
+@keyframes fadeUp{
 
 from{
-opacity:0;
-transform:scale(.9);
+    opacity:0;
+    transform:translateY(20px);
 }
 
 to{
-opacity:1;
-transform:scale(1);
+    opacity:1;
+    transform:translateY(0);
 }
 
 }
 
-/* ===========================
-RESPONSIVE
-=========================== */
+/* ==========================================
+   TABLET
+========================================== */
+
+@media(max-width:992px){
+
+.team-footer{
+    grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+/* ==========================================
+   MOBILE
+========================================== */
 
 @media(max-width:768px){
 
+.team-members{
+    padding:20px;
+}
+
 .team-header{
-flex-direction:column;
-align-items:flex-start;
+    flex-direction:column;
+    align-items:flex-start;
 }
 
-.team-toolbar{
-flex-direction:column;
+.team-card{
+    flex-direction:column;
+    align-items:flex-start;
 }
 
-.team-grid{
-grid-template-columns:1fr;
+.member-actions{
+    width:100%;
+    justify-content:flex-end;
 }
 
-.member-buttons{
-flex-direction:column;
+.team-footer{
+    grid-template-columns:1fr;
 }
 
-.form-buttons{
-flex-direction:column;
+}
+
+/* ==========================================
+   SMALL MOBILE
+========================================== */
+
+@media(max-width:480px){
+
+.team-card img{
+    width:55px;
+    height:55px;
+}
+
+.member-info h3{
+    font-size:16px;
+}
+
+.team-header h2{
+    font-size:20px;
+}
+
+.view-btn{
+    width:100%;
+}
+
+.member-actions{
+    justify-content:space-between;
+}
+
+.member-actions button{
+    flex:1;
 }
 
 }
