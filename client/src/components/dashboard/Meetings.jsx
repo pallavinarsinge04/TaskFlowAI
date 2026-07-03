@@ -1,159 +1,144 @@
-// Meetings.jsx
-// This file combines the structure discussed earlier.
-// NOTE: Replace or extend the handlers/UI as needed for your project.
-
-import { useState, useEffect } from "react";
 import "./Meetings.css";
 import {
-  FaVideo, FaClock, FaUsers, FaCalendarAlt,
-  FaMapMarkerAlt, FaPlus, FaTrash,
-  FaEdit, FaPlay, FaSearch, FaFilter
+  FaVideo,
+  FaClock,
+  FaUsers,
+  FaCalendarAlt,
+  FaMapMarkerAlt
 } from "react-icons/fa";
 
 function Meetings() {
-  const [meetings, setMeetings] = useState(() => {
-    const saved = localStorage.getItem("meetings");
-    return saved ? JSON.parse(saved) : [];
-  });
 
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("All");
-  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
-
-  const [meeting, setMeeting] = useState({
-    title:"",
-    date:"",
-    time:"",
-    platform:"",
-    location:"",
-    members:"",
-    status:"Upcoming"
-  });
-
-  useEffect(()=>{
-    const t=setInterval(()=>setCurrentTime(new Date().toLocaleTimeString()),1000);
-    return ()=>clearInterval(t);
-  },[]);
-
-  useEffect(()=>{
-    localStorage.setItem("meetings",JSON.stringify(meetings));
-  },[meetings]);
-
-  const handleChange=(e)=>{
-    setMeeting({...meeting,[e.target.name]:e.target.value});
-  };
-
-  const saveMeeting=(e)=>{
-    e.preventDefault();
-    if(!meeting.title||!meeting.date||!meeting.time){
-      alert("Fill required fields");
-      return;
+  const meetings = [
+    {
+      id: 1,
+      title: "Daily Scrum Meeting",
+      date: "Today",
+      time: "10:00 AM",
+      platform: "Google Meet",
+      participants: 8,
+      location: "Online",
+      status: "Upcoming"
+    },
+    {
+      id: 2,
+      title: "UI Design Review",
+      date: "Today",
+      time: "2:30 PM",
+      platform: "Zoom",
+      participants: 5,
+      location: "Conference Room A",
+      status: "Upcoming"
+    },
+    {
+      id: 3,
+      title: "Sprint Planning",
+      date: "Tomorrow",
+      time: "11:00 AM",
+      platform: "Microsoft Teams",
+      participants: 12,
+      location: "Online",
+      status: "Scheduled"
+    },
+    {
+      id: 4,
+      title: "Client Presentation",
+      date: "Friday",
+      time: "4:00 PM",
+      platform: "Google Meet",
+      participants: 6,
+      location: "Online",
+      status: "Scheduled"
     }
-    if(editingId){
-      setMeetings(meetings.map(m=>m.id===editingId?{...meeting,id:editingId}:m));
-    }else{
-      setMeetings([{id:Date.now(),...meeting},...meetings]);
-    }
-    setMeeting({
-      title:"",date:"",time:"",
-      platform:"",location:"",
-      members:"",status:"Upcoming"
-    });
-    setEditingId(null);
-    setShowForm(false);
-  };
-
-  const deleteMeeting=(id)=>{
-    if(window.confirm("Delete meeting?")){
-      setMeetings(meetings.filter(m=>m.id!==id));
-    }
-  };
-
-  const editMeeting=(m)=>{
-    setMeeting(m);
-    setEditingId(m.id);
-    setShowForm(true);
-  };
-
-  const joinMeeting=(m)=>{
-    alert(`Joining ${m.title}`);
-  };
-
-  const filteredMeetings=meetings.filter(m=>{
-    const s=m.title.toLowerCase().includes(search.toLowerCase());
-    const f=filter==="All"||m.status===filter;
-    return s&&f;
-  });
+  ];
 
   return (
-    <div className="meeting-page">
-      <div className="meeting-header">
+    <div className="meetings">
+
+      <div className="meetings-header">
+
         <div>
-          <h1>🎥 Team Meetings</h1>
-          <p>Current Time: {currentTime}</p>
+          <h2>
+            <FaCalendarAlt />
+            Upcoming Meetings
+          </h2>
+          <p>Stay updated with your schedule</p>
         </div>
-        <button className="create-btn" onClick={()=>setShowForm(true)}>
-          <FaPlus/> Create Meeting
+
+        <button className="schedule-btn">
+          + Schedule
         </button>
-      </div>
 
-      <div className="meeting-toolbar">
-        <div className="search-box">
-          <FaSearch/>
-          <input value={search} onChange={(e)=>setSearch(e.target.value)} placeholder="Search"/>
-        </div>
-        <div className="filter-box">
-          <FaFilter/>
-          <select value={filter} onChange={(e)=>setFilter(e.target.value)}>
-            <option>All</option>
-            <option>Live</option>
-            <option>Upcoming</option>
-            <option>Scheduled</option>
-          </select>
-        </div>
       </div>
-
-      {showForm && (
-        <div className="meeting-modal">
-          <form className="meeting-form-card" onSubmit={saveMeeting}>
-            <h2>{editingId?"Edit":"Create"} Meeting</h2>
-            <input name="title" placeholder="Title" value={meeting.title} onChange={handleChange}/>
-            <input name="date" placeholder="Date" value={meeting.date} onChange={handleChange}/>
-            <input name="time" placeholder="Time" value={meeting.time} onChange={handleChange}/>
-            <input name="platform" placeholder="Platform" value={meeting.platform} onChange={handleChange}/>
-            <input name="location" placeholder="Location" value={meeting.location} onChange={handleChange}/>
-            <input name="members" placeholder="Members" value={meeting.members} onChange={handleChange}/>
-            <select name="status" value={meeting.status} onChange={handleChange}>
-              <option>Upcoming</option><option>Live</option><option>Scheduled</option>
-            </select>
-            <button type="submit">Save</button>
-            <button type="button" onClick={()=>setShowForm(false)}>Cancel</button>
-          </form>
-        </div>
-      )}
 
       <div className="meeting-list">
-        {filteredMeetings.map(item=>(
-          <div className="meeting-item" key={item.id}>
-            <div>
-              <h3>{item.title}</h3>
-              <p><FaCalendarAlt/> {item.date}</p>
-              <p><FaClock/> {item.time}</p>
-              <p><FaUsers/> {item.members}</p>
-              <p><FaMapMarkerAlt/> {item.location}</p>
-              <p>{item.platform}</p>
+
+        {meetings.map((meeting) => (
+
+          <div
+            key={meeting.id}
+            className="meeting-card"
+          >
+
+            <div className="meeting-top">
+
+              <div>
+
+                <h3>{meeting.title}</h3>
+
+                <span className={`status ${meeting.status.toLowerCase()}`}>
+                  {meeting.status}
+                </span>
+
+              </div>
+
+              <button className="join-btn">
+                <FaVideo />
+                Join
+              </button>
+
             </div>
-            <div>
-              <span>{item.status}</span>
-              <button onClick={()=>joinMeeting(item)}><FaPlay/> Join</button>
-              <button onClick={()=>editMeeting(item)}><FaEdit/> Edit</button>
-              <button onClick={()=>deleteMeeting(item.id)}><FaTrash/> Delete</button>
+
+            <div className="meeting-details">
+
+              <div>
+                <FaCalendarAlt />
+                <span>{meeting.date}</span>
+              </div>
+
+              <div>
+                <FaClock />
+                <span>{meeting.time}</span>
+              </div>
+
+              <div>
+                <FaUsers />
+                <span>{meeting.participants} Participants</span>
+              </div>
+
+              <div>
+                <FaMapMarkerAlt />
+                <span>{meeting.location}</span>
+              </div>
+
             </div>
+
+            <div className="meeting-footer">
+
+              <span>{meeting.platform}</span>
+
+              <button className="details-btn">
+                View Details
+              </button>
+
+            </div>
+
           </div>
+
         ))}
+
       </div>
+
     </div>
   );
 }
