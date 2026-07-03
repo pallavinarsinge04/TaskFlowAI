@@ -316,3 +316,117 @@ transition:.3s;
 background:#d97706;
 
 }
+.notification-list{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.notification-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:#fff;
+    border-radius:16px;
+    padding:18px;
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    transition:.3s;
+    border-left:6px solid #2563eb;
+}
+
+.notification-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 28px rgba(37,99,235,.15);
+}
+
+.notification-icon{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#eff6ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#2563eb;
+    font-size:22px;
+    margin-right:18px;
+}
+
+.notification-body{
+    flex:1;
+}
+
+.notification-body h3{
+    margin-bottom:6px;
+    color:#0f172a;
+}
+
+.notification-body p{
+    color:#64748b;
+    margin-bottom:8px;
+}
+
+.notification-body small{
+    color:#94a3b8;
+}
+
+.notification-actions{
+    display:flex;
+    gap:10px;
+}
+
+.notification-actions button{
+    border:none;
+    cursor:pointer;
+    padding:10px 14px;
+    border-radius:10px;
+    font-weight:600;
+    transition:.3s;
+}
+
+.read-btn{
+    background:#22c55e;
+    color:white;
+}
+
+.archive-btn{
+    background:#f59e0b;
+    color:white;
+}
+
+.delete-btn{
+    background:#ef4444;
+    color:white;
+}
+
+.notification-actions button:hover{
+    transform:scale(1.05);
+}
+
+.unread{
+    background:#eff6ff;
+}
+
+@media(max-width:768px){
+
+.notification-card{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:15px;
+}
+
+.notification-actions{
+    width:100%;
+    justify-content:flex-end;
+    flex-wrap:wrap;
+}
+
+.notification-toolbar{
+    flex-direction:column;
+    gap:15px;
+}
+
+.search-box{
+    width:100%;
+}
+}

@@ -15,7 +15,7 @@ import {
 const API = "http://localhost:5000/api/notifications";
 
 function Notifications() {
-useNotification();
+
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
@@ -341,38 +341,87 @@ item.read ? count : count + 1
 
         ) : (
 
-          filteredNotifications.map(item => (
+        <div className="notification-list">
 
-            <div className="notification-actions">
+  {loading ? (
 
-  {!item.read && (
+    <div className="empty-state">
+      Loading Notifications...
+    </div>
 
-    <button
-      className="read-btn"
-      onClick={() => markRead(item._id)}
-    >
-      Mark Read
-    </button>
+  ) : filteredNotifications.length === 0 ? (
+
+    <div className="empty-state">
+      <FaBell size={50} />
+      <h2>No Notifications</h2>
+      <p>You're all caught up.</p>
+    </div>
+
+  ) : (
+
+    filteredNotifications.map(item => (
+
+      <div
+        key={item._id}
+        className={`notification-card ${item.type} ${
+          item.read ? "" : "unread"
+        }`}
+      >
+
+        <div className="notification-icon">
+
+          <FaBell />
+
+        </div>
+
+        <div className="notification-body">
+
+          <h3>{item.title}</h3>
+
+          <p>{item.message}</p>
+
+          <small>
+            {new Date(item.createdAt).toLocaleString()}
+          </small>
+
+        </div>
+
+        <div className="notification-actions">
+
+          {!item.read && (
+
+            <button
+              className="read-btn"
+              onClick={() => markRead(item._id)}
+            >
+              <FaCheck />
+            </button>
+
+          )}
+
+          <button
+            className="archive-btn"
+            onClick={() => archiveNotification(item._id)}
+          >
+            Archive
+          </button>
+
+          <button
+            className="delete-btn"
+            onClick={() => deleteNotification(item._id)}
+          >
+            <FaTrash />
+          </button>
+
+        </div>
+
+      </div>
+
+    ))
 
   )}
 
-  <button
-    className="archive-btn"
-    onClick={() => archiveNotification(item._id)}
-  >
-    Archive
-  </button>
-
-  <button
-    className="delete-btn"
-    onClick={() => deleteNotification(item._id)}
-  >
-    Delete
-  </button>
-
 </div>
-
-          ))
 
         )}
 
