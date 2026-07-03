@@ -1,113 +1,202 @@
+import { useState } from "react";
 import "./Notifications.css";
 import {
   FaBell,
   FaCheckCircle,
-  FaExclamationCircle,
-  FaUsers,
-  FaRobot,
-  FaClock
+  FaTrash,
+  FaExclamationTriangle,
+  FaInfoCircle,
+  FaEnvelopeOpen
 } from "react-icons/fa";
 
 function Notifications() {
 
-  const notifications = [
+  const [notifications, setNotifications] = useState([
     {
-      title: "Task Completed",
-      message: "Dashboard UI has been completed successfully.",
+      id: 1,
+      title: "New Task Assigned",
+      message: "You have been assigned a new UI Design task.",
+      type: "info",
       time: "2 min ago",
-      type: "success"
+      read: false,
     },
     {
-      title: "New Team Member",
-      message: "Amit Sharma joined your project.",
-      time: "15 min ago",
-      type: "team"
-    },
-    {
-      title: "AI Suggestion",
-      message: "AI recommends prioritizing 3 pending tasks.",
-      time: "30 min ago",
-      type: "ai"
-    },
-    {
-      title: "Project Deadline",
-      message: "TaskFlow AI deadline is tomorrow.",
-      time: "1 hour ago",
-      type: "warning"
-    },
-    {
+      id: 2,
       title: "Meeting Reminder",
-      message: "Daily Scrum starts in 20 minutes.",
+      message: "Sprint Planning Meeting starts in 30 minutes.",
+      type: "warning",
+      time: "15 min ago",
+      read: false,
+    },
+    {
+      id: 3,
+      title: "Project Completed",
+      message: "TaskFlow Dashboard project marked as completed.",
+      type: "success",
+      time: "1 hour ago",
+      read: true,
+    },
+    {
+      id: 4,
+      title: "New Team Member",
+      message: "John Smith joined your development team.",
+      type: "info",
       time: "Today",
-      type: "meeting"
+      read: true,
     }
-  ];
+  ]);
+
+  const unread = notifications.filter(n => !n.read).length;
+
+  const markRead = (id) => {
+    setNotifications(prev =>
+      prev.map(item =>
+        item.id === id
+          ? { ...item, read: true }
+          : item
+      )
+    );
+  };
+
+  const deleteNotification = (id) => {
+    if (!window.confirm("Delete this notification?")) return;
+
+    setNotifications(prev =>
+      prev.filter(item => item.id !== id)
+    );
+  };
+
+  const markAllRead = () => {
+    setNotifications(prev =>
+      prev.map(item => ({
+        ...item,
+        read: true
+      }))
+    );
+  };
 
   const getIcon = (type) => {
+
     switch (type) {
+
       case "success":
         return <FaCheckCircle />;
+
       case "warning":
-        return <FaExclamationCircle />;
-      case "team":
-        return <FaUsers />;
-      case "ai":
-        return <FaRobot />;
+        return <FaExclamationTriangle />;
+
       default:
-        return <FaBell />;
+        return <FaInfoCircle />;
+
     }
+
   };
 
   return (
-    <div className="notifications-card">
+
+    <div className="dashboard-notifications">
 
       <div className="notification-header">
 
         <div>
-          <h2>🔔 Notifications</h2>
-          <p>Latest project updates</p>
+
+          <h2>
+
+            <FaBell />
+
+            Notifications
+
+          </h2>
+
+          <p>
+
+            {unread} Unread Notifications
+
+          </p>
+
         </div>
 
-        <span className="notification-count">
-          {notifications.length}
-        </span>
+        <button
+          className="mark-read-btn"
+          onClick={markAllRead}
+        >
+          <FaEnvelopeOpen />
+          Mark All
+        </button>
 
       </div>
 
       <div className="notification-list">
 
-        {notifications.map((item, index) => (
+        {notifications.length === 0 ? (
 
-          <div
-            className={`notification-item ${item.type}`}
-            key={index}
-          >
+          <div className="notification-empty">
 
-            <div className="notification-icon">
-              {getIcon(item.type)}
-            </div>
+            <FaBell size={40} />
 
-            <div className="notification-content">
-
-              <h4>{item.title}</h4>
-
-              <p>{item.message}</p>
-
-              <span>
-                <FaClock />
-                {item.time}
-              </span>
-
-            </div>
+            <p>No Notifications</p>
 
           </div>
 
-        ))}
+        ) : (
+
+          notifications.map(item => (
+
+            <div
+              key={item.id}
+              className={`notification-card ${item.read ? "read" : "unread"}`}
+            >
+
+              <div className={`notification-icon ${item.type}`}>
+
+                {getIcon(item.type)}
+
+              </div>
+
+              <div className="notification-content">
+
+                <h4>{item.title}</h4>
+
+                <p>{item.message}</p>
+
+                <small>{item.time}</small>
+
+              </div>
+
+              <div className="notification-actions">
+
+                {!item.read && (
+
+                  <button
+                    className="read-btn"
+                    onClick={() => markRead(item.id)}
+                  >
+                    Read
+                  </button>
+
+                )}
+
+                <button
+                  className="delete-btn"
+                  onClick={() => deleteNotification(item.id)}
+                >
+                  <FaTrash />
+                </button>
+
+              </div>
+
+            </div>
+
+          ))
+
+        )}
 
       </div>
 
     </div>
+
   );
+
 }
 
 export default Notifications;
