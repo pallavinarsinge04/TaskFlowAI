@@ -1,294 +1,274 @@
+/* ==========================
+   NAVBAR
+========================== */
+
 .navbar{
-
-height:80px;
-
-background:#fff;
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-padding:0 30px;
-
-border-bottom:1px solid #edf2f7;
-
-box-shadow:0 3px 10px rgba(0,0,0,.05);
-
-position:sticky;
-
-top:0;
-
-z-index:999;
-
+    width:100%;
+    height:75px;
+    background:#ffffff;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 30px;
+    border-bottom:1px solid #e5e7eb;
+    position:sticky;
+    top:0;
+    z-index:999;
+    box-shadow:0 4px 15px rgba(0,0,0,.05);
 }
 
-/* LEFT */
+/* ==========================
+   SEARCH
+========================== */
 
-.navbar-left{
-
-width:45%;
-
+.navbar-search{
+    width:420px;
+    height:45px;
+    background:#f5f7fb;
+    border-radius:30px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:0 18px;
+    transition:.3s;
 }
 
-.search-box{
-
-height:48px;
-
-background:#f5f7fb;
-
-display:flex;
-
-align-items:center;
-
-gap:15px;
-
-padding:0 18px;
-
-border-radius:12px;
-
+.navbar-search:hover{
+    background:#eef4ff;
 }
 
-.search-box svg{
-
-color:#64748b;
-
+.navbar-search svg{
+    color:#2563eb;
+    font-size:18px;
 }
 
-.search-box input{
-
-flex:1;
-
-border:none;
-
-background:none;
-
-font-size:15px;
-
-outline:none;
-
+.navbar-search input{
+    flex:1;
+    border:none;
+    outline:none;
+    background:transparent;
+    font-size:15px;
+    color:#374151;
 }
 
-/* RIGHT */
+.navbar-search input::placeholder{
+    color:#9ca3af;
+}
+
+/* ==========================
+   RIGHT SIDE
+========================== */
 
 .navbar-right{
-
-display:flex;
-
-align-items:center;
-
-gap:15px;
-
+    display:flex;
+    align-items:center;
+    gap:18px;
 }
 
-.create-btn{
+/* ==========================
+   CLOCK
+========================== */
 
-height:46px;
-
-padding:0 22px;
-
-border:none;
-
-border-radius:10px;
-
-background:#2563eb;
-
-color:white;
-
-font-weight:600;
-
-display:flex;
-
-align-items:center;
-
-gap:10px;
-
-cursor:pointer;
-
-transition:.3s;
-
+.navbar-time{
+    font-size:15px;
+    font-weight:600;
+    color:#2563eb;
+    background:#eff6ff;
+    padding:10px 16px;
+    border-radius:12px;
 }
 
-.create-btn:hover{
-
-background:#1d4ed8;
-
-}
+/* ==========================
+   ICON BUTTONS
+========================== */
 
 .icon-btn{
+    position:relative;
+    width:45px;
+    height:45px;
+    border:none;
+    background:#f5f7fb;
+    border-radius:12px;
+    cursor:pointer;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    transition:.3s;
+}
 
-width:46px;
-
-height:46px;
-
-border:none;
-
-border-radius:12px;
-
-background:#f5f7fb;
-
-cursor:pointer;
-
-font-size:18px;
-
-position:relative;
-
-transition:.3s;
-
+.icon-btn svg{
+    font-size:20px;
+    color:#2563eb;
 }
 
 .icon-btn:hover{
-
-background:#2563eb;
-
-color:white;
-
+    background:#2563eb;
+    transform:translateY(-3px);
 }
+
+.icon-btn:hover svg{
+    color:white;
+}
+
+/* ==========================
+   NOTIFICATION BADGE
+========================== */
 
 .badge{
+    position:absolute;
+    top:-5px;
+    right:-5px;
+    width:20px;
+    height:20px;
+    background:#ef4444;
+    color:white;
+    border-radius:50%;
+    font-size:11px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-weight:bold;
+}
 
-position:absolute;
+/* ==========================
+   PROFILE
+========================== */
 
-top:8px;
+.navbar-profile{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    cursor:pointer;
+    transition:.3s;
+    padding:8px 12px;
+    border-radius:15px;
+}
 
-right:8px;
+.navbar-profile:hover{
+    background:#f5f7fb;
+}
 
-width:18px;
+.navbar-profile img{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #2563eb;
+}
 
-height:18px;
+.navbar-profile h4{
+    font-size:15px;
+    color:#111827;
+    margin-bottom:3px;
+}
 
-background:#ef4444;
+.navbar-profile span{
+    font-size:12px;
+    color:#6b7280;
+}
 
-border-radius:50%;
+/* ==========================
+   RESPONSIVE
+========================== */
 
-font-size:11px;
+@media(max-width:1200px){
 
-color:white;
-
-display:flex;
-
-align-items:center;
-
-justify-content:center;
+.navbar-search{
+    width:300px;
+}
 
 }
 
-.date{
+@media(max-width:992px){
 
-font-weight:600;
+.navbar{
+    padding:0 20px;
+}
 
-color:#475569;
+.navbar-search{
+    width:220px;
+}
 
-margin-left:10px;
-
-margin-right:10px;
+.navbar-time{
+    display:none;
+}
 
 }
 
-.profile{
+@media(max-width:768px){
 
-display:flex;
+.navbar{
+    flex-wrap:wrap;
+    height:auto;
+    padding:15px;
+    gap:15px;
+}
 
-align-items:center;
+.navbar-search{
+    width:100%;
+    order:2;
+}
 
-gap:12px;
+.navbar-right{
+    width:100%;
+    justify-content:flex-end;
+}
 
-cursor:pointer;
-
-padding:8px 12px;
-
-border-radius:12px;
-
-transition:.3s;
+.navbar-profile h4,
+.navbar-profile span{
+    display:none;
+}
 
 }
 
-.profile:hover{
+@media(max-width:576px){
 
-background:#f5f7fb;
+.navbar{
+    padding:12px;
+}
+
+.navbar-right{
+    gap:10px;
+}
+
+.icon-btn{
+    width:42px;
+    height:42px;
+}
+
+.navbar-profile img{
+    width:42px;
+    height:42px;
+}
 
 }
 
-.profile img{
+/* ==========================
+   ANIMATION
+========================== */
 
-width:50px;
+.navbar{
+    animation:fadeDown .4s ease;
+}
 
-height:50px;
+@keyframes fadeDown{
 
-border-radius:50%;
+0%{
+    opacity:0;
+    transform:translateY(-20px);
+}
 
-object-fit:cover;
+100%{
+    opacity:1;
+    transform:translateY(0);
+}
 
 }
 
-.profile h4{
+/* ==========================
+   GLASS EFFECT
+========================== */
 
-font-size:15px;
-
-margin:0;
-
-}
-
-.profile p{
-
-font-size:12px;
-
-color:#64748b;
-
-margin:0;
-
-}
-.notification-icon{
-
-position:relative;
-
-font-size:22px;
-
-cursor:pointer;
-
-margin-right:20px;
-
-color:#334155;
-
-transition:.3s;
-
-}
-
-.notification-icon:hover{
-
-color:#2563eb;
-
-}
-
-.badge{
-
-position:absolute;
-
-top:-8px;
-
-right:-10px;
-
-background:#ef4444;
-
-color:white;
-
-width:20px;
-
-height:20px;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-border-radius:50%;
-
-font-size:11px;
-
-font-weight:700;
-
-box-shadow:0 3px 10px rgba(0,0,0,.2);
-
+.navbar{
+    backdrop-filter:blur(12px);
 }
