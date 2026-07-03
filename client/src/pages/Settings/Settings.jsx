@@ -1,90 +1,163 @@
-import { useState } from "react";
+
+
+import { useState, useEffect } from "react";
 import "./Settings.css";
 
 function Settings() {
+
+  // Logged in user
+  const loggedUser =
+    JSON.parse(localStorage.getItem("user")) || {};
+
+  // Unique key for each user's profile picture
+  const profileKey = `profilePic_${loggedUser.email}`;
+
+  // Profile states
+  const [name, setName] = useState(loggedUser.name || "");
+  const [email, setEmail] = useState(loggedUser.email || "");
+
+  const [profilePic, setProfilePic] = useState(
+    localStorage.getItem(profileKey) ||
+      loggedUser.profilePic ||
+      "https://i.pravatar.cc/150"
+  );
+
+  // Preferences
   const [darkMode, setDarkMode] = useState(false);
   const [emailNotif, setEmailNotif] = useState(true);
   const [pushNotif, setPushNotif] = useState(true);
   const [language, setLanguage] = useState("English");
 
+  useEffect(() => {
+    const saved = localStorage.getItem(profileKey);
+
+    if (saved) {
+      setProfilePic(saved);
+    }
+  }, []);
+
+  // Upload Profile Picture
+  const handleProfileChange = (e) => {
+
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+      setProfilePic(reader.result);
+
+      localStorage.setItem(
+        profileKey,
+        reader.result
+      );
+
+      const user =
+        JSON.parse(localStorage.getItem("user")) || {};
+
+      user.profilePic = reader.result;
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(user)
+      );
+
+      window.dispatchEvent(
+        new Event("profilePicUpdated")
+      );
+
+    };
+
+    reader.readAsDataURL(file);
+
+  };
+
+  // Save Profile
+  const saveProfile = () => {
+
+    const user = {
+      ...loggedUser,
+      name,
+      email,
+      profilePic
+    };
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(user)
+    );
+
+    alert("Profile Updated Successfully");
+
+    window.dispatchEvent(
+      new Event("profileUpdated")
+    );
+
+  };
+
   return (
     <div className={`settings-page ${darkMode ? "dark" : ""}`}>
-      
+
       <div className="settings-header">
         <h1>⚙️ Settings</h1>
         <p>Manage your account preferences and system configuration</p>
       </div>
 
-      {/* Profile Section */}
+      {/* Profile Card */}
+
       <div className="settings-card">
+
         <h2>👤 Profile Settings</h2>
-        {/* Update Profile Picture */}
 
-<div className="profile-picture-section">
+        <div className="profile-picture-section">
 
-  <h3>Update Profile Picture</h3>
+          <img
+            src={profilePic}
+            alt="Profile"
+            className="settings-profile-img"
+          />
 
-  <img
-    src={
-      JSON.parse(localStorage.getItem("user"))?.profilePic ||
-      "https://i.pravatar.cc/150"
-    }
-    alt="Profile"
-    className="settings-profile-img"
-    id="settingsProfileImage"
-  />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleProfileChange}
+          />
 
-  <input
-    type="file"
-    accept="image/*"
-    onChange={(e) => {
-
-      const file = e.target.files[0];
-
-      if (!file) return;
-
-      const reader = new FileReader();
-
-      reader.onload = () => {
-
-        const user =
-          JSON.parse(localStorage.getItem("user")) || {};
-
-        user.profilePic = reader.result;
-
-        localStorage.setItem(
-          "user",
-          JSON.stringify(user)
-        );
-
-        document.getElementById(
-          "settingsProfileImage"
-        ).src = reader.result;
-
-        window.dispatchEvent(
-          new Event("profilePicUpdated")
-        );
-
-      };
-
-      reader.readAsDataURL(file);
-
-    }}
-  />
-
-</div>
+        </div>
 
         <div className="form-group">
+
           <label>Full Name</label>
-          <input type="text" placeholder="Enter your name" />
+
+          <input
+            type="text"
+            value={name}
+            onChange={(e)=>setName(e.target.value)}
+          />
+
         </div>
 
         <div className="form-group">
+
           <label>Email</label>
-          <input type="email" placeholder="Enter your email" />
+
+          <input
+            type="email"
+            value={email}
+            onChange={(e)=>setEmail(e.target.value)}
+          />
+
         </div>
 
-        <button className="save-btn">Save Profile</button>
+        <button
+          className="save-btn"
+          onClick={saveProfile}
+        >
+          Save Profile
+        </button>
+
       </div>
 
       {/* Preferences */}

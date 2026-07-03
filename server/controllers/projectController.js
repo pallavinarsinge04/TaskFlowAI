@@ -53,28 +53,32 @@ export const createProject = async (req, res) => {
 };
 export const deleteProject = async (req, res) => {
 
+  console.log("DELETE CONTROLLER HIT");
+  console.log(req.params.id);
+
   try {
 
     const project = await Project.findByIdAndDelete(req.params.id);
 
     if (!project) {
       return res.status(404).json({
-        message: "Project not found"
+        message: "Project not found",
       });
     }
 
     getIO().emit("projectDeleted", req.params.id);
 
     res.json({
-      message: "Project deleted successfully"
+      message: "Project deleted successfully",
     });
 
   } catch (err) {
 
+    console.log(err);
+
     res.status(500).json({
-      message: err.message
+      message: err.message,
     });
 
   }
-
 };

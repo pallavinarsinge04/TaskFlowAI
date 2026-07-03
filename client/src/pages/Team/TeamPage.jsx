@@ -1,15 +1,29 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "./TeamPage.css";
+import { FaPlus, FaTrash, FaUsers } from "react-icons/fa";
 
 function TeamPage() {
-  const [members, setMembers] = useState([]);
+
+  // Load saved members
+  const [members, setMembers] = useState(() => {
+    const saved = localStorage.getItem("teamMembers");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const [showForm, setShowForm] = useState(false);
-
+  const [search, setSearch] = useState("");
   const [form, setForm] = useState({
     name: "",
     role: "",
   });
+
+  // Save automatically whenever members change
+  useEffect(() => {
+    localStorage.setItem(
+      "teamMembers",
+      JSON.stringify(members)
+    );
+  }, [members]);
 
   const handleChange = (e) => {
     setForm({
@@ -19,9 +33,10 @@ function TeamPage() {
   };
 
   const addMember = (e) => {
+
     e.preventDefault();
 
-    if (!form.name || !form.role) {
+    if (!form.name.trim() || !form.role.trim()) {
       alert("Please fill all fields.");
       return;
     }
@@ -30,9 +45,12 @@ function TeamPage() {
       id: Date.now(),
       name: form.name,
       role: form.role,
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        form.name
+      )}&background=2563eb&color=ffffff`,
     };
 
-    setMembers([...members, newMember]);
+    setMembers((prev) => [newMember, ...prev]);
 
     setForm({
       name: "",
@@ -43,28 +61,76 @@ function TeamPage() {
   };
 
   const removeMember = (id) => {
-    setMembers(members.filter((m) => m.id !== id));
+
+    if (window.confirm("Remove this member?")) {
+
+      setMembers((prev) =>
+        prev.filter((m) => m.id !== id)
+      );
+
+    }
+
   };
 
-  return (
-    <div className="team-page">
+  const filtered = useMemo(() => {
 
-      {/* HEADER */}
+    return members.filter((m) =>
+
+      m.name
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+
+      m.role
+        .toLowerCase()
+        .includes(search.toLowerCase())
+
+    );
+
+  }, [members, search]);
+
+  return (
+
+    <div className="team-page">
 
       <div className="team-header">
 
-        <h2>👥 Team Members</h2>
+        <div>
+
+          <h1>
+            <FaUsers /> Team Management
+          </h1>
+
+          <p>
+            Manage your project members.
+          </p>
+
+        </div>
 
         <button
           className="add-btn"
           onClick={() => setShowForm(true)}
         >
-          + Add Member
+          <FaPlus /> Add Member
         </button>
 
       </div>
 
-      {/* ADD MEMBER FORM */}
+      <div className="team-toolbar">
+
+        <input
+          type="text"
+          placeholder="Search member..."
+          value={search}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
+        />
+
+        <span className="member-count">
+          {filtered.length} Members
+        </span>
+
+      </div>
 
       {showForm && (
 
@@ -93,13 +159,15 @@ function TeamPage() {
             <div className="form-buttons">
 
               <button type="submit">
-                Save Member
+                Save
               </button>
 
               <button
                 type="button"
                 className="cancel-btn"
-                onClick={() => setShowForm(false)}
+                onClick={() =>
+                  setShowForm(false)
+                }
               >
                 Cancel
               </button>
@@ -112,40 +180,46 @@ function TeamPage() {
 
       )}
 
-      {/* MEMBER LIST */}
-
-      {members.length === 0 ? (
+      {filtered.length === 0 ? (
 
         <div className="empty-card">
 
           <h2>No Team Members</h2>
 
           <p>
-            Click the <b>Add Member</b> button to create your first team member.
+            Add your first member to get started.
           </p>
 
         </div>
 
       ) : (
 
-        <div className="member-list">
+        <div className="member-grid">
 
-          {members.map((m) => (
+          {filtered.map((m) => (
 
-            <div className="member-card" key={m.id}>
+            <div
+              className="member-card"
+              key={m.id}
+            >
 
-              <div>
+              <img
+                src={m.avatar}
+                alt={m.name}
+                className="avatar"
+              />
 
-                <h3>{m.name}</h3>
+              <h3>{m.name}</h3>
 
-                <p>{m.role}</p>
-
-              </div>
+              <p>{m.role}</p>
 
               <button
                 className="delete-btn"
-                onClick={() => removeMember(m.id)}
+                onClick={() =>
+                  removeMember(m.id)
+                }
               >
+                <FaTrash />
                 Remove
               </button>
 
@@ -158,6 +232,7 @@ function TeamPage() {
       )}
 
     </div>
+
   );
 }
 

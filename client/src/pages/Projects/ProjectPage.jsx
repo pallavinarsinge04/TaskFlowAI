@@ -114,30 +114,27 @@ function ProjectPage() {
     ).length
 
   };
-  const handleDelete = async (id) => {
+ const handleDelete = async (id) => {
+
+  console.log("Deleting Project ID:", id);
 
   if (!window.confirm("Delete this project?")) return;
 
   try {
 
-    await axios.delete(
-
+    const res = await axios.delete(
       `http://localhost:5000/api/projects/${id}`
-
     );
 
+    console.log(res.data);
+
     setProjects(prev =>
-
-      prev.filter(project =>
-
-        project._id !== id
-
-      )
-
+      prev.filter(project => project._id !== id)
     );
 
   } catch (err) {
 
+    console.log(err.response?.data);
     console.log(err);
 
   }

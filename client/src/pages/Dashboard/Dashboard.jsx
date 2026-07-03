@@ -1,7 +1,9 @@
 import "./Dashboard.css";
+
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/layout/Navbar";
 import RightSidebar from "../../components/dashboard/RightSidebar";
+
 import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
 import StatsCards from "../../components/dashboard/StatsCard";
 import ProductivityChart from "../../components/dashboard/ProductivityChart";
@@ -15,83 +17,157 @@ import Activity from "../../components/dashboard/Activity";
 import CalendarWidget from "../../components/dashboard/CalendarWidget";
 import QuickActions from "../../components/dashboard/QuickActions";
 
+import { useState } from "react";
+import { FaBars } from "react-icons/fa";
+
 function Dashboard() {
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
+
     <div className="dashboard-layout">
 
-      {/* LEFT SIDEBAR */}
-      <Sidebar />
+      {/* Mobile Overlay */}
 
-      {/* MAIN CONTENT */}
-      <div className="dashboard-main">
+      {sidebarOpen && (
 
-        {/* TOP NAVBAR */}
-        
+        <div
+          className="dashboard-overlay"
+          onClick={() => setSidebarOpen(false)}
+        />
 
-       <div className="dashboard-container">
+      )}
 
-    <WelcomeBanner />
+      {/* Sidebar */}
 
-    <StatsCards />
+      <div className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`}>
 
-    <section className="dashboard-section">
-        <div className="dashboard-card large">
-            <ProductivityChart />
-        </div>
+        <Sidebar />
 
-        <div className="dashboard-card small">
-            <AIInsights />
-        </div>
-    </section>
-
-    <section className="dashboard-section">
-        <div className="dashboard-card large">
-            <ProjectProgress />
-        </div>
-
-        <div className="dashboard-card small">
-            <RecentTasks />
-        </div>
-    </section>
-
-    <section className="dashboard-section">
-        <div className="dashboard-card large">
-            <TeamMembers />
-        </div>
-
-        <div className="dashboard-card small">
-            <Meetings />
-        </div>
-    </section>
-
-    <section className="dashboard-section">
-        <div className="dashboard-card large">
-            <Activity />
-        </div>
-
-        <div className="dashboard-card small">
-            <Notifications />
-        </div>
-    </section>
-
-    <section className="dashboard-section">
-        <div className="dashboard-card large">
-            <CalendarWidget />
-        </div>
-
-        <div className="dashboard-card small">
-            <QuickActions />
-        </div>
-    </section>
-
-</div>
       </div>
 
-      {/* RIGHT SIDEBAR */}
-      <RightSidebar />
+      {/* Main */}
+
+      <div className="dashboard-main">
+
+        <div className="mobile-header">
+
+          <button
+            className="menu-btn"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <FaBars />
+          </button>
+
+          <h2>TaskFlow AI</h2>
+
+        </div>
+
+        <Navbar />
+
+        <div className="dashboard-container">
+
+          <WelcomeBanner />
+
+          <StatsCards />
+
+          <div className="dashboard-grid">
+
+            <div className="dashboard-card chart">
+
+              <ProductivityChart />
+
+            </div>
+
+            <div className="dashboard-card">
+
+              <AIInsights />
+
+            </div>
+
+          </div>
+
+          <div className="dashboard-grid">
+
+            <div className="dashboard-card">
+
+              <ProjectProgress />
+
+            </div>
+
+            <div className="dashboard-card">
+
+              <RecentTasks />
+
+            </div>
+
+          </div>
+
+          <div className="dashboard-grid">
+
+            <div className="dashboard-card">
+
+              <TeamMembers />
+
+            </div>
+
+            <div className="dashboard-card">
+
+              <Meetings />
+
+            </div>
+
+          </div>
+
+          <div className="dashboard-grid">
+
+            <div className="dashboard-card">
+
+              <Activity />
+
+            </div>
+
+            <div className="dashboard-card">
+
+              <Notifications />
+
+            </div>
+
+          </div>
+
+          <div className="dashboard-grid">
+
+            <div className="dashboard-card">
+
+              <CalendarWidget />
+
+            </div>
+
+            <div className="dashboard-card">
+
+              <QuickActions />
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Right Sidebar */}
+
+      <div className="dashboard-right">
+
+        <RightSidebar />
+
+      </div>
 
     </div>
+
   );
+
 }
 
 export default Dashboard;
