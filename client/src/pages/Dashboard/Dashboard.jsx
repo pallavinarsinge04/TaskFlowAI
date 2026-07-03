@@ -43,7 +43,7 @@ function Dashboard() {
 
       <div className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`}>
 
-        <Sidebar />
+        
 
       </div>
 
