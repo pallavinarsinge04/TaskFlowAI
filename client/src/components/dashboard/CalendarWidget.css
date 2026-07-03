@@ -1,111 +1,273 @@
+/* ==========================
+   CALENDAR WIDGET
+========================== */
+
 .calendar-widget{
     background:#fff;
-    border-radius:18px;
+    border-radius:20px;
     padding:25px;
-    box-shadow:0 10px 25px rgba(0,0,0,.08);
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+    transition:.35s;
 }
+
+.calendar-widget:hover{
+    transform:translateY(-5px);
+    box-shadow:0 18px 40px rgba(37,99,235,.15);
+}
+
+/* ==========================
+   HEADER
+========================== */
 
 .calendar-header{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:20px;
+    margin-bottom:25px;
+    gap:20px;
 }
 
 .calendar-header h2{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:24px;
     color:#1e293b;
 }
 
-.calendar-header button{
+.calendar-controls{
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+
+.calendar-controls button{
+    width:40px;
+    height:40px;
+    border:none;
+    border-radius:12px;
     background:#2563eb;
     color:#fff;
-    border:none;
-    padding:8px 16px;
-    border-radius:8px;
     cursor:pointer;
+    transition:.3s;
 }
 
-.calendar-month{
+.calendar-controls button:hover{
+    background:#1d4ed8;
+    transform:scale(1.1);
+}
+
+.calendar-controls span{
+    font-weight:700;
+    color:#1e293b;
+    min-width:140px;
     text-align:center;
-    margin-bottom:20px;
 }
 
-.calendar-month h3{
-    color:#475569;
+/* ==========================
+   DAY NAMES
+========================== */
+
+.calendar-days{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:10px;
+    margin-bottom:12px;
 }
+
+.day-name{
+    text-align:center;
+    font-weight:700;
+    color:#64748b;
+    font-size:14px;
+}
+
+/* ==========================
+   GRID
+========================== */
 
 .calendar-grid{
     display:grid;
     grid-template-columns:repeat(7,1fr);
     gap:10px;
-    text-align:center;
 }
 
-.calendar-grid span{
-    font-weight:bold;
-    color:#64748b;
-}
+/* ==========================
+   CELL
+========================== */
 
-.day{
-    padding:12px;
-    border-radius:10px;
+.calendar-cell{
+    aspect-ratio:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f8fafc;
+    border-radius:14px;
     cursor:pointer;
     transition:.3s;
-    background:#f8fafc;
+    font-weight:600;
+    color:#334155;
 }
 
-.day:hover{
+.calendar-cell:hover{
     background:#dbeafe;
+    color:#2563eb;
+    transform:scale(1.05);
 }
 
-.day.active{
+.calendar-cell.empty{
+    background:transparent;
+    cursor:default;
+}
+
+.calendar-cell.today{
     background:#2563eb;
-    color:white;
+    color:#fff;
+    font-weight:700;
+    box-shadow:0 8px 20px rgba(37,99,235,.3);
 }
 
-.day.event{
-    background:#10b981;
-    color:white;
-}
+/* ==========================
+   FOOTER
+========================== */
 
-.day.inactive{
-    opacity:.4;
-}
-
-.upcoming-events{
+.calendar-footer{
     margin-top:30px;
 }
 
-.upcoming-events h3{
+.event-card{
+    background:linear-gradient(135deg,#2563eb,#3b82f6);
+    color:#fff;
+    padding:20px;
+    border-radius:18px;
+    box-shadow:0 10px 25px rgba(37,99,235,.25);
+}
+
+.event-card h4{
     margin-bottom:15px;
+    font-size:18px;
+}
+
+.event-card p{
+    margin:8px 0;
+    opacity:.95;
+}
+
+/* ==========================
+   ANIMATION
+========================== */
+
+.calendar-widget{
+    animation:fadeCalendar .5s ease;
+}
+
+@keyframes fadeCalendar{
+
+from{
+    opacity:0;
+    transform:translateY(20px);
+}
+
+to{
+    opacity:1;
+    transform:translateY(0);
+}
+
+}
+
+/* ==========================
+   TABLET
+========================== */
+
+@media(max-width:992px){
+
+.calendar-header{
+    flex-direction:column;
+    align-items:flex-start;
+}
+
+.calendar-controls{
+    width:100%;
+    justify-content:space-between;
+}
+
+}
+
+/* ==========================
+   MOBILE
+========================== */
+
+@media(max-width:768px){
+
+.calendar-widget{
+    padding:20px;
+}
+
+.calendar-header h2{
+    font-size:20px;
+}
+
+.calendar-days{
+    gap:6px;
+}
+
+.calendar-grid{
+    gap:6px;
+}
+
+.calendar-cell{
+    font-size:14px;
+}
+
+.calendar-controls span{
+    min-width:auto;
+    font-size:15px;
 }
 
 .event-card{
-    display:flex;
+    padding:18px;
+}
+
+}
+
+/* ==========================
+   SMALL MOBILE
+========================== */
+
+@media(max-width:480px){
+
+.calendar-widget{
+    padding:15px;
+}
+
+.calendar-header{
     gap:15px;
-    align-items:center;
-    padding:12px;
-    margin-bottom:12px;
-    border-radius:12px;
-    background:#f8fafc;
 }
 
-.event-icon{
-    font-size:24px;
+.calendar-header h2{
+    font-size:18px;
 }
 
-.event-info h4{
-    margin:0;
-    color:#1e293b;
+.calendar-controls button{
+    width:34px;
+    height:34px;
 }
 
-.event-info p{
-    margin:3px 0;
-    color:#64748b;
+.day-name{
+    font-size:12px;
 }
 
-.event-info span{
-    color:#2563eb;
-    font-size:14px;
-    font-weight:600;
+.calendar-cell{
+    font-size:13px;
+    border-radius:10px;
+}
+
+.event-card h4{
+    font-size:16px;
+}
+
+.event-card p{
+    font-size:13px;
+}
+
 }

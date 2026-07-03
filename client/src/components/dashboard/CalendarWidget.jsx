@@ -1,113 +1,164 @@
+import { useState } from "react";
 import "./CalendarWidget.css";
+import {
+  FaChevronLeft,
+  FaChevronRight,
+  FaCalendarAlt
+} from "react-icons/fa";
 
 function CalendarWidget() {
-  const events = [
-    {
-      title: "Sprint Planning",
-      date: "28 June 2026",
-      time: "10:00 AM",
-    },
-    {
-      title: "UI Review Meeting",
-      date: "29 June 2026",
-      time: "02:00 PM",
-    },
-    {
-      title: "Client Presentation",
-      date: "30 June 2026",
-      time: "11:30 AM",
-    },
-    {
-      title: "Project Deadline",
-      date: "02 July 2026",
-      time: "06:00 PM",
-    },
+
+  const today = new Date();
+
+  const [currentDate, setCurrentDate] = useState(today);
+
+  const month = currentDate.getMonth();
+  const year = currentDate.getFullYear();
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
   ];
 
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+  const firstDay = new Date(year, month, 1).getDay();
+
+  const totalDays = new Date(
+    year,
+    month + 1,
+    0
+  ).getDate();
+
+  const previousMonth = () => {
+    setCurrentDate(
+      new Date(year, month - 1, 1)
+    );
+  };
+
+  const nextMonth = () => {
+    setCurrentDate(
+      new Date(year, month + 1, 1)
+    );
+  };
+
+  const calendarDays = [];
+
+  for (let i = 0; i < firstDay; i++) {
+    calendarDays.push(null);
+  }
+
+  for (let i = 1; i <= totalDays; i++) {
+    calendarDays.push(i);
+  }
+
   return (
+
     <div className="calendar-widget">
 
       <div className="calendar-header">
-        <h2>📅 Calendar</h2>
-        <button>View All</button>
-      </div>
 
-      <div className="calendar-month">
-        <h3>June 2026</h3>
-      </div>
+        <h2>
 
-      <div className="calendar-grid">
+          <FaCalendarAlt />
 
-        <span>Sun</span>
-        <span>Mon</span>
-        <span>Tue</span>
-        <span>Wed</span>
-        <span>Thu</span>
-        <span>Fri</span>
-        <span>Sat</span>
+          Calendar
 
-        <div className="day inactive">31</div>
-        <div className="day">1</div>
-        <div className="day">2</div>
-        <div className="day">3</div>
-        <div className="day">4</div>
-        <div className="day">5</div>
-        <div className="day">6</div>
+        </h2>
 
-        <div className="day">7</div>
-        <div className="day">8</div>
-        <div className="day">9</div>
-        <div className="day">10</div>
-        <div className="day">11</div>
-        <div className="day">12</div>
-        <div className="day">13</div>
+        <div className="calendar-controls">
 
-        <div className="day">14</div>
-        <div className="day">15</div>
-        <div className="day">16</div>
-        <div className="day">17</div>
-        <div className="day">18</div>
-        <div className="day active">19</div>
-        <div className="day">20</div>
+          <button onClick={previousMonth}>
+            <FaChevronLeft />
+          </button>
 
-        <div className="day">21</div>
-        <div className="day">22</div>
-        <div className="day">23</div>
-        <div className="day">24</div>
-        <div className="day">25</div>
-        <div className="day">26</div>
-        <div className="day">27</div>
+          <span>
 
-        <div className="day event">28</div>
-        <div className="day event">29</div>
-        <div className="day event">30</div>
+            {months[month]} {year}
+
+          </span>
+
+          <button onClick={nextMonth}>
+            <FaChevronRight />
+          </button>
+
+        </div>
 
       </div>
 
-      <div className="upcoming-events">
+      <div className="calendar-days">
 
-        <h3>Upcoming Events</h3>
+        {days.map(day => (
 
-        {events.map((event, index) => (
-          <div className="event-card" key={index}>
-
-            <div className="event-icon">
-              📌
-            </div>
-
-            <div className="event-info">
-              <h4>{event.title}</h4>
-              <p>{event.date}</p>
-              <span>{event.time}</span>
-            </div>
-
+          <div
+            key={day}
+            className="day-name"
+          >
+            {day}
           </div>
+
         ))}
 
       </div>
 
+      <div className="calendar-grid">
+
+        {calendarDays.map((day,index)=>{
+
+          const isToday =
+            day === today.getDate() &&
+            month === today.getMonth() &&
+            year === today.getFullYear();
+
+          return(
+
+            <div
+              key={index}
+              className={`calendar-cell ${
+                day ? "" : "empty"
+              } ${isToday ? "today" : ""}`}
+            >
+
+              {day}
+
+            </div>
+
+          );
+
+        })}
+
+      </div>
+
+      <div className="calendar-footer">
+
+        <div className="event-card">
+
+          <h4>Today's Schedule</h4>
+
+          <p>10:00 AM - Sprint Meeting</p>
+
+          <p>02:00 PM - UI Review</p>
+
+          <p>05:00 PM - Client Demo</p>
+
+        </div>
+
+      </div>
+
     </div>
+
   );
+
 }
 
 export default CalendarWidget;
