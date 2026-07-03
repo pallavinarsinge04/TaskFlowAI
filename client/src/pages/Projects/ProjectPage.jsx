@@ -43,11 +43,24 @@ function ProjectPage() {
       });
 
     });
+    socket.on("projectDeleted", (id) => {
+
+  setProjects(prev =>
+
+    prev.filter(project =>
+
+      project._id !== id
+
+    )
+
+  );
+
+});
 
     return () => {
 
       socket.off("projectCreated");
-
+      socket.off("projectDeleted");
     };
 
   }, []);
@@ -101,6 +114,35 @@ function ProjectPage() {
     ).length
 
   };
+  const handleDelete = async (id) => {
+
+  if (!window.confirm("Delete this project?")) return;
+
+  try {
+
+    await axios.delete(
+
+      `http://localhost:5000/api/projects/${id}`
+
+    );
+
+    setProjects(prev =>
+
+      prev.filter(project =>
+
+        project._id !== id
+
+      )
+
+    );
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+
+};
 
   return (
 
@@ -226,13 +268,15 @@ function ProjectPage() {
 
           {filteredProjects.map(project => (
 
-            <ProjectCard
+           <ProjectCard
 
-              key={project._id}
+    key={project._id}
 
-              project={project}
+    project={project}
 
-            />
+    onDelete={handleDelete}
+
+/>
 
           ))}
 

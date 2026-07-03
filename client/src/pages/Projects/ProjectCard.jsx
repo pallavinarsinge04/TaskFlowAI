@@ -1,4 +1,5 @@
-function ProjectCard({ project }) {
+import { FaTrash } from "react-icons/fa";
+function ProjectCard({ project ,  onDelete}) {
 
 return(
 
@@ -92,6 +93,23 @@ width:`${project.progress}%`
 </strong>
 
 </div>
+
+</div>
+<div className="project-actions">
+
+  <button
+
+    className="delete-project-btn"
+
+    onClick={() => onDelete(project._id)}
+
+  >
+
+    <FaTrash />
+
+    Delete
+
+  </button>
 
 </div>
 
