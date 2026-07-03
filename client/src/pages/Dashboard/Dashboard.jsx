@@ -5,7 +5,7 @@ import Navbar from "../../components/layout/Navbar";
 import RightSidebar from "../../components/dashboard/RightSidebar";
 
 import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
-import StatsCards from "../../components/dashboard/StatsCard";
+import StatsCards from "../../components/dashboard/StatsCards";
 import ProductivityChart from "../../components/dashboard/ProductivityChart";
 import ProjectProgress from "../../components/dashboard/ProjectProgress";
 import RecentTasks from "../../components/dashboard/RecentTasks";
