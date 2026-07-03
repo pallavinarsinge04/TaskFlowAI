@@ -1,237 +1,155 @@
-import { useState } from "react";
 import "./ProductivityChart.css";
 import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
+  FaArrowUp,
+  FaArrowDown,
+  FaChartLine
+} from "react-icons/fa";
 
 function ProductivityChart() {
-  const weekData = [
-    { day: "Mon", productivity: 45 },
-    { day: "Tue", productivity: 62 },
-    { day: "Wed", productivity: 58 },
-    { day: "Thu", productivity: 81 },
-    { day: "Fri", productivity: 74 },
-    { day: "Sat", productivity: 90 },
-    { day: "Sun", productivity: 85 },
+
+  const data = [
+    { day: "Mon", value: 70 },
+    { day: "Tue", value: 85 },
+    { day: "Wed", value: 60 },
+    { day: "Thu", value: 92 },
+    { day: "Fri", value: 78 },
+    { day: "Sat", value: 98 },
+    { day: "Sun", value: 88 }
   ];
 
-  const monthData = [
-    { day: "W1", productivity: 60 },
-    { day: "W2", productivity: 75 },
-    { day: "W3", productivity: 82 },
-    { day: "W4", productivity: 91 },
-  ];
-
-  const yearData = [
-    { day: "Jan", productivity: 50 },
-    { day: "Feb", productivity: 58 },
-    { day: "Mar", productivity: 65 },
-    { day: "Apr", productivity: 72 },
-    { day: "May", productivity: 80 },
-    { day: "Jun", productivity: 84 },
-    { day: "Jul", productivity: 79 },
-    { day: "Aug", productivity: 87 },
-    { day: "Sep", productivity: 91 },
-    { day: "Oct", productivity: 93 },
-    { day: "Nov", productivity: 90 },
-    { day: "Dec", productivity: 96 },
-  ];
-
-  const [filter, setFilter] = useState("week");
-  const [data, setData] = useState(weekData);
-  const [updated, setUpdated] = useState(
-    new Date().toLocaleTimeString()
-  );
-
-  const changeFilter = (value) => {
-    setFilter(value);
-
-    if (value === "week") setData(weekData);
-
-    if (value === "month") setData(monthData);
-
-    if (value === "year") setData(yearData);
-
-    setUpdated(new Date().toLocaleTimeString());
-  };
-
-  const refreshData = () => {
-    const randomData = data.map((item) => ({
-      ...item,
-      productivity:
-        Math.floor(Math.random() * 40) + 60,
-    }));
-
-    setData(randomData);
-    setUpdated(new Date().toLocaleTimeString());
-  };
-
-  const downloadReport = () => {
-    alert("Productivity Report Downloaded Successfully");
-  };
+  const max = Math.max(...data.map(item => item.value));
 
   return (
-    <div className="chart-card">
 
-      {/* Header */}
+    <div className="productivity-chart">
 
       <div className="chart-header">
 
         <div>
-          <h2>📈 Productivity Overview</h2>
-          <p>Real-Time Performance Analytics</p>
-        </div>
 
-        <div className="chart-buttons">
+          <h2>
 
-          <button
-            className={filter === "week" ? "active" : ""}
-            onClick={() => changeFilter("week")}
-          >
-            Week
-          </button>
+            <FaChartLine />
 
-          <button
-            className={filter === "month" ? "active" : ""}
-            onClick={() => changeFilter("month")}
-          >
-            Month
-          </button>
+            Productivity Overview
 
-          <button
-            className={filter === "year" ? "active" : ""}
-            onClick={() => changeFilter("year")}
-          >
-            Year
-          </button>
-
-        </div>
-
-      </div>
-
-      {/* Summary */}
-
-      <div className="chart-summary">
-
-        <div className="summary-box">
-          <h4>Total Hours</h4>
-          <h2>48h</h2>
-        </div>
-
-        <div className="summary-box">
-          <h4>Completed</h4>
-          <h2>92%</h2>
-        </div>
-
-        <div className="summary-box">
-          <h4>Efficiency</h4>
-          <h2>87%</h2>
-        </div>
-
-        <div className="summary-box">
-          <h4>Status</h4>
-          <h2 style={{ color: "#22c55e" }}>
-            Excellent
           </h2>
+
+          <p>
+
+            Weekly productivity performance
+
+          </p>
+
+        </div>
+
+        <div className="chart-score">
+
+          <h1>89%</h1>
+
+          <span>
+
+            <FaArrowUp />
+
+            +12%
+
+          </span>
+
         </div>
 
       </div>
 
-      {/* Action Buttons */}
+      <div className="chart-bars">
 
-      <div className="chart-actions">
+        {data.map((item) => (
 
-        <button
-          className="refresh-btn"
-          onClick={refreshData}
-        >
-          🔄 Refresh Data
-        </button>
+          <div
+            key={item.day}
+            className="bar-item"
+          >
 
-        <button
-          className="download-btn"
-          onClick={downloadReport}
-        >
-          📥 Download Report
-        </button>
+            <div className="bar-wrapper">
+
+              <div
+
+                className="bar"
+
+                style={{
+                  height: `${(item.value / max) * 220}px`
+                }}
+
+              >
+
+                <span className="bar-value">
+
+                  {item.value}%
+
+                </span>
+
+              </div>
+
+            </div>
+
+            <p>{item.day}</p>
+
+          </div>
+
+        ))}
 
       </div>
-
-      <ResponsiveContainer
-        width="100%"
-        height={320}
-      >
-
-        <AreaChart data={data}>
-
-          <defs>
-
-            <linearGradient
-              id="color"
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="1"
-            >
-
-              <stop
-                offset="5%"
-                stopColor="#2563eb"
-                stopOpacity={0.8}
-              />
-
-              <stop
-                offset="95%"
-                stopColor="#2563eb"
-                stopOpacity={0}
-              />
-
-            </linearGradient>
-
-          </defs>
-
-          <CartesianGrid strokeDasharray="3 3" />
-
-          <XAxis dataKey="day" />
-
-          <YAxis />
-
-          <Tooltip />
-
-          <Area
-            type="monotone"
-            dataKey="productivity"
-            stroke="#2563eb"
-            strokeWidth={4}
-            fill="url(#color)"
-          />
-
-        </AreaChart>
-
-      </ResponsiveContainer>
-
-      {/* Footer */}
 
       <div className="chart-footer">
 
-        <span>
-          🟢 System Healthy
-        </span>
+        <div className="footer-card">
 
-        <span>
-          Last Updated : {updated}
-        </span>
+          <h3>Completed Tasks</h3>
+
+          <span>148</span>
+
+        </div>
+
+        <div className="footer-card">
+
+          <h3>Pending Tasks</h3>
+
+          <span>22</span>
+
+        </div>
+
+        <div className="footer-card">
+
+          <h3>Efficiency</h3>
+
+          <span className="green">
+
+            <FaArrowUp />
+
+            94%
+
+          </span>
+
+        </div>
+
+        <div className="footer-card">
+
+          <h3>Delay</h3>
+
+          <span className="red">
+
+            <FaArrowDown />
+
+            6%
+
+          </span>
+
+        </div>
 
       </div>
 
     </div>
+
   );
+
 }
 
 export default ProductivityChart;
