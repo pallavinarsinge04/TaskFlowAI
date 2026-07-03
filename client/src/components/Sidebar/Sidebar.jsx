@@ -1,76 +1,142 @@
+import { useState } from "react";
 import {
-  FaHome,
-  FaTasks,
+  FaTachometerAlt,
   FaProjectDiagram,
+  FaTasks,
   FaUsers,
-  FaBell,
+  FaRobot,
+  FaChartBar,
   FaCog,
   FaSignOutAlt,
+  FaBars,
+  FaTimes
 } from "react-icons/fa";
 
-import { useNavigate } from "react-router-dom";
-import "./sidebar.css";
+import { NavLink } from "react-router-dom";
 
-function Sidebar({ collapsed, setCollapsed }) {
-  const navigate = useNavigate();
+import "./Sidebar.css";
 
-  const menuItems = [
-    { icon: <FaHome />, label: "Dashboard", path: "/dashboard" },
-    { icon: <FaTasks />, label: "Tasks", path: "/tasks" },
-    { icon: <FaProjectDiagram />, label: "Projects", path: "/projects" },
-    { icon: <FaUsers />, label: "Team", path: "/team" },
-    { icon: <FaBell />, label: "Notifications", path: "/notifications" },
-    { icon: <FaCog />, label: "Settings", path: "/settings" },
+function Sidebar() {
+
+  const [collapsed, setCollapsed] = useState(false);
+
+  const menus = [
+    {
+      title: "Dashboard",
+      icon: <FaTachometerAlt />,
+      path: "/dashboard"
+    },
+    {
+      title: "Projects",
+      icon: <FaProjectDiagram />,
+      path: "/projects"
+    },
+    {
+      title: "Tasks",
+      icon: <FaTasks />,
+      path: "/tasks"
+    },
+    {
+      title: "Team",
+      icon: <FaUsers />,
+      path: "/team"
+    },
+    {
+      title: "AI Assistant",
+      icon: <FaRobot />,
+      path: "/ai-assistant"
+    },
+    {
+      title: "Analytics",
+      icon: <FaChartBar />,
+      path: "/analytics"
+    },
+    {
+      title: "Settings",
+      icon: <FaCog />,
+      path: "/settings"
+    }
   ];
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    navigate("/login");
-  };
-
   return (
-    <div className={`sidebar ${collapsed ? "collapsed" : ""}`}>
 
-      {/* Logo */}
-      <div className="logo">
-        {!collapsed && <h2>TaskFlow</h2>}
+    <aside className={`sidebar ${collapsed ? "collapsed" : ""}`}>
 
-        <button onClick={() => setCollapsed(!collapsed)}>
-          ☰
+      <div className="sidebar-top">
+
+        <div className="sidebar-logo">
+
+          {!collapsed && <h2>TaskFlow AI</h2>}
+
+        </div>
+
+        <button
+          className="collapse-btn"
+          onClick={() => setCollapsed(!collapsed)}
+        >
+
+          {collapsed ? <FaBars /> : <FaTimes />}
+
         </button>
+
       </div>
 
-      {/* Navigation */}
-      <nav className="sidebar-menu">
-        {menuItems.map((item, index) => (
-          <div
-            key={index}
-            className="nav-item"
-            onClick={() => navigate(item.path)}
-          >
-            <span>{item.icon}</span>
+      <nav>
 
-            {!collapsed && <span>{item.label}</span>}
-          </div>
+        {menus.map((menu, index) => (
+
+          <NavLink
+
+            key={index}
+
+            to={menu.path}
+
+            className={({ isActive }) =>
+              isActive
+                ? "sidebar-link active"
+                : "sidebar-link"
+            }
+
+          >
+
+            <span className="sidebar-icon">
+
+              {menu.icon}
+
+            </span>
+
+            {!collapsed &&
+
+              <span>{menu.title}</span>
+
+            }
+
+          </NavLink>
+
         ))}
+
       </nav>
 
-      {/* Logout Button */}
-      <div className="sidebar-footer">
-        <button
-          className="logout-btn"
-          onClick={handleLogout}
-        >
+      <div className="sidebar-bottom">
+
+        <button className="logout-btn">
+
           <FaSignOutAlt />
 
-          {!collapsed && <span>Logout</span>}
+          {!collapsed &&
+
+            <span>Logout</span>
+
+          }
+
         </button>
+
       </div>
 
-    </div>
+    </aside>
+
   );
+
 }
 
 export default Sidebar;

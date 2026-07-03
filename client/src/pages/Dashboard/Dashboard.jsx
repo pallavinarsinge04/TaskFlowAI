@@ -53,18 +53,12 @@ function Dashboard() {
 
         <div className="mobile-header">
 
-          <button
-            className="menu-btn"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <FaBars />
-          </button>
-
+        
           <h2>TaskFlow AI</h2>
 
         </div>
 
-        <Navbar />
+        
 
         <div className="dashboard-container">
 
