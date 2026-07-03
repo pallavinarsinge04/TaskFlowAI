@@ -1,142 +1,177 @@
+import { useState } from "react";
 import "./Activity.css";
 import {
-  FaCircle,
+  FaHistory,
+  FaCheckCircle,
   FaTasks,
-  FaProjectDiagram,
-  FaComments,
   FaUserPlus,
-  FaRobot
+  FaTrash,
+  FaProjectDiagram,
+  FaFilter
 } from "react-icons/fa";
 
 function Activity() {
 
-  const activities = [
+  const [activities] = useState([
     {
-      user: "Pallavi",
-      action: "completed task",
-      target: "Dashboard UI",
-      time: "Just now",
+      id: 1,
       type: "task",
-      online: true
+      title: "Task Completed",
+      description: "Landing Page UI completed successfully.",
+      time: "5 min ago"
     },
     {
-      user: "Amit",
-      action: "created project",
-      target: "Smart AI Ecommerce",
-      time: "5 min ago",
+      id: 2,
       type: "project",
-      online: true
+      title: "Project Created",
+      description: "TaskFlow AI Dashboard project created.",
+      time: "20 min ago"
     },
     {
-      user: "Riya",
-      action: "sent a message",
-      target: "Development Team",
-      time: "10 min ago",
-      type: "chat",
-      online: false
-    },
-    {
-      user: "AI Assistant",
-      action: "generated",
-      target: "Priority Suggestions",
-      time: "20 min ago",
-      type: "ai",
-      online: true
-    },
-    {
-      user: "Karan",
-      action: "joined",
-      target: "UI Team",
-      time: "30 min ago",
+      id: 3,
       type: "member",
-      online: true
+      title: "New Team Member",
+      description: "John Smith joined Development Team.",
+      time: "1 hour ago"
+    },
+    {
+      id: 4,
+      type: "delete",
+      title: "Task Deleted",
+      description: "Old Bug Report removed.",
+      time: "Yesterday"
+    },
+    {
+      id: 5,
+      type: "task",
+      title: "Task Updated",
+      description: "Authentication module moved to In Progress.",
+      time: "Yesterday"
     }
-  ];
+  ]);
+
+  const [filter, setFilter] = useState("All");
+
+  const filteredActivities =
+    filter === "All"
+      ? activities
+      : activities.filter(item => item.type === filter);
 
   const getIcon = (type) => {
+
     switch (type) {
+
       case "task":
         return <FaTasks />;
+
       case "project":
         return <FaProjectDiagram />;
-      case "chat":
-        return <FaComments />;
+
       case "member":
         return <FaUserPlus />;
-      case "ai":
-        return <FaRobot />;
+
+      case "delete":
+        return <FaTrash />;
+
       default:
-        return <FaTasks />;
+        return <FaCheckCircle />;
+
     }
+
   };
 
   return (
-    <div className="activity-card">
+
+    <div className="activity">
 
       <div className="activity-header">
 
         <div>
 
-          <h2>⚡ Live Team Activity</h2>
+          <h2>
 
-          <p>Real-time project updates</p>
+            <FaHistory />
+
+            Recent Activity
+
+          </h2>
+
+          <p>Track everything happening in your workspace</p>
 
         </div>
 
-        <span className="live-status">
-          <FaCircle />
-          LIVE
-        </span>
+        <div className="activity-filter">
+
+          <FaFilter />
+
+          <select
+            value={filter}
+            onChange={(e) =>
+              setFilter(e.target.value)
+            }
+          >
+            <option>All</option>
+            <option value="task">task</option>
+            <option value="project">project</option>
+            <option value="member">member</option>
+            <option value="delete">delete</option>
+          </select>
+
+        </div>
 
       </div>
 
-      <div className="activity-list">
+      <div className="timeline">
 
-        {activities.map((item, index) => (
+        {filteredActivities.length === 0 ? (
 
-          <div className="activity-item" key={index}>
+          <div className="empty-activity">
 
-            <div className="activity-icon">
+            <FaHistory size={50} />
 
-              {getIcon(item.type)}
+            <h3>No Activity</h3>
 
-            </div>
-
-            <div className="activity-info">
-
-              <h4>
-
-                {item.user}
-
-                <span className="action">
-                  {" "}
-                  {item.action}{" "}
-                </span>
-
-                <strong>{item.target}</strong>
-
-              </h4>
-
-              <p>{item.time}</p>
-
-            </div>
-
-            <div
-              className={
-                item.online
-                  ? "online"
-                  : "offline"
-              }
-            ></div>
+            <p>No records found.</p>
 
           </div>
 
-        ))}
+        ) : (
+
+          filteredActivities.map(activity => (
+
+            <div
+              className="timeline-item"
+              key={activity.id}
+            >
+
+              <div className={`timeline-icon ${activity.type}`}>
+
+                {getIcon(activity.type)}
+
+              </div>
+
+              <div className="timeline-content">
+
+                <h4>{activity.title}</h4>
+
+                <p>{activity.description}</p>
+
+                <span>{activity.time}</span>
+
+              </div>
+
+            </div>
+
+          ))
+
+        )}
 
       </div>
 
     </div>
+
   );
+
 }
 
 export default Activity;
