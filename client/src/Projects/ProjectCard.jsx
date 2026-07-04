@@ -1,9 +1,12 @@
 import { FaEdit, FaTrash, FaEye, FaCalendarAlt } from "react-icons/fa";
 import { format } from "date-fns";
 import { supabase } from "../../supabase/supabaseClient";
-
+import { useState } from "react";
+import EditProjectModal from "./EditProjectModal";
+import { useNavigate } from "react-router-dom";
 function ProjectCard({ project, reload }) {
-
+    const [showEdit, setShowEdit] = useState(false);
+    const navigate = useNavigate();
   const deleteProject = async () => {
 
     const confirmDelete = window.confirm(
@@ -96,21 +99,15 @@ function ProjectCard({ project, reload }) {
 
       <div className="project-actions">
 
-        <button className="view-btn">
+       <button
+  className="view-btn"
+  onClick={() => navigate(`/projects/${project.id}`)}
+>
+  <FaEye />
+  View
+</button>
 
-          <FaEye />
-
-          View
-
-        </button>
-
-        <button className="edit-btn">
-
-          <FaEdit />
-
-          Edit
-
-        </button>
+      <button className="edit-btn" onClick={() => setShowEdit(true)}></button>
 
         <button
           className="delete-btn"
@@ -124,6 +121,7 @@ function ProjectCard({ project, reload }) {
         </button>
 
       </div>
+     
 
     </div>
   );

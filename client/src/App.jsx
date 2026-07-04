@@ -28,6 +28,7 @@ from "./components/SocketInitializer";
 import TestSupabase from "./pages/TestSupabase";
 import {  useEffect } from "react";
 import { supabase } from "./supabase/supabaseClient";
+import ProjectDetails from "./projects/ProjectDetails";
 function App() {
  useEffect(() => {
 
@@ -90,6 +91,10 @@ function App() {
           <Route path="/voice" element={<VoiceAssistantPage />} />
 
           <Route path="/kanban" element={<KanbanBoard />} />
+          <Route
+  path="/projects/:id"
+  element={<ProjectDetails />}
+/>
           <Route
   path="/test"
   element={<TestSupabase />}
