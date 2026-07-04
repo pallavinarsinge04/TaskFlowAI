@@ -28,7 +28,7 @@ from "./components/SocketInitializer";
 import TestSupabase from "./pages/TestSupabase";
 import {  useEffect } from "react";
 import { supabase } from "./supabase/supabaseClient";
-import ProjectDetails from "./projects/ProjectDetails";
+import ProjectDetails from "./pages/Projects/ProjectDetails";
 function App() {
  useEffect(() => {
 

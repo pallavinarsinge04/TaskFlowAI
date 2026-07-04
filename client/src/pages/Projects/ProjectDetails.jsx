@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { supabase } from "./../supabase/supabaseClient";
+import { supabase } from "../../supabase/supabaseClient";
+import TaskList from "./TaskList";
 import {
   FaCalendarAlt,
   FaChartLine,
@@ -88,6 +89,7 @@ function ProjectDetails() {
           <p>{project.progress}%</p>
 
         </div>
+        <TaskList projectId={project.id} />
 
         <div className="details-card">
 
