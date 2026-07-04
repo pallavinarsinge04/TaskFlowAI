@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "../../supabase/supabaseClient";
 import TaskList from "./TaskList";
+import ProjectAnalytics from "./ProjectAnalytics";
 import {
   FaCalendarAlt,
   FaChartLine,
@@ -70,48 +71,48 @@ function ProjectDetails() {
 
       <div className="details-grid">
 
-        <div className="details-card">
+  <div className="details-card">
+    <FaFlag />
+    <h3>Status</h3>
+    <p>{project.status}</p>
+  </div>
 
-          <FaFlag />
+  <div className="details-card">
+    <FaChartLine />
+    <h3>Progress</h3>
+    <p>{project.progress}%</p>
+  </div>
 
-          <h3>Status</h3>
+  <div className="details-card">
+    <FaClipboardList />
+    <h3>Priority</h3>
+    <p>{project.priority}</p>
+  </div>
 
-          <p>{project.status}</p>
+  <div className="details-card">
+    <FaCalendarAlt />
+    <h3>Due Date</h3>
+    <p>{project.due_date || "No Date"}</p>
+  </div>
 
-        </div>
+</div>
 
-        <div className="details-card">
+<div className="progress-wrapper">
+  <div className="progress-bar">
+    <div
+      className="progress-fill"
+      style={{
+        width: `${project.progress}%`
+      }}
+    />
+  </div>
+</div>
 
-          <FaChartLine />
+{/* Project Tasks */}
+<TaskList projectId={project.id} />
 
-          <h3>Progress</h3>
-
-          <p>{project.progress}%</p>
-
-        </div>
-        <TaskList projectId={project.id} />
-
-        <div className="details-card">
-
-          <FaClipboardList />
-
-          <h3>Priority</h3>
-
-          <p>{project.priority}</p>
-
-        </div>
-
-        <div className="details-card">
-
-          <FaCalendarAlt />
-
-          <h3>Due Date</h3>
-
-          <p>{project.due_date || "No Date"}</p>
-
-        </div>
-
-      </div>
+{/* Project Analytics */}
+<ProjectAnalytics projectId={project.id} />
 
       <div className="progress-wrapper">
 
