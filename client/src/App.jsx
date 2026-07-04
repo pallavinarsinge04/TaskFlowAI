@@ -25,7 +25,33 @@ import AppLayout from "./layouts/AppLayout";
 import { Navigate } from "react-router-dom";
 import SocketInitializer
 from "./components/SocketInitializer";
+import TestSupabase from "./pages/TestSupabase";
+import {  useEffect } from "react";
+import { supabase } from "./supabase/supabaseClient";
 function App() {
+ useEffect(() => {
+
+  async function checkSession() {
+
+    const {
+      data: { session }
+    } = await supabase.auth.getSession();
+
+    if (session) {
+
+      console.log("Logged In");
+
+    } else {
+
+      console.log("Not Logged In");
+
+    }
+
+  }
+
+  checkSession();
+
+}, []);
   return (
     <BrowserRouter>
   <SocketInitializer />
@@ -64,6 +90,10 @@ function App() {
           <Route path="/voice" element={<VoiceAssistantPage />} />
 
           <Route path="/kanban" element={<KanbanBoard />} />
+          <Route
+  path="/test"
+  element={<TestSupabase />}
+/>
 
         </Route>
 

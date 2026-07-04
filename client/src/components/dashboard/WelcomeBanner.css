@@ -3,160 +3,164 @@
 =========================== */
 
 .welcome-banner{
-    width:100%;
+    position:relative;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:40px;
-    border-radius:25px;
-    background:linear-gradient(135deg,#2563eb,#4f46e5,#7c3aed);
-    color:white;
+    gap:30px;
+    padding:35px;
+    border-radius:24px;
     overflow:hidden;
-    position:relative;
-    margin-bottom:30px;
-    box-shadow:0 20px 40px rgba(37,99,235,.25);
+    color:#fff;
+    background:linear-gradient(135deg,#2563eb,#3b82f6,#7c3aed);
+    background-size:300% 300%;
+    animation:gradientMove 8s ease infinite;
+    box-shadow:0 15px 40px rgba(37,99,235,.25);
 }
-
-/* Background Glow */
 
 .welcome-banner::before{
     content:"";
     position:absolute;
-    width:320px;
-    height:320px;
+    width:250px;
+    height:250px;
     background:rgba(255,255,255,.08);
     border-radius:50%;
-    top:-140px;
+    top:-120px;
     right:-100px;
 }
 
 .welcome-banner::after{
     content:"";
     position:absolute;
-    width:220px;
-    height:220px;
-    background:rgba(255,255,255,.06);
+    width:180px;
+    height:180px;
+    background:rgba(255,255,255,.05);
     border-radius:50%;
     bottom:-80px;
-    left:-80px;
+    left:-60px;
 }
 
 /* ===========================
-   CONTENT
+   LEFT
 =========================== */
 
-.welcome-content{
-    position:relative;
+.welcome-left{
+    flex:1;
     z-index:2;
-    max-width:600px;
 }
 
-.welcome-tag{
-    display:inline-block;
-    background:rgba(255,255,255,.15);
-    backdrop-filter:blur(8px);
-    padding:8px 18px;
-    border-radius:30px;
-    font-size:14px;
-    margin-bottom:20px;
+.welcome-top{
+    display:flex;
+    align-items:center;
+    gap:18px;
 }
 
-.welcome-content h1{
-    font-size:42px;
+.greeting-icon{
+    width:70px;
+    height:70px;
+    border-radius:18px;
+    background:rgba(255,255,255,.18);
+    backdrop-filter:blur(10px);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:32px;
+}
+
+.welcome-top h1{
+    font-size:34px;
+    margin-bottom:8px;
     font-weight:700;
-    margin-bottom:15px;
-    line-height:1.2;
 }
 
-.welcome-content h1 span{
-    color:#facc15;
-}
-
-.welcome-content p{
-    font-size:17px;
+.welcome-top p{
+    font-size:16px;
     opacity:.95;
-    line-height:1.7;
-    margin-bottom:28px;
-    max-width:500px;
 }
 
 /* ===========================
-   BUTTON
+   INFO
 =========================== */
 
-.welcome-content button{
+.welcome-info{
+    margin-top:30px;
+    display:flex;
+    gap:18px;
+    flex-wrap:wrap;
+}
+
+.info-box{
     display:flex;
     align-items:center;
     gap:10px;
-    border:none;
-    background:white;
-    color:#2563eb;
-    padding:14px 28px;
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(10px);
+    padding:14px 18px;
     border-radius:14px;
-    font-size:16px;
-    font-weight:600;
-    cursor:pointer;
+    font-size:15px;
     transition:.35s;
 }
 
-.welcome-content button:hover{
-    transform:translateY(-4px);
-    box-shadow:0 12px 25px rgba(0,0,0,.18);
+.info-box:hover{
+    transform:translateY(-5px);
+    background:rgba(255,255,255,.22);
 }
 
-.welcome-content button svg{
-    transition:.3s;
-}
-
-.welcome-content button:hover svg{
-    transform:translateX(6px);
+.info-box svg{
+    font-size:18px;
 }
 
 /* ===========================
-   RIGHT SIDE
+   RIGHT
 =========================== */
 
-.welcome-image{
-    position:relative;
+.welcome-right{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:20px;
     z-index:2;
-    display:flex;
-    justify-content:center;
-    align-items:center;
 }
 
-/* ===========================
-   HERO CIRCLE
-=========================== */
-
-.hero-circle{
-    width:190px;
-    height:190px;
+.welcome-avatar{
+    width:120px;
+    height:120px;
+    object-fit:cover;
     border-radius:50%;
-    background:rgba(255,255,255,.15);
-    backdrop-filter:blur(18px);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    animation:float 4s ease-in-out infinite;
+    border:5px solid rgba(255,255,255,.35);
+    box-shadow:0 10px 25px rgba(0,0,0,.25);
+    animation:floatAvatar 3s ease-in-out infinite;
 }
 
-.hero-circle svg{
-    font-size:90px;
-    color:white;
+.weather-box{
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(10px);
+    padding:15px 25px;
+    border-radius:16px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    font-weight:600;
+}
+
+.weather-box span{
+    font-size:13px;
+    opacity:.9;
+    margin-top:4px;
 }
 
 /* ===========================
-   FLOAT ANIMATION
+   ANIMATIONS
 =========================== */
 
-@keyframes float{
+@keyframes floatAvatar{
 
 0%{
 transform:translateY(0px);
 }
 
 50%{
-transform:translateY(-12px);
+transform:translateY(-10px);
 }
 
 100%{
@@ -165,136 +169,123 @@ transform:translateY(0px);
 
 }
 
+@keyframes gradientMove{
+
+0%{
+background-position:0% 50%;
+}
+
+50%{
+background-position:100% 50%;
+}
+
+100%{
+background-position:0% 50%;
+}
+
+}
+
 /* ===========================
-   RESPONSIVE
+   TABLET
 =========================== */
-
-@media(max-width:1200px){
-
-.welcome-content h1{
-font-size:36px;
-}
-
-.hero-circle{
-width:170px;
-height:170px;
-}
-
-.hero-circle svg{
-font-size:75px;
-}
-
-}
 
 @media(max-width:992px){
 
 .welcome-banner{
-padding:35px;
+    flex-direction:column;
+    align-items:flex-start;
 }
 
-.welcome-content h1{
-font-size:32px;
-}
-
-.hero-circle{
-width:150px;
-height:150px;
-}
-
-.hero-circle svg{
-font-size:65px;
-}
-
-}
-
-@media(max-width:768px){
-
-.welcome-banner{
-flex-direction:column-reverse;
-text-align:center;
-padding:30px 20px;
-gap:30px;
-}
-
-.welcome-content{
-max-width:100%;
-}
-
-.welcome-content h1{
-font-size:30px;
-}
-
-.welcome-content p{
-font-size:15px;
-margin:auto;
-margin-bottom:25px;
-}
-
-.welcome-content button{
-margin:auto;
-}
-
-.hero-circle{
-width:130px;
-height:130px;
-}
-
-.hero-circle svg{
-font-size:55px;
-}
-
-}
-
-@media(max-width:480px){
-
-.welcome-banner{
-padding:25px 18px;
-border-radius:18px;
-}
-
-.welcome-content h1{
-font-size:24px;
-}
-
-.welcome-content p{
-font-size:14px;
-}
-
-.hero-circle{
-width:100px;
-height:100px;
-}
-
-.hero-circle svg{
-font-size:45px;
-}
-
-.welcome-content button{
-width:100%;
-justify-content:center;
-font-size:15px;
+.welcome-right{
+    width:100%;
+    flex-direction:row;
+    justify-content:space-between;
 }
 
 }
 
 /* ===========================
-   FADE ANIMATION
+   MOBILE
 =========================== */
 
+@media(max-width:768px){
+
 .welcome-banner{
-animation:bannerFade .5s ease;
+    padding:25px;
+    gap:25px;
 }
 
-@keyframes bannerFade{
-
-from{
-opacity:0;
-transform:translateY(25px);
+.welcome-top{
+    flex-direction:column;
+    align-items:flex-start;
 }
 
-to{
-opacity:1;
-transform:translateY(0);
+.welcome-top h1{
+    font-size:28px;
+}
+
+.greeting-icon{
+    width:60px;
+    height:60px;
+    font-size:26px;
+}
+
+.welcome-avatar{
+    width:90px;
+    height:90px;
+}
+
+.weather-box{
+    padding:12px 18px;
+}
+
+.info-box{
+    width:100%;
+}
+
+}
+
+/* ===========================
+   SMALL MOBILE
+=========================== */
+
+@media(max-width:480px){
+
+.welcome-banner{
+    padding:20px;
+}
+
+.welcome-top h1{
+    font-size:22px;
+}
+
+.welcome-top p{
+    font-size:14px;
+}
+
+.welcome-info{
+    gap:12px;
+}
+
+.info-box{
+    font-size:13px;
+    padding:12px;
+}
+
+.welcome-right{
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+}
+
+.welcome-avatar{
+    width:80px;
+    height:80px;
+}
+
+.weather-box{
+    width:100%;
+    text-align:center;
 }
 
 }

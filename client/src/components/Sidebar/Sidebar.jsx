@@ -12,7 +12,7 @@ import {
   FaTimes
 } from "react-icons/fa";
 
-import { NavLink } from "react-router-dom";
+import { NavLink ,useNavigate } from "react-router-dom";
 
 import "./Sidebar.css";
 
@@ -118,15 +118,15 @@ function Sidebar() {
       </nav>
 
       <div className="sidebar-bottom">
-
+        
         <button className="logout-btn">
 
           <FaSignOutAlt />
 
           {!collapsed &&
-
+ <nav link to="/login" className="sidebar-link">
             <span>Logout</span>
-
+</nav>
           }
 
         </button>

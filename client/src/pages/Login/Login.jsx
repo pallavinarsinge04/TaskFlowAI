@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import API from "../../api/axios";
+import { supabase } from "./../../supabase/supabaseClient";
 import "./Login.css";
 
 function Login() {
@@ -18,51 +18,38 @@ function Login() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+ const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
-      const res = await API.post("/auth/login", form);
+  const { email, password } = formData;
 
-      localStorage.setItem("token", res.data.token);
+  const { data, error } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(res.data.user)
-      );
+  if (error) {
+    alert(error.message);
+    return;
+  }
 
-      alert("Login Successful");
-      localStorage.setItem(
-  "token",
-  res.data.token
-);
+  // Get user profile
+  const { data: profile } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", data.user.id)
+    .single();
 
-localStorage.setItem(
-  "user",
-  JSON.stringify(res.data.user)
-);
+  localStorage.setItem(
+    "user",
+    JSON.stringify(profile)
+  );
 
-localStorage.setItem(
-  "userId",
-  res.data.user._id
-);
+  alert("Login Successful!");
 
-localStorage.setItem(
-  "role",
-  res.data.user.role
-);
-
-      navigate("/dashboard");
-    } catch (err) {
-      console.log(err);
-
-      alert(
-        err.response?.data?.message ||
-        "Login Failed"
-      );
-    }
-  };
-
+  navigate("/dashboard");
+};
   return (
     <div className="login-page">
 

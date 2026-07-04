@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import API from "../../api/axios";
 import "./Register.css";
+import { supabase } from "./../../supabase/supabaseClient";
 const Register = () => {
   const navigate = useNavigate();
 
@@ -19,21 +19,40 @@ const Register = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const res = await API.post("/auth/register", formData);
+  const { name, email, password } = formData;
 
-      alert(res.data.message || "Registration Successful");
+  if (!name || !email || !password) {
+    alert("Please fill all fields.");
+    return;
+  }
 
-      navigate("/login");
-    } catch (error) {
-      alert(
-        error.response?.data?.message || "Registration Failed"
-      );
-    }
-  };
+  // Create Supabase Auth user
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
 
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  // Save additional profile information
+  await supabase.from("users").insert([
+    {
+      id: data.user.id,
+      name,
+      email,
+      profile_pic: null,
+    },
+  ]);
+
+  alert("Registration Successful!");
+
+  navigate("/login");
+};
   return (
   <div className="register-page">
 

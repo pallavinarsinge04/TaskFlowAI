@@ -18,6 +18,13 @@ import {
 import "./Sidebar.css";
 
 function Sidebar() {
+  const handleLogout = () => {
+
+  localStorage.removeItem("user");
+
+  navigate("/login");
+
+};
   return (
     <aside className="sidebar">
 

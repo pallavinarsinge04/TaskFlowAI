@@ -16,7 +16,8 @@ import "./QuickActions.css";
 function QuickActions() {
 
   const navigate = useNavigate();
-  const [active, setActive] = useState(null);
+
+  const [hovered, setHovered] = useState(null);
 
   const actions = [
     {
@@ -38,14 +39,14 @@ function QuickActions() {
       icon: <FaUsers />,
       color: "#f59e0b",
       path: "/team",
-      description: "Manage team members"
+      description: "Manage members"
     },
     {
       title: "AI Assistant",
       icon: <FaRobot />,
       color: "#8b5cf6",
       path: "/ai-assistant",
-      description: "Open AI Assistant"
+      description: "Ask AI"
     },
     {
       title: "Analytics",
@@ -55,11 +56,11 @@ function QuickActions() {
       description: "View reports"
     },
     {
-      title: "Schedule Meeting",
+      title: "Meeting",
       icon: <FaCalendarPlus />,
       color: "#ef4444",
-      path: "/Meetings",
-      description: "Create meeting"
+      path: "/meeting",
+      description: "Schedule meeting"
     },
     {
       title: "Team Chat",
@@ -69,24 +70,13 @@ function QuickActions() {
       description: "Open chat"
     },
     {
-      title: "Export Report",
+      title: "Export",
       icon: <FaFileExport />,
       color: "#6366f1",
       path: "/analytics",
-      description: "Export project reports"
+      description: "Export report"
     }
   ];
-
-  const handleClick = (index, path) => {
-
-    setActive(index);
-
-    setTimeout(() => {
-      setActive(null);
-      navigate(path);
-    }, 180);
-
-  };
 
   return (
 
@@ -94,9 +84,17 @@ function QuickActions() {
 
       <div className="quick-header">
 
-        <h2>⚡ Quick Actions</h2>
+        <div>
 
-        <p>Frequently Used Shortcuts</p>
+          <h2>⚡ Quick Actions</h2>
+
+          <p>Frequently used shortcuts</p>
+
+        </div>
+
+        <span className="action-count">
+          {actions.length} Tools
+        </span>
 
       </div>
 
@@ -105,22 +103,33 @@ function QuickActions() {
         {actions.map((action, index) => (
 
           <div
+
             key={index}
+
             className={`action-card ${
-              active === index ? "clicked" : ""
+              hovered === index ? "active" : ""
             }`}
-            onClick={() =>
-              handleClick(index, action.path)
-            }
+
+            onMouseEnter={() => setHovered(index)}
+
+            onMouseLeave={() => setHovered(null)}
+
+            onClick={() => navigate(action.path)}
+
           >
 
             <div
+
               className="action-icon"
+
               style={{
                 background: action.color
               }}
+
             >
+
               {action.icon}
+
             </div>
 
             <h4>{action.title}</h4>
@@ -136,6 +145,7 @@ function QuickActions() {
     </div>
 
   );
+
 }
 
 export default QuickActions;
