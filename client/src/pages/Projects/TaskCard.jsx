@@ -124,6 +124,11 @@ reload();
           <FaTrash />
           Delete
         </button>
+        await logActivity(
+  task.project_id,
+  "Deleted",
+  `Task "${task.title}" was deleted`
+);
 
       </div>
 

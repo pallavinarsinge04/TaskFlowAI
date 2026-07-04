@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../../supabase/supabaseClient";
 import TaskList from "./TaskList";
 import ProjectAnalytics from "./ProjectAnalytics";
+import ActivityTimeline from "./ActivityTimeline";
 import {
   FaCalendarAlt,
   FaChartLine,
@@ -113,6 +114,7 @@ function ProjectDetails() {
 
 {/* Project Analytics */}
 <ProjectAnalytics projectId={project.id} />
+<ActivityTimeline projectId={project.id} />
 
       <div className="progress-wrapper">
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { supabase } from "../../supabase/supabaseClient";
 import { updateProjectProgress } from "./../../utils/updateProjectProgress";
+import { logActivity } from "./../../utils/logActivity";
 function AddTaskModal({ projectId, close, reload }) {
 
   const [title, setTitle] = useState("");
@@ -39,8 +40,11 @@ function AddTaskModal({ projectId, close, reload }) {
 
     alert("Task Added Successfully");
     await updateProjectProgress(projectId);
-
-
+await logActivity(
+  task.project_id,
+  "Completed",
+  `Task "${task.title}" was completed`
+);
 
     reload();
 
