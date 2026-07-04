@@ -6,7 +6,7 @@ import {
 } from "react-icons/fa";
 import { format } from "date-fns";
 import { supabase } from "../../supabase/supabaseClient";
-
+import { updateProjectProgress } from "./../../utils/updateProjectProgress";
 function TaskCard({ task, reload }) {
 
   const completeTask = async () => {
@@ -17,7 +17,11 @@ function TaskCard({ task, reload }) {
         completed: true,
         status: "Completed",
       })
+      
       .eq("id", task.id);
+      await updateProjectProgress(task.project_id);
+
+reload();
 
     if (error) {
       alert(error.message);
@@ -39,7 +43,9 @@ function TaskCard({ task, reload }) {
       .from("tasks")
       .delete()
       .eq("id", task.id);
+await updateProjectProgress(task.project_id);
 
+reload();
     if (error) {
       alert(error.message);
       return;
