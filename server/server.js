@@ -12,6 +12,7 @@ import commentRoutes from "./routes/commentRoutes.js";
 
 app.use("/api/comments", commentRoutes);
 dotenv.config();
+
 const app = express();
 const server = http.createServer(app);
 
