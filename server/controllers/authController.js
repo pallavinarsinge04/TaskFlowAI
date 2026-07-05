@@ -1,152 +1,79 @@
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const generateToken = require("../utils/generateToken");
+import supabase from "../config/supabase.js";
 
-// Register
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   try {
-
-    console.log("BODY:", req.body);
-
-    if (!req.body) {
-      return res.status(400).json({
-        success: false,
-        message: "Request body missing"
-      });
-    }
 
     const { name, email, password } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required"
-      });
-    }
-
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists"
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      name,
+    const { data, error } = await supabase.auth.signUp({
       email,
-      password: hashedPassword,
-      role: "Member"
+      password,
+      options: {
+        data: {
+          name
+        }
+      }
     });
+
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
 
     res.status(201).json({
       success: true,
-      message: "Registration successful",
-      token: generateToken(user._id),
-      user
+      user: data.user,
+      session: data.session
     });
 
-  } catch (error) {
-
-    console.log(error);
+  } catch (err) {
 
     res.status(500).json({
       success: false,
-      message: error.message
+      message: err.message
     });
 
   }
 };
-await sendEmail(
 
-user.email,
+export const login = async (req, res) => {
 
-"Welcome to TaskFlow AI",
-
-`
-
-<h1>Welcome ${user.name}</h1>
-
-<p>
-
-Your account has been created successfully.
-
-</p>
-
-`
-
-);
-
-// Login
-exports.login = async (req, res) => {
   try {
-
-    console.log("BODY:", req.body);
 
     const { email, password } = req.body;
 
-    if (!email || !password) {
+    const { data, error } =
+      await supabase.auth.signInWithPassword({
+
+        email,
+        password
+
+      });
+
+    if (error) {
+
       return res.status(400).json({
         success: false,
-        message: "Email and password required"
+        message: error.message
       });
+
     }
 
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    const match = await bcrypt.compare(
-      password,
-      user.password
-    );
-
-    if (!match) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid password"
-      });
-    }
-
-    res.status(200).json({
+    res.json({
       success: true,
-      token: generateToken(user._id),
-      user
+      user: data.user,
+      session: data.session
     });
 
-  } catch (error) {
-
-    console.log(error);
+  } catch (err) {
 
     res.status(500).json({
       success: false,
-      message: error.message
+      message: err.message
     });
-    res.json({
-
-  token,
-
-  user: {
-
-    _id: user._id,
-
-    name: user.name,
-
-    email: user.email,
-
-    role: user.role,
-
-  },
-
-});
 
   }
+
 };

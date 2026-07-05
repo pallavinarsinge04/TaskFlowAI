@@ -1,4 +1,4 @@
-import Notification from "../models/Notification.js";
+
 import { getIO } from "../config/socket.js";
 
 /* Get Notifications */
