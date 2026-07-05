@@ -9,7 +9,8 @@ import { initSocket } from "./config/socket.js";
 import authRoutes from "./routes/authRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
-
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+app.use("/api/analytics", analyticsRoutes);
 app.use("/api/comments", commentRoutes);
 dotenv.config();
 const app = express();

@@ -1,54 +1,53 @@
-const Task = require("../models/Task");
+import supabase from "../config/supabase.js";
 
-exports.getAnalytics = async (req, res) => {
+export const getDashboardAnalytics = async (req, res) => {
+
   try {
 
-    const total = await Task.countDocuments();
+    // Total Projects
+    const { count: totalProjects } = await supabase
+      .from("projects")
+      .select("*", { count: "exact", head: true });
 
-    const todo = await Task.countDocuments({
-      status: "Todo",
-    });
+    // Total Tasks
+    const { count: totalTasks } = await supabase
+      .from("tasks")
+      .select("*", { count: "exact", head: true });
 
-    const progress = await Task.countDocuments({
-      status: "In Progress",
-    });
+    // Completed Tasks
+    const { count: completedTasks } = await supabase
+      .from("tasks")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "Completed");
 
-    const completed = await Task.countDocuments({
-      status: "Done",
-    });
+    // Recent Projects
+    const { data: recentProjects } = await supabase
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(5);
 
-    const high = await Task.countDocuments({
-      priority: "High",
-    });
-
-    const medium = await Task.countDocuments({
-      priority: "Medium",
-    });
-
-    const low = await Task.countDocuments({
-      priority: "Low",
-    });
+    // Recent Tasks
+    const { data: recentTasks } = await supabase
+      .from("tasks")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(10);
 
     res.json({
-      success: true,
-
-      analytics: {
-        total,
-        todo,
-        progress,
-        completed,
-        high,
-        medium,
-        low,
-      },
+      totalProjects,
+      totalTasks,
+      completedTasks,
+      recentProjects,
+      recentTasks,
     });
 
-  } catch (error) {
+  } catch (err) {
 
     res.status(500).json({
-      success: false,
-      message: error.message,
+      message: err.message,
     });
 
   }
+
 };
