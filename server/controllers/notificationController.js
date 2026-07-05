@@ -1,231 +1,302 @@
-import Notification from "../models/Notification.js";
+import supabase from "../config/supabase.js";
 import { getIO } from "../config/socket.js";
 
-/* Get Notifications */
-
-export const getNotifications=async(req,res)=>{
-
-try{
-
-const {role,userId}=req.query;
-
-const notifications=await Notification.find({
-
-$or:[
-
-{role:"All"},
-
-{role},
-
-{receiver:userId}
-
-]
-
-}).sort({
-
-createdAt:-1
-
-});
-
-res.json(notifications);
-
-}catch(err){
-
-res.status(500).json({
-
-message:err.message
-
-});
-
-}
-
-};
-
-/* Create */
-
-export const createNotification=async(req,res)=>{
-
-try{
-
-const notification=await Notification.create(req.body);
-
-const io=getIO();
-
-/* User Notification */
-
-if(notification.receiver){
-
-io.to(
-
-notification.receiver.toString()
-
-).emit(
-
-"notification",
-
-notification
-
-);
-
-}
-
-/* Role Notification */
-
-else if(notification.role!=="All"){
-
-io.to(notification.role)
-
-.emit(
-
-"notification",
-
-notification
-
-);
-
-}
-
-/* Global */
-
-else{
-
-io.emit(
-
-"notification",
-
-notification
-
-);
-
-}
-
-res.status(201)
-
-.json(notification);
-
-}catch(err){
-
-res.status(500)
-
-.json({
-
-message:err.message
-
-});
-
-}
-
-};
-
-/* Mark Read */
-
-export const markRead=async(req,res)=>{
-
-const notification=
-
-await Notification.findByIdAndUpdate(
-
-req.params.id,
-
-{
-
-read:true
-
-},
-
-{
-
-new:true
-
-}
-
-);
-
-res.json(notification);
-
-};
-export const archiveNotification = async (req, res) => {
+/* ======================================
+   GET NOTIFICATIONS
+====================================== */
+
+export const getNotifications = async (req, res) => {
 
   try {
 
-    const notification =
-      await Notification.findByIdAndUpdate(
+    const { role, userId } = req.query;
 
-        req.params.id,
+    const { data, error } = await supabase
 
-        {
-          archived: true
-        },
+      .from("notifications")
 
-        {
-          new: true
-        }
+      .select("*")
 
-      );
+      .or(
+        `role.eq.All,role.eq.${role},user_id.eq.${userId}`
+      )
 
-    res.json(notification);
+      .order("created_at", {
+        ascending: false,
+      });
+
+    if (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+
+    res.json(data);
 
   } catch (err) {
 
     res.status(500).json({
-      message: err.message
+      message: err.message,
     });
 
   }
 
 };
-/* Mark All */
 
-export const markAllRead=async(req,res)=>{
+/* ======================================
+   CREATE NOTIFICATION
+====================================== */
 
-await Notification.updateMany(
+export const createNotification = async (req, res) => {
 
-{},
+  try {
 
-{
+    const { data, error } = await supabase
 
-read:true
+      .from("notifications")
 
-}
+      .insert([req.body])
 
-);
+      .select()
 
-res.json({
+      .single();
 
-message:"Done"
+    if (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
 
-});
+    const io = getIO();
+
+    if (data.user_id) {
+
+      io.to(data.user_id)
+        .emit("notification", data);
+
+    }
+
+    else if (data.role !== "All") {
+
+      io.to(data.role)
+        .emit("notification", data);
+
+    }
+
+    else {
+
+      io.emit("notification", data);
+
+    }
+
+    res.status(201).json(data);
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message,
+    });
+
+  }
 
 };
 
-/* Delete */
+/* ======================================
+   MARK READ
+====================================== */
 
-export const deleteNotification=async(req,res)=>{
+export const markRead = async (req, res) => {
 
-await Notification.findByIdAndDelete(
+  try {
 
-req.params.id
+    const { data, error } = await supabase
 
-);
+      .from("notifications")
 
-res.json({
+      .update({
+        is_read: true,
+      })
 
-message:"Deleted"
+      .eq("id", req.params.id)
 
-});
+      .select()
+
+      .single();
+
+    if (error) {
+
+      return res.status(500).json({
+        message: error.message,
+      });
+
+    }
+
+    res.json(data);
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message,
+    });
+
+  }
 
 };
 
-/* Delete All */
+/* ======================================
+   ARCHIVE
+====================================== */
 
-export const deleteAllNotifications=async(req,res)=>{
+export const archiveNotification = async (req, res) => {
 
-await Notification.deleteMany({});
+  try {
 
-res.json({
+    const { data, error } = await supabase
 
-message:"Deleted"
+      .from("notifications")
 
-});
+      .update({
+        archived: true,
+      })
+
+      .eq("id", req.params.id)
+
+      .select()
+
+      .single();
+
+    if (error) {
+
+      return res.status(500).json({
+        message: error.message,
+      });
+
+    }
+
+    res.json(data);
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message,
+    });
+
+  }
+
+};
+
+/* ======================================
+   MARK ALL READ
+====================================== */
+
+export const markAllRead = async (req, res) => {
+
+  try {
+
+    const { error } = await supabase
+
+      .from("notifications")
+
+      .update({
+        is_read: true,
+      })
+
+      .neq("id", "");
+
+    if (error) {
+
+      return res.status(500).json({
+        message: error.message,
+      });
+
+    }
+
+    res.json({
+      message: "Done",
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message,
+    });
+
+  }
+
+};
+
+/* ======================================
+   DELETE
+====================================== */
+
+export const deleteNotification = async (req, res) => {
+
+  try {
+
+    const { error } = await supabase
+
+      .from("notifications")
+
+      .delete()
+
+      .eq("id", req.params.id);
+
+    if (error) {
+
+      return res.status(500).json({
+        message: error.message,
+      });
+
+    }
+
+    res.json({
+      message: "Deleted",
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message,
+    });
+
+  }
+
+};
+
+/* ======================================
+   DELETE ALL
+====================================== */
+
+export const deleteAllNotifications = async (req, res) => {
+
+  try {
+
+    const { error } = await supabase
+
+      .from("notifications")
+
+      .delete()
+
+      .neq("id", "");
+
+    if (error) {
+
+      return res.status(500).json({
+        message: error.message,
+      });
+
+    }
+
+    res.json({
+      message: "Deleted",
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message,
+    });
+
+  }
 
 };
