@@ -1,84 +1,179 @@
-import Project from "../models/Project.js";
-import Notification from "../models/Notification.js";
+import supabase from "../config/supabase.js";
 import { getIO } from "../config/socket.js";
 import { sendEmail } from "../services/emailService.js";
 
+// =========================
+// Get All Projects
+// =========================
+
 export const getProjects = async (req, res) => {
+
   try {
-    const projects = await Project.find().sort({ createdAt: -1 });
-    res.json(projects);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
 
-export const createProject = async (req, res) => {
-  try {
-    // 1. Create Project
-    const project = await Project.create(req.body);
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    // 2. Create Notification
-    const notification = await Notification.create({
-      title: "New Project",
-      message: `${project.name} has been created.`,
-      type: "project",
-      role: "Manager"
-    });
+    if (error) {
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
 
-    // 3. Socket Emit (Role-based)
-    getIO()
-      .to("Manager")
-      .emit("notification", notification);
-
-    getIO().emit("projectCreated", project);
-
-    // 4. Email Notification (NO JSX HERE!)
-    await sendEmail(
-      req.user?.email || "admin@taskflow.com",
-      "Project Created",
-      `
-        <h1>Project Created</h1>
-        <p><b>${project.name}</b> was created successfully.</p>
-      `
-    );
-
-    // 5. Response
-    res.status(201).json(project);
+    res.json(data);
 
   } catch (err) {
+
     res.status(500).json({
       message: err.message,
     });
-  }
-};
-export const deleteProject = async (req, res) => {
 
-  console.log("DELETE CONTROLLER HIT");
-  console.log(req.params.id);
+  }
+
+};
+
+// =========================
+// Create Project
+// =========================
+
+export const createProject = async (req, res) => {
 
   try {
 
-    const project = await Project.findByIdAndDelete(req.params.id);
+    const {
 
-    if (!project) {
-      return res.status(404).json({
-        message: "Project not found",
+      title,
+      description,
+      status,
+      priority,
+      due_date,
+      progress
+
+    } = req.body;
+
+    const { data, error } = await supabase
+
+      .from("projects")
+
+      .insert([
+        {
+          title,
+          description,
+          status,
+          priority,
+          due_date,
+          progress
+        }
+      ])
+
+      .select()
+
+      .single();
+
+    if (error) {
+
+      return res.status(500).json({
+        message: error.message
       });
+
+    }
+
+    // Notification
+
+    await supabase
+
+      .from("notifications")
+
+      .insert([
+        {
+          title: "New Project",
+          message: `${data.title} has been created.`,
+          type: "project"
+        }
+      ]);
+
+    // Socket
+
+    getIO().emit("projectCreated", data);
+
+    // Email
+
+    await sendEmail(
+
+      req.user?.email || "admin@taskflow.com",
+
+      "Project Created",
+
+      `
+        <h1>Project Created</h1>
+
+        <p>
+
+        <b>${data.title}</b>
+
+        was created successfully.
+
+        </p>
+
+      `
+
+    );
+
+    res.status(201).json(data);
+
+  } catch (err) {
+
+    res.status(500).json({
+
+      message: err.message
+
+    });
+
+  }
+
+};
+
+// =========================
+// Delete Project
+// =========================
+
+export const deleteProject = async (req, res) => {
+
+  try {
+
+    const { error } = await supabase
+
+      .from("projects")
+
+      .delete()
+
+      .eq("id", req.params.id);
+
+    if (error) {
+
+      return res.status(500).json({
+        message: error.message
+      });
+
     }
 
     getIO().emit("projectDeleted", req.params.id);
 
     res.json({
-      message: "Project deleted successfully",
+
+      message: "Project deleted successfully"
+
     });
 
   } catch (err) {
 
-    console.log(err);
-
     res.status(500).json({
-      message: err.message,
+
+      message: err.message
+
     });
 
   }
+
 };

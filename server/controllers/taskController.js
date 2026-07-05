@@ -1,4 +1,6 @@
-const Task = require("./../models/Task");
+import supabase from "../config/supabase.js";
+import { getIO } from "../config/socket.js";
+import { sendEmail } from "../services/emailService.js";
 await sendEmail(
 
 assignedUser.email,
@@ -21,67 +23,152 @@ ${task.deadline}
 
 );
 // Get all tasks
-exports.getTasks = async (req, res) => {
+export const getTasks = async (req, res) => {
   try {
-    const tasks = await Task.find();
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
 
     res.status(200).json({
       success: true,
-      tasks,
+      tasks: data,
     });
-  } catch (error) {
+
+  } catch (err) {
+
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message,
     });
+
   }
 };
 
 // Get single task
-exports.getTaskById = async (req, res) => {
-  try {
-    const task = await Task.findById(req.params.id);
+export const getTaskById = async (req, res) => {
 
-    res.status(200).json({
+  try {
+
+    const { data, error } = await supabase
+
+      .from("tasks")
+
+      .select("*")
+
+      .eq("id", req.params.id)
+
+      .single();
+
+    if (error) {
+      return res.status(404).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    res.json({
       success: true,
-      task,
+      task: data,
     });
-  } catch (error) {
+
+  } catch (err) {
+
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message,
     });
+
   }
+
 };
 
 // Create task
-exports.createTask = async (req, res) => {
+export const createTask = async (req, res) => {
+
   try {
-    const task = await Task.create(req.body);
-    const notification = await Notification.create({
 
-  title:"New Task",
+    const { data, error } = await supabase
 
-  message:`${task.title} assigned.`,
+      .from("tasks")
 
-  type:"task"
+      .insert([req.body])
 
-});
+      .select()
 
-getIO()
-  .to(notification.role)
-  .emit("notification", notification);
+      .single();
+
+    if (error) {
+
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+
+    }
+
+    // Notification
+
+    await supabase
+
+      .from("notifications")
+
+      .insert([
+        {
+          title: "New Task",
+          message: `${data.title} assigned.`,
+          type: "task",
+        },
+      ]);
+
+    getIO().emit("taskCreated", data);
+
+    if (req.user?.email) {
+
+      await sendEmail(
+
+        req.user.email,
+
+        "Task Assigned",
+
+        `
+          <h2>${data.title}</h2>
+
+          <p>
+
+          Deadline:
+
+          ${data.deadline || "No Deadline"}
+
+          </p>
+        `
+
+      );
+
+    }
 
     res.status(201).json({
       success: true,
-      task,
+      task: data,
     });
-  } catch (error) {
+
+  } catch (err) {
+
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message,
     });
+
   }
+
 };
 const notification=await Notification.create({
 
@@ -111,49 +198,93 @@ notification
 
 );
 // Update task
-exports.updateTask = async (req, res) => {
-  try {
-    const task = await Task.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+export const updateTask = async (req, res) => {
 
-    res.status(200).json({
+  try {
+
+    const { data, error } = await supabase
+
+      .from("tasks")
+
+      .update(req.body)
+
+      .eq("id", req.params.id)
+
+      .select()
+
+      .single();
+
+    if (error) {
+
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+
+    }
+
+    getIO().emit("taskUpdated", data);
+
+    res.json({
       success: true,
-      task,
+      task: data,
     });
-  } catch (error) {
+
+  } catch (err) {
+
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message,
     });
+
   }
+
 };
 
 // Update task status
-exports.updateStatus = async (req, res) => {
-  try {
-    const task = await Task.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: req.body.status,
-      },
-      {
-        new: true,
-      }
-    );
+export const updateStatus = async (req, res) => {
 
-    res.status(200).json({
+  try {
+
+    const { data, error } = await supabase
+
+      .from("tasks")
+
+      .update({
+        status: req.body.status,
+      })
+
+      .eq("id", req.params.id)
+
+      .select()
+
+      .single();
+
+    if (error) {
+
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+
+    }
+
+    getIO().emit("taskUpdated", data);
+
+    res.json({
       success: true,
-      task,
+      task: data,
     });
-  } catch (error) {
+
+  } catch (err) {
+
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: err.message,
     });
+
   }
+
 };
 
 // Delete task

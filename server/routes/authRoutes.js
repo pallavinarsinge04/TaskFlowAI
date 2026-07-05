@@ -1,34 +1,17 @@
 import express from "express";
 
+import {
+
+  register,
+
+  login
+
+} from "../controllers/authController.js";
+
 const router = express.Router();
 
-router.post("/login", (req, res) => {
-  const { email, password } = req.body;
+router.post("/register", register);
 
-  return res.json({
-    message: "Login success",
-    token: "demo-token",
-    user: { email }
-  });
-});
-router.post("/forgot-password", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // 🔥 SIMPLE RESPONSE (no email system yet)
-    res.json({
-      message: "Reset link sent successfully (demo mode)",
-    });
-
-  } catch (err) {
-    res.status(500).json({ message: "Server error" });
-  }
-});
+router.post("/login", login);
 
 export default router;

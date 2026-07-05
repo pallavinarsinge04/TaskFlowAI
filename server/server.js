@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import http from "http";
 import cors from "cors";
 
-import connectDB from "./config/db.js";
+
 import { initSocket } from "./config/socket.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -22,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 
 // DB
-connectDB();
+
 import notificationRoutes from "./routes/notificationRoutes.js";
 
 app.use(
