@@ -1,14 +1,17 @@
-const express = require("express");
+import express from "express";
+
+import {
+
+  getComments,
+
+  addComment
+
+} from "../controllers/commentController.js";
 
 const router = express.Router();
-
-const {
-  getComments,
-  addComment,
-} = require("../controllers/commentController");
 
 router.get("/:taskId", getComments);
 
 router.post("/", addComment);
 
-module.exports = router;
+export default router;

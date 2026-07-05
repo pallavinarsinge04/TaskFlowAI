@@ -1,302 +1,231 @@
-import supabase from "../config/supabase.js";
+import Notification from "../models/Notification.js";
 import { getIO } from "../config/socket.js";
 
-/* ======================================
-   GET NOTIFICATIONS
-====================================== */
+/* Get Notifications */
 
-export const getNotifications = async (req, res) => {
+export const getNotifications=async(req,res)=>{
 
-  try {
+try{
 
-    const { role, userId } = req.query;
+const {role,userId}=req.query;
 
-    const { data, error } = await supabase
+const notifications=await Notification.find({
 
-      .from("notifications")
+$or:[
 
-      .select("*")
+{role:"All"},
 
-      .or(
-        `role.eq.All,role.eq.${role},user_id.eq.${userId}`
-      )
+{role},
 
-      .order("created_at", {
-        ascending: false,
-      });
+{receiver:userId}
 
-    if (error) {
-      return res.status(500).json({
-        message: error.message,
-      });
-    }
+]
 
-    res.json(data);
+}).sort({
 
-  } catch (err) {
+createdAt:-1
 
-    res.status(500).json({
-      message: err.message,
-    });
+});
 
-  }
+res.json(notifications);
+
+}catch(err){
+
+res.status(500).json({
+
+message:err.message
+
+});
+
+}
 
 };
 
-/* ======================================
-   CREATE NOTIFICATION
-====================================== */
+/* Create */
 
-export const createNotification = async (req, res) => {
+export const createNotification=async(req,res)=>{
 
-  try {
+try{
 
-    const { data, error } = await supabase
+const notification=await Notification.create(req.body);
 
-      .from("notifications")
+const io=getIO();
 
-      .insert([req.body])
+/* User Notification */
 
-      .select()
+if(notification.receiver){
 
-      .single();
+io.to(
 
-    if (error) {
-      return res.status(500).json({
-        message: error.message,
-      });
-    }
+notification.receiver.toString()
 
-    const io = getIO();
+).emit(
 
-    if (data.user_id) {
+"notification",
 
-      io.to(data.user_id)
-        .emit("notification", data);
+notification
 
-    }
+);
 
-    else if (data.role !== "All") {
+}
 
-      io.to(data.role)
-        .emit("notification", data);
+/* Role Notification */
 
-    }
+else if(notification.role!=="All"){
 
-    else {
+io.to(notification.role)
 
-      io.emit("notification", data);
+.emit(
 
-    }
+"notification",
 
-    res.status(201).json(data);
+notification
 
-  } catch (err) {
+);
 
-    res.status(500).json({
-      message: err.message,
-    });
+}
 
-  }
+/* Global */
 
-};
+else{
 
-/* ======================================
-   MARK READ
-====================================== */
+io.emit(
 
-export const markRead = async (req, res) => {
+"notification",
 
-  try {
+notification
 
-    const { data, error } = await supabase
+);
 
-      .from("notifications")
+}
 
-      .update({
-        is_read: true,
-      })
+res.status(201)
 
-      .eq("id", req.params.id)
+.json(notification);
 
-      .select()
+}catch(err){
 
-      .single();
+res.status(500)
 
-    if (error) {
+.json({
 
-      return res.status(500).json({
-        message: error.message,
-      });
+message:err.message
 
-    }
+});
 
-    res.json(data);
-
-  } catch (err) {
-
-    res.status(500).json({
-      message: err.message,
-    });
-
-  }
+}
 
 };
 
-/* ======================================
-   ARCHIVE
-====================================== */
+/* Mark Read */
 
+export const markRead=async(req,res)=>{
+
+const notification=
+
+await Notification.findByIdAndUpdate(
+
+req.params.id,
+
+{
+
+read:true
+
+},
+
+{
+
+new:true
+
+}
+
+);
+
+res.json(notification);
+
+};
 export const archiveNotification = async (req, res) => {
 
   try {
 
-    const { data, error } = await supabase
+    const notification =
+      await Notification.findByIdAndUpdate(
 
-      .from("notifications")
+        req.params.id,
 
-      .update({
-        archived: true,
-      })
+        {
+          archived: true
+        },
 
-      .eq("id", req.params.id)
+        {
+          new: true
+        }
 
-      .select()
+      );
 
-      .single();
-
-    if (error) {
-
-      return res.status(500).json({
-        message: error.message,
-      });
-
-    }
-
-    res.json(data);
+    res.json(notification);
 
   } catch (err) {
 
     res.status(500).json({
-      message: err.message,
+      message: err.message
     });
 
   }
 
 };
+/* Mark All */
 
-/* ======================================
-   MARK ALL READ
-====================================== */
+export const markAllRead=async(req,res)=>{
 
-export const markAllRead = async (req, res) => {
+await Notification.updateMany(
 
-  try {
+{},
 
-    const { error } = await supabase
+{
 
-      .from("notifications")
+read:true
 
-      .update({
-        is_read: true,
-      })
+}
 
-      .neq("id", "");
+);
 
-    if (error) {
+res.json({
 
-      return res.status(500).json({
-        message: error.message,
-      });
+message:"Done"
 
-    }
-
-    res.json({
-      message: "Done",
-    });
-
-  } catch (err) {
-
-    res.status(500).json({
-      message: err.message,
-    });
-
-  }
+});
 
 };
 
-/* ======================================
-   DELETE
-====================================== */
+/* Delete */
 
-export const deleteNotification = async (req, res) => {
+export const deleteNotification=async(req,res)=>{
 
-  try {
+await Notification.findByIdAndDelete(
 
-    const { error } = await supabase
+req.params.id
 
-      .from("notifications")
+);
 
-      .delete()
+res.json({
 
-      .eq("id", req.params.id);
+message:"Deleted"
 
-    if (error) {
-
-      return res.status(500).json({
-        message: error.message,
-      });
-
-    }
-
-    res.json({
-      message: "Deleted",
-    });
-
-  } catch (err) {
-
-    res.status(500).json({
-      message: err.message,
-    });
-
-  }
+});
 
 };
 
-/* ======================================
-   DELETE ALL
-====================================== */
+/* Delete All */
 
-export const deleteAllNotifications = async (req, res) => {
+export const deleteAllNotifications=async(req,res)=>{
 
-  try {
+await Notification.deleteMany({});
 
-    const { error } = await supabase
+res.json({
 
-      .from("notifications")
+message:"Deleted"
 
-      .delete()
-
-      .neq("id", "");
-
-    if (error) {
-
-      return res.status(500).json({
-        message: error.message,
-      });
-
-    }
-
-    res.json({
-      message: "Deleted",
-    });
-
-  } catch (err) {
-
-    res.status(500).json({
-      message: err.message,
-    });
-
-  }
+});
 
 };
