@@ -1,19 +1,47 @@
-const { getAISuggestion } = require("./../services/aiServices");
+import openai from "../config/openai.js";
+import supabase from "../config/supabase.js";
 
-exports.suggest = async (req, res) => {
+export const chatWithAI = async (req, res) => {
+
   try {
-    const { task } = req.body;
 
-    const suggestion = getAISuggestion(task);
+    const { prompt, userId } = req.body;
+
+    const completion = await openai.chat.completions.create({
+
+      model: "gpt-4.1-mini",
+
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+
+    });
+
+    const response = completion.choices[0].message.content;
+
+    await supabase
+      .from("ai_chats")
+      .insert([
+        {
+          user_id: userId,
+          prompt,
+          response,
+        },
+      ]);
 
     res.json({
-      success: true,
-      suggestion,
+      response,
     });
-  } catch (error) {
+
+  } catch (err) {
+
     res.status(500).json({
-      success: false,
-      message: error.message,
+      message: err.message,
     });
+
   }
+
 };
