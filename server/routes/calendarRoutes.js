@@ -1,11 +1,8 @@
-const express = require("express");
+import express from "express";
+import { getCalendarEvents } from "../controllers/calendarController.js";
 
 const router = express.Router();
 
-const {
-  getUpcomingTasks,
-} = require("../controllers/calendarController");
+router.get("/", getCalendarEvents);
 
-router.get("/", getUpcomingTasks);
-
-module.exports = router;
+export default router;

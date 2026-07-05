@@ -12,25 +12,80 @@ exports.startTimer = async (req, res) => {
     log,
   });
 };
+export const startTimer = async (req, res) => {
 
-exports.stopTimer = async (req, res) => {
-  const log = await TimeLog.findById(req.params.id);
+  const { user_id, project_id, task_id } = req.body;
 
-  log.endTime = new Date();
+  const { data, error } = await supabase
 
-  log.duration =
-    Math.floor(
-      (log.endTime - log.startTime) / 1000
-    );
+    .from("time_entries")
 
-  await log.save();
+    .insert([{
 
-  res.json({
-    success: true,
-    log,
-  });
+      user_id,
+
+      project_id,
+
+      task_id,
+
+      start_time: new Date()
+
+    }])
+
+    .select()
+
+    .single();
+
+  if (error)
+    return res.status(500).json(error);
+
+  res.json(data);
+
 };
 
+export const stopTimer = async (req, res) => {
+
+  const { id } = req.params;
+
+  const { data: entry } = await supabase
+
+    .from("time_entries")
+
+    .select("*")
+
+    .eq("id", id)
+
+    .single();
+
+  const end = new Date();
+
+  const duration = Math.floor(
+
+    (end - new Date(entry.start_time)) / 1000
+
+  );
+
+  const { data } = await supabase
+
+    .from("time_entries")
+
+    .update({
+
+      end_time: end,
+
+      duration
+
+    })
+
+    .eq("id", id)
+
+    .select()
+
+    .single();
+
+  res.json(data);
+
+};
 exports.getLogs = async (req, res) => {
   const logs = await TimeLog.find();
 
@@ -38,4 +93,23 @@ exports.getLogs = async (req, res) => {
     success: true,
     logs,
   });
+};
+export const getEntries = async (req, res) => {
+
+  const { data } = await supabase
+
+    .from("time_entries")
+
+    .select("*")
+
+    .eq("user_id", req.params.userId)
+
+    .order("created_at", {
+
+      ascending: false
+
+    });
+
+  res.json(data);
+
 };

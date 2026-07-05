@@ -1,23 +1,40 @@
-const Task = require("../models/Task");
+import supabase from "../config/supabase.js";
 
-exports.getUpcomingTasks = async (req, res) => {
+export const getCalendarEvents = async (req, res) => {
+
   try {
-    const tasks = await Task.find({
-      dueDate: {
-        $ne: null,
-      },
-    }).sort({
-      dueDate: 1,
+
+    const { data: projects } = await supabase
+      .from("projects")
+      .select("id,title,due_date");
+
+    const { data: tasks } = await supabase
+      .from("tasks")
+      .select("id,title,due_date");
+
+    const events = [
+      ...(projects || []).map(project => ({
+        id: project.id,
+        title: `📁 ${project.title}`,
+        date: project.due_date,
+        type: "project"
+      })),
+      ...(tasks || []).map(task => ({
+        id: task.id,
+        title: `✅ ${task.title}`,
+        date: task.due_date,
+        type: "task"
+      }))
+    ];
+
+    res.json(events);
+
+  } catch (err) {
+
+    res.status(500).json({
+      message: err.message
     });
 
-    res.json({
-      success: true,
-      tasks,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
   }
+
 };

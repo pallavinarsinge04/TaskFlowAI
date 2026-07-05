@@ -2,8 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import http from "http";
 import cors from "cors";
-
-
+import timeTrackerRoutes from "./routes/timeTrackerRoutes.js";
+import calendarRoutes from "./routes/calendarRoutes.js";
+app.use("/api/calendar", calendarRoutes);
+app.use("/api/time", timeTrackerRoutes);
 import { initSocket } from "./config/socket.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
