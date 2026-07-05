@@ -1,25 +1,12 @@
-import transporter from "../config/email.js";
+import { Resend } from "resend";
 
-export const sendEmail = async (
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-to,
-
-subject,
-
-html
-
-)=>{
-
-await transporter.sendMail({
-
-from:"TaskFlow AI <yourgmail@gmail.com>",
-
-to,
-
-subject,
-
-html
-
-});
-
-};
+export async function sendEmail(to, subject, html) {
+  await resend.emails.send({
+    from: process.env.EMAIL_FROM,
+    to,
+    subject,
+    html,
+  });
+}
