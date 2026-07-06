@@ -1,100 +1,122 @@
-import { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { supabase } from "../../supabase/supabaseClient";
 import "./KanbanBoard.css";
 
-function KanbanBoard() {
-
-  const [tasks, setTasks] = useState([]);
-
-  useEffect(() => {
-    const data = JSON.parse(localStorage.getItem("tasks")) || [];
-    setTasks(data);
-  }, []);
-
+function KanbanBoard({ tasks, setTasks }) {
   const columns = {
-    Pending: tasks.filter(t => t.status === "Pending"),
-    "In Progress": tasks.filter(t => t.status === "In Progress"),
-    Completed: tasks.filter(t => t.status === "Completed")
+    Pending: tasks.filter((t) => t.status === "Pending"),
+    "In Progress": tasks.filter((t) => t.status === "In Progress"),
+    Completed: tasks.filter((t) => t.status === "Completed"),
   };
 
-  const onDragEnd = (result) => {
-
-    const { destination, source, draggableId } = result;
+  const onDragEnd = async (result) => {
+    const { destination, draggableId } = result;
 
     if (!destination) return;
 
-    const updatedTasks = [...tasks];
+    const newStatus = destination.droppableId;
 
-    const task = updatedTasks.find(t => t.id.toString() === draggableId);
+    const task = tasks.find((t) => t.id === draggableId);
 
-    task.status = destination.droppableId;
+    if (!task) return;
+
+    if (task.status === newStatus) return;
+
+    // Update UI instantly
+    const updatedTasks = tasks.map((t) =>
+      t.id === draggableId
+        ? {
+            ...t,
+            status: newStatus,
+          }
+        : t
+    );
 
     setTasks(updatedTasks);
 
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+    // Update Supabase
+    const { error } = await supabase
+      .from("tasks")
+      .update({
+        status: newStatus,
+      })
+      .eq("id", draggableId);
+
+    if (error) {
+      console.error(error);
+
+      // Restore previous state if update fails
+      setTasks(tasks);
+
+      alert(error.message);
+    }
   };
 
   return (
     <div className="kanban-container">
-
       <h1>📊 Kanban Board</h1>
 
       <DragDropContext onDragEnd={onDragEnd}>
+        <div className="kanban-columns">
+          {Object.keys(columns).map((column) => (
+            <Droppable key={column} droppableId={column}>
+              {(provided) => (
+                <div
+                  className="kanban-column"
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                >
+                  <h2>{column}</h2>
 
-        {Object.keys(columns).map((column) => (
+                  {columns[column].map((task, index) => (
+                    <Draggable
+                      key={task.id}
+                      draggableId={task.id}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          className="kanban-card"
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <h3>{task.title}</h3>
 
-          <Droppable droppableId={column} key={column}>
+                          <p>{task.description}</p>
 
-            {(provided) => (
+                          <div className="kanban-footer">
+                            <span>
+                              <strong>Priority:</strong>{" "}
+                              {task.priority}
+                            </span>
 
-              <div
-                className="kanban-column"
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-              >
+                            <span>
+                              <strong>Assigned:</strong>{" "}
+                              {task.assignee || "-"}
+                            </span>
+                          </div>
 
-                <h2>{column}</h2>
+                          {task.due_date && (
+                            <div className="kanban-date">
+                              📅{" "}
+                              {new Date(
+                                task.due_date
+                              ).toLocaleDateString()}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
 
-                {columns[column].map((task, index) => (
-
-                  <Draggable
-                    key={task.id}
-                    draggableId={task.id.toString()}
-                    index={index}
-                  >
-
-                    {(provided) => (
-
-                      <div
-                        className="kanban-card"
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-
-                        <h3>{task.title}</h3>
-                        <p>{task.description}</p>
-
-                      </div>
-
-                    )}
-
-                  </Draggable>
-
-                ))}
-
-                {provided.placeholder}
-
-              </div>
-
-            )}
-
-          </Droppable>
-
-        ))}
-
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          ))}
+        </div>
       </DragDropContext>
-
     </div>
   );
 }
