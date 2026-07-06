@@ -10,19 +10,15 @@ import {
 import DueDateCountdown from "./DueDateCountdown";
 
 function TaskCard({ task, onEdit, onDelete }) {
-
   return (
-
     <div className="task-card">
 
+      {/* HEADER */}
       <div className="task-card-header">
 
         <div>
-
           <h2>{task.title}</h2>
-
           <p>{task.description}</p>
-
         </div>
 
         <div className="task-actions">
@@ -42,12 +38,12 @@ function TaskCard({ task, onEdit, onDelete }) {
           </button>
 
         </div>
-
       </div>
 
+      {/* STATUS + PRIORITY */}
       <div className="task-info">
 
-        <span className={`status ${task.status.replace(/\s/g, "")}`}>
+        <span className={`status ${task.status?.replace(/\s/g, "")}`}>
           <FaCheckCircle />
           {task.status}
         </span>
@@ -59,53 +55,40 @@ function TaskCard({ task, onEdit, onDelete }) {
 
       </div>
 
+      {/* PROGRESS */}
       <div className="progress-section">
 
         <div className="progress-header">
-
           <span>Progress</span>
-
           <span>{task.progress || 0}%</span>
-
         </div>
 
         <div className="progress-bar">
-
           <div
             className="progress-fill"
-            style={{
-              width: `${task.progress || 0}%`
-            }}
-          ></div>
-
+            style={{ width: `${task.progress || 0}%` }}
+          />
         </div>
 
       </div>
 
+      {/* FOOTER */}
       <div className="task-footer">
 
         <span>
-
           <FaCalendarAlt />
-
           <DueDateCountdown dueDate={task.due_date} />
-
         </span>
 
         <span>
-
           <FaUserCircle />
-
           {task.assignee}
-
         </span>
 
       </div>
 
     </div>
-
   );
-
 }
 
 export default TaskCard;
