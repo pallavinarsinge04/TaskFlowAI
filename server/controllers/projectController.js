@@ -23,13 +23,17 @@ export const getProjects = async (req, res) => {
 
     res.json(data);
 
-  } catch (err) {
+  } 
+ catch (err) {
 
-    res.status(500).json({
-      message: err.message,
-    });
+  console.error("Create Project Error:");
+  console.error(err);
 
-  }
+  res.status(500).json({
+    message: err.message
+  });
+
+}
 
 };
 
@@ -38,102 +42,54 @@ export const getProjects = async (req, res) => {
 // =========================
 
 export const createProject = async (req, res) => {
-
   try {
 
     const {
-
-      title,
+      name,
       description,
       status,
       priority,
-      due_date,
+      startDate,
+      endDate,
+      teamMembers,
       progress
-
     } = req.body;
 
     const { data, error } = await supabase
-
       .from("projects")
-
       .insert([
         {
-          title,
+          name,
           description,
           status,
           priority,
-          due_date,
+          start_date: startDate,
+          end_date: endDate,
+          team_members: teamMembers,
           progress
         }
       ])
-
       .select()
-
       .single();
 
     if (error) {
-
       return res.status(500).json({
         message: error.message
       });
-
     }
 
-    // Notification
-
-    await supabase
-
-      .from("notifications")
-
-      .insert([
-        {
-          title: "New Project",
-          message: `${data.title} has been created.`,
-          type: "project"
-        }
-      ]);
-
-    // Socket
-
     getIO().emit("projectCreated", data);
-
-    // Email
-
-    await sendEmail(
-
-      req.user?.email || "admin@taskflow.com",
-
-      "Project Created",
-
-      `
-        <h1>Project Created</h1>
-
-        <p>
-
-        <b>${data.title}</b>
-
-        was created successfully.
-
-        </p>
-
-      `
-
-    );
 
     res.status(201).json(data);
 
   } catch (err) {
+    console.error(err);
 
     res.status(500).json({
-
       message: err.message
-
     });
-
   }
-
 };
-
 // =========================
 // Delete Project
 // =========================

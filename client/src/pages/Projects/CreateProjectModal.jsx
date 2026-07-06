@@ -28,19 +28,35 @@ setForm({
 
 };
 console.log(form);
-const handleSubmit=async(e)=>{
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-e.preventDefault();
+  console.log("Sending:", form);
 
-const res=await axios.post(
-"http://localhost:5000/api/projects",
-form
-);
+  try {
 
-addProject(res.data);
+    const res = await axios.post(
+      "http://localhost:5000/api/projects",
+      form
+    );
 
-close();
+    console.log("Success:", res.data);
 
+    addProject(res.data);
+
+    close();
+
+  } catch (err) {
+
+    console.error("Backend Error:", err.response?.data);
+
+    console.error(err);
+
+    alert(
+      err.response?.data?.message || err.message
+    );
+
+  }
 };
 
 return(

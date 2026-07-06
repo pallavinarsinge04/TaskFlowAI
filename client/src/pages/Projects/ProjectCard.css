@@ -119,3 +119,41 @@ font-size:16px;
 color:#1E293B;
 
 }
+.project-actions{
+    display:flex;
+    gap:12px;
+    margin-top:20px;
+}
+
+.edit-project-btn{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    transition:.3s;
+}
+
+.edit-project-btn:hover{
+    background:#1d4ed8;
+}
+
+.delete-project-btn{
+    background:#ef4444;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.delete-project-btn:hover{
+    background:#dc2626;
+}

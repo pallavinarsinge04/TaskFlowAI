@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import "./Tasks.css";
 import TaskCard from "./TaskCard";
@@ -6,131 +5,304 @@ import TaskModal from "./TaskModal";
 import KanbanBoard from "../../components/kanban/KanbanBoard";
 import { FaPlus, FaSearch, FaList, FaColumns } from "react-icons/fa";
 import socket from "../../socket/socket";
+import { supabase } from "../../supabase/supabaseClient";
 
 function Tasks() {
-  const [tasks,setTasks]=useState([]);
-  const [search,setSearch]=useState("");
-  const [status,setStatus]=useState("All");
-  const [priority,setPriority]=useState("All");
-  const [sort,setSort]=useState("Newest");
-  const [view,setView]=useState("list");
-  const [showFav,setShowFav]=useState(false);
-  const [openModal,setOpenModal]=useState(false);
-  const [editTask,setEditTask]=useState(null);
-  const [loading,setLoading]=useState(true);
+  const [tasks, setTasks] = useState([]);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("All");
+  const [priority, setPriority] = useState("All");
+  const [sort, setSort] = useState("Newest");
+  const [view, setView] = useState("list");
+  const [showFav, setShowFav] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [editTask, setEditTask] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [user, setUser] = useState(null);
 
-  useEffect(()=>{
-    const t=setTimeout(()=>setLoading(false),700);
+  // LOAD USER + PROJECT
+  useEffect(() => {
+    init();
+  }, []);
 
-    socket.on("task_created",task=>setTasks(p=>[...p,task]));
-    socket.on("task_updated",u=>setTasks(p=>p.map(x=>x.id===u.id?u:x)));
-    socket.on("task_deleted",id=>setTasks(p=>p.filter(x=>x.id!==id)));
+  const init = async () => {
+    const { data: userData } = await supabase.auth.getUser();
 
-    return ()=>{
-      clearTimeout(t);
+    if (!userData?.user) return;
+
+    setUser(userData.user);
+
+    const { data: projectData } = await supabase
+      .from("projects")
+      .select("id")
+      .eq("user_id", userData.user.id)
+      .limit(1)
+      .single();
+
+    if (projectData) {
+      setSelectedProjectId(projectData.id);
+    }
+
+    loadTasks(userData.user.id);
+  };
+
+  // SOCKET EVENTS
+  useEffect(() => {
+    socket.on("task_created", (task) =>
+      setTasks((prev) => [task, ...prev])
+    );
+
+    socket.on("task_updated", (updated) =>
+      setTasks((prev) =>
+        prev.map((t) => (t.id === updated.id ? updated : t))
+      )
+    );
+
+    socket.on("task_deleted", (id) =>
+      setTasks((prev) => prev.filter((t) => t.id !== id))
+    );
+
+    return () => {
       socket.off("task_created");
       socket.off("task_updated");
       socket.off("task_deleted");
     };
-  },[]);
+  }, []);
 
-  const handleSaveTask=(task)=>{
-    if(editTask){
-      const updated={...task,id:editTask.id};
-      socket.emit("task_updated",updated);
-      setTasks(p=>p.map(t=>t.id===updated.id?updated:t));
-    }else{
-      const created={...task,id:Date.now()};
-      socket.emit("task_created",created);
-      setTasks(p=>[...p,created]);
+  // LOAD TASKS
+  const loadTasks = async (userId) => {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.log(error);
+      setLoading(false);
+      return;
     }
-    setOpenModal(false);
-    setEditTask(null);
+
+    setTasks(data || []);
+    setLoading(false);
   };
 
-  const handleDelete=id=>{
-    socket.emit("task_deleted",id);
-    setTasks(p=>p.filter(t=>t.id!==id));
+  // SAVE TASK (CREATE / UPDATE)
+  const handleSaveTask = async (task) => {
+    try {
+      if (!user) return;
+
+      // UPDATE TASK
+      if (editTask) {
+        const { data, error } = await supabase
+          .from("tasks")
+          .update({
+            title: task.title,
+            description: task.description,
+            priority: task.priority,
+            status: task.status,
+            due_date: task.dueDate,
+            assignee: task.assignee,
+          })
+          .eq("id", editTask.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setTasks((prev) =>
+          prev.map((t) => (t.id === editTask.id ? data : t))
+        );
+      }
+
+      // CREATE TASK
+      else {
+        const { data, error } = await supabase
+          .from("tasks")
+          .insert([
+            {
+              project_id: selectedProjectId,
+              user_id: user.id,
+              title: task.title,
+              description: task.description,
+              priority: task.priority,
+              status: task.status,
+              due_date: task.dueDate,
+              assignee: task.assignee,
+            },
+          ])
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        setTasks((prev) => [data, ...prev]);
+      }
+
+      setOpenModal(false);
+      setEditTask(null);
+    } catch (err) {
+      console.log(err);
+      alert(err.message);
+    }
   };
 
-  const filteredTasks=useMemo(()=>tasks.filter(task=>{
-    const matches=task.title.toLowerCase().includes(search.toLowerCase()) &&
-      (status==="All"||task.status===status) &&
-      (priority==="All"||task.priority===priority);
-    if(!showFav) return matches;
-    return matches && JSON.parse(localStorage.getItem(`favorite_${task.id}`));
-  }).sort((a,b)=>{
-    if(sort==="Priority"){
-      const o={High:3,Medium:2,Low:1};
-      return o[b.priority]-o[a.priority];
-    }
-    if(sort==="Status") return a.status.localeCompare(b.status);
-    return sort==="Newest"?b.id-a.id:a.id-b.id;
-  }),[tasks,search,status,priority,showFav,sort]);
+  // DELETE TASK
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Delete this task?");
+    if (!confirmDelete) return;
 
-  if(loading) return <div className="loading">Loading Tasks...</div>;
+    const { error } = await supabase
+      .from("tasks")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.log(error);
+      return;
+    }
+
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // FILTER + SORT
+  const filteredTasks = useMemo(() => {
+    return tasks
+      .filter((task) => {
+        const matchSearch = task.title
+          ?.toLowerCase()
+          .includes(search.toLowerCase());
+
+        const matchStatus =
+          status === "All" || task.status === status;
+
+        const matchPriority =
+          priority === "All" || task.priority === priority;
+
+        return matchSearch && matchStatus && matchPriority;
+      })
+      .sort((a, b) => {
+        if (sort === "Newest") {
+          return new Date(b.created_at) - new Date(a.created_at);
+        }
+
+        if (sort === "Oldest") {
+          return new Date(a.created_at) - new Date(b.created_at);
+        }
+
+        if (sort === "Priority") {
+          const p = { High: 3, Medium: 2, Low: 1 };
+          return p[b.priority] - p[a.priority];
+        }
+
+        if (sort === "Status") {
+          return a.status.localeCompare(b.status);
+        }
+
+        return 0;
+      });
+  }, [tasks, search, status, priority, sort]);
+
+  if (loading)
+    return <div className="loading">Loading Tasks...</div>;
 
   return (
     <div className="tasks-page">
+
+      {/* HEADER */}
       <div className="tasks-header">
         <div>
           <h1>Task Management</h1>
           <p>Manage project tasks professionally</p>
         </div>
-        <span className="task-count">{filteredTasks.length} Tasks</span>
+
+        <span className="task-count">
+          {filteredTasks.length} Tasks
+        </span>
+
         <div className="header-buttons">
-          <button className="add-btn" onClick={()=>{setEditTask(null);setOpenModal(true);}}><FaPlus/> Add Task</button>
-          <button className="refresh-btn" onClick={()=>setTasks([...tasks])}>Refresh</button>
+          <button
+            className="add-btn"
+            onClick={() => {
+              setEditTask(null);
+              setOpenModal(true);
+            }}
+          >
+            <FaPlus /> Add Task
+          </button>
         </div>
       </div>
 
+      {/* FILTERS */}
       <div className="task-filters">
+
         <div className="search-box">
-          <FaSearch/>
-          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search task..."/>
+          <FaSearch />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search task..."
+          />
         </div>
 
-        <select value={status} onChange={e=>setStatus(e.target.value)}>
-          <option>All</option><option>Pending</option><option>In Progress</option><option>Completed</option>
+        <select value={status} onChange={(e) => setStatus(e.target.value)}>
+          <option>All</option>
+          <option>Pending</option>
+          <option>In Progress</option>
+          <option>Completed</option>
         </select>
 
-        <select value={priority} onChange={e=>setPriority(e.target.value)}>
-          <option>All</option><option>High</option><option>Medium</option><option>Low</option>
+        <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+          <option>All</option>
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
         </select>
 
-        <select value={sort} onChange={e=>setSort(e.target.value)}>
-          <option>Newest</option><option>Oldest</option><option>Priority</option><option>Status</option>
+        <select value={sort} onChange={(e) => setSort(e.target.value)}>
+          <option>Newest</option>
+          <option>Oldest</option>
+          <option>Priority</option>
+          <option>Status</option>
         </select>
       </div>
 
-      <div className="view-toggle">
-        <button onClick={()=>setShowFav(!showFav)}>⭐ {showFav?"Show All":"Favorites"}</button>
-        <button className={view==="list"?"active":""} onClick={()=>setView("list")}><FaList/> List</button>
-        <button className={view==="kanban"?"active":""} onClick={()=>setView("kanban")}><FaColumns/> Kanban</button>
+      {/* TASK LIST */}
+      <div className="task-list">
+        {filteredTasks.length === 0 ? (
+          <div className="empty-task">
+            <h2>No Tasks Found</h2>
+          </div>
+        ) : (
+          filteredTasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              task={task}
+              onEdit={(t) => {
+                setEditTask(t);
+                setOpenModal(true);
+              }}
+              onDelete={handleDelete}
+            />
+          ))
+        )}
       </div>
 
-      {view==="list" ? (
-        <div className="task-list">
-          {filteredTasks.length===0 ? (
-            <div className="empty-task">
-              <img src="https://cdn-icons-png.flaticon.com/512/7486/7486754.png" width="180" />
-              <h2>No Tasks Yet</h2>
-              <p>Create your first task.</p>
-            </div>
-          ) : filteredTasks.map(task=>(
-            <TaskCard key={task.id} task={task}
-              onEdit={(t)=>{setEditTask(t);setOpenModal(true);}}
-              onDelete={handleDelete}/>
-          ))}
-        </div>
-      ) : <KanbanBoard tasks={tasks} setTasks={setTasks}/>}
-
-      <button className="floating-add" onClick={()=>{setEditTask(null);setOpenModal(true);}}>+</button>
-
-      <TaskModal open={openModal} editTask={editTask}
-        onClose={()=>{setOpenModal(false);setEditTask(null);}}
-        onSave={handleSaveTask}/>
+      {/* MODAL */}
+      <TaskModal
+        open={openModal}
+        editTask={editTask}
+        onClose={() => {
+          setOpenModal(false);
+          setEditTask(null);
+        }}
+        onSave={handleSaveTask}
+      />
     </div>
   );
 }
+
 export default Tasks;

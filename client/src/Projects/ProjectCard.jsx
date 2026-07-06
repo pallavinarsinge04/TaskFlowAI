@@ -1,16 +1,17 @@
 import { FaEdit, FaTrash, FaEye, FaCalendarAlt } from "react-icons/fa";
 import { format } from "date-fns";
-import { supabase } from "../../supabase/supabaseClient";
+import { supabase } from "./../../supabase/supabaseClient";
 import { useState } from "react";
 import EditProjectModal from "./EditProjectModal";
 import { useNavigate } from "react-router-dom";
-function ProjectCard({ project, reload }) {
-    const [showEdit, setShowEdit] = useState(false);
-    const navigate = useNavigate();
-  const deleteProject = async () => {
 
+function ProjectCard({ project, reload }) {
+  const [showEdit, setShowEdit] = useState(false);
+  const navigate = useNavigate();
+
+  const deleteProject = async () => {
     const confirmDelete = window.confirm(
-      `Delete "${project.title}" ?`
+      `Delete "${project.name}" ?`
     );
 
     if (!confirmDelete) return;
@@ -25,6 +26,7 @@ function ProjectCard({ project, reload }) {
       return;
     }
 
+    // Refresh projects list
     reload();
   };
 
@@ -35,95 +37,107 @@ function ProjectCard({ project, reload }) {
   };
 
   return (
-    <div className="project-card">
+    <>
+      <div className="project-card">
 
-      <div className="project-top">
+        <div className="project-top">
+          <div>
+            <h3>{project.name}</h3>
+            <p>{project.description}</p>
+          </div>
 
-        <div>
-          <h3>{project.title}</h3>
-
-          <p>{project.description}</p>
+          <span
+            className={`status-badge ${project.status
+              .replace(/\s/g, "")
+              .toLowerCase()}`}
+          >
+            {project.status}
+          </span>
         </div>
 
-        <span
-          className={`status-badge ${project.status
-            .replace(/\s/g, "")
-            .toLowerCase()}`}
-        >
-          {project.status}
-        </span>
-
-      </div>
-
-      <div className="priority-row">
-
-        <span className={`priority ${project.priority.toLowerCase()}`}>
-          {project.priority}
-        </span>
-
-        <div className="due-date">
-
-          <FaCalendarAlt />
-
-          {project.due_date
-            ? format(new Date(project.due_date), "dd MMM yyyy")
-            : "No Due Date"}
-
+        <div className="priority-row">
+          <span className={`priority ${project.priority.toLowerCase()}`}>
+            {project.priority}
+          </span>
         </div>
 
-      </div>
+        <div className="project-dates">
 
-      <div className="progress-section">
+          <div className="date-item">
+            <FaCalendarAlt />
+            <strong> Start:</strong>{" "}
+            {project.start_date
+              ? format(new Date(project.start_date), "dd MMM yyyy")
+              : "Not Set"}
+          </div>
 
-        <div className="progress-info">
-
-          <span>Progress</span>
-
-          <span>{project.progress}%</span>
+          <div className="date-item">
+            <FaCalendarAlt />
+            <strong> End:</strong>{" "}
+            {project.end_date
+              ? format(new Date(project.end_date), "dd MMM yyyy")
+              : "Not Set"}
+          </div>
 
         </div>
 
-        <div className="progress-bar">
+        <div className="progress-section">
 
-          <div
-            className="progress-fill"
-            style={{
-              width: `${project.progress}%`,
-              background: progressColor(),
-            }}
-          />
+          <div className="progress-info">
+            <span>Progress</span>
+            <span>{project.progress}%</span>
+          </div>
+
+          <div className="progress-bar">
+            <div
+              className="progress-fill"
+              style={{
+                width: `${project.progress}%`,
+                background: progressColor(),
+              }}
+            />
+          </div>
 
         </div>
 
-      </div>
+        <div className="project-actions">
 
-      <div className="project-actions">
+          <button
+            className="view-btn"
+            onClick={() => navigate(`/projects/${project.id}`)}
+          >
+            <FaEye />
+            View
+          </button>
 
-       <button
-  className="view-btn"
-  onClick={() => navigate(`/projects/${project.id}`)}
+         <button
+  className="edit-btn"
+  onClick={() => setShowEdit(true)}
 >
-  <FaEye />
-  View
+  <FaEdit />
+  Edit
 </button>
+          <button
+            className="delete-btn"
+            onClick={deleteProject}
+          >
+            <FaTrash />
+            Delete
+          </button>
 
-      <button className="edit-btn" onClick={() => setShowEdit(true)}></button>
-
-        <button
-          className="delete-btn"
-          onClick={deleteProject}
-        >
-
-          <FaTrash />
-
-          Delete
-
-        </button>
+        </div>
 
       </div>
-     
 
-    </div>
+      {/* Edit Modal */}
+     {showEdit && (
+        <EditProjectModal
+          project={project}
+          close={() => setShowEdit(false)}
+          reload={reload}
+        />
+      )}
+    </>
   );
 }
 

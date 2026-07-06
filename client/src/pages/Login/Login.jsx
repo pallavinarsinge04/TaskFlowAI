@@ -18,10 +18,10 @@ function Login() {
     });
   };
 
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
-  const { email, password } = formData;
+  const { email, password } = form;
 
   const { data, error } =
     await supabase.auth.signInWithPassword({
@@ -35,11 +35,15 @@ function Login() {
   }
 
   // Get user profile
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("users")
     .select("*")
     .eq("id", data.user.id)
     .single();
+
+  if (profileError) {
+    console.log(profileError);
+  }
 
   localStorage.setItem(
     "user",

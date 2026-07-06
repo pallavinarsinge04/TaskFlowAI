@@ -1,6 +1,8 @@
-import { FaTrash } from "react-icons/fa";
+import { FaTrash , FaEdit } from "react-icons/fa";
+import { useState } from "react";
+import EditProjectModal from "./EditProjectModal";
 function ProjectCard({ project ,  onDelete}) {
-
+const [showEdit, setShowEdit] = useState(false);
 return(
 
 <div className="project-card">
@@ -34,84 +36,74 @@ width:`${project.progress}%`
 
 <div className="project-details">
 
-<div>
+  <div>
+    📅
+    <p>Start</p>
+    <strong>
+      {project.start_date
+        ? new Date(project.start_date).toLocaleDateString()
+        : "-"}
+    </strong>
+  </div>
 
-📅
+  <div>
+    🏁
+    <p>End</p>
+    <strong>
+      {project.end_date
+        ? new Date(project.end_date).toLocaleDateString()
+        : "-"}
+    </strong>
+  </div>
 
-<p>Start</p>
+  <div>
+    👥
+    <p>Members</p>
+    <strong>
+      {project.team_members}
+    </strong>
+  </div>
 
-<strong>
-
-{project.startDate
-? new Date(project.startDate).toLocaleDateString()
-:"-"}
-
-</strong>
-
-</div>
-
-<div>
-
-🏁
-
-<p>End</p>
-
-<strong>
-
-{project.endDate
-? new Date(project.endDate).toLocaleDateString()
-:"-"}
-
-</strong>
-
-</div>
-
-<div>
-
-👥
-
-<p>Members</p>
-
-<strong>
-
-{project.teamMembers}
-
-</strong>
+  <div>
+    🔥
+    <p>Priority</p>
+    <strong>
+      {project.priority}
+    </strong>
+  </div>
 
 </div>
 
-<div>
 
-🔥
-
-<p>Priority</p>
-
-<strong>
-
-{project.priority}
-
-</strong>
-
-</div>
-
-</div>
 <div className="project-actions">
 
   <button
-
-    className="delete-project-btn"
-
-    onClick={() => onDelete(project._id)}
-
+    className="edit-project-btn"
+    onClick={() => setShowEdit(true)}
   >
+    <FaEdit />
+    Edit
+  </button>
 
+  <button
+    className="delete-project-btn"
+    onClick={() => onDelete(project.id)}
+  >
     <FaTrash />
-
     Delete
-
   </button>
 
 </div>
+{showEdit && (
+  <EditProjectModal
+    project={project}
+    close={() => setShowEdit(false)}
+    reload={() => {
+      setShowEdit(false);
+      window.location.reload();
+    }}
+  />
+)}
 
 </div>
 

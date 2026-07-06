@@ -33,8 +33,8 @@ function ProjectPage() {
       setProjects(prev => {
 
         const exists = prev.find(
-          p => p._id === project._id
-        );
+  p => p.id === project.id
+);
 
         if (exists) return prev;
 
@@ -49,7 +49,7 @@ function ProjectPage() {
 
     prev.filter(project =>
 
-      project._id !== id
+     project.id !== id
 
     )
 
@@ -129,9 +129,8 @@ function ProjectPage() {
     console.log(res.data);
 
     setProjects(prev =>
-      prev.filter(project => project._id !== id)
-    );
-
+    prev.filter(project => project.id !== id)
+);
   } catch (err) {
 
     console.log(err.response?.data);
@@ -139,6 +138,24 @@ function ProjectPage() {
 
   }
 
+};
+
+const deleteProject = async (id) => {
+  const confirmDelete = window.confirm("Delete this project?");
+
+  if (!confirmDelete) return;
+
+  const { error } = await supabase
+    .from("projects")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  loadProjects();
 };
 
   return (
@@ -264,15 +281,10 @@ function ProjectPage() {
         <div className="project-grid">
 
           {filteredProjects.map(project => (
-
-           <ProjectCard
-
-    key={project._id}
-
+<ProjectCard
+    key={project.id}
     project={project}
-
     onDelete={handleDelete}
-
 />
 
           ))}

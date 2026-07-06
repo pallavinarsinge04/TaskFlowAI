@@ -88,7 +88,7 @@ function TaskCard({ task, onEdit, onDelete }) {
 
           <FaCalendarAlt />
 
-          <DueDateCountdown dueDate={task.dueDate} />
+          <DueDateCountdown dueDate={task.due_date} />
 
         </span>
 

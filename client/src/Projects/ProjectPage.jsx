@@ -41,6 +41,7 @@ function ProjectPage() {
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
+      console.log(data);
 
     if (error) {
       alert(error.message);
@@ -62,9 +63,9 @@ function ProjectPage() {
     }
 
     if (search !== "") {
-      result = result.filter((p) =>
-        p.title.toLowerCase().includes(search.toLowerCase())
-      );
+     result = result.filter((p) =>
+  p.name.toLowerCase().includes(search.toLowerCase())
+);
     }
 
     setFilteredProjects(result);
@@ -111,9 +112,8 @@ function ProjectPage() {
             setStatusFilter(e.target.value)
           }
         >
-          <option>All</option>
           <option>Planning</option>
-          <option>In Progress</option>
+          <option>Active</option>
           <option>Completed</option>
         </select>
 
