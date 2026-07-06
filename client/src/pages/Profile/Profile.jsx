@@ -1,24 +1,29 @@
-import { useEffect, useState } from "react";
-import { supabase } from "../../supabase/supabaseClient";
+import { useState, useEffect } from "react";
 import "./Profile.css";
+import { supabase } from "../../supabase/supabaseClient";
 
 function Profile() {
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const [profile, setProfile] = useState({
+    id: "",
     name: "",
+    role: "",
     email: "",
     phone: "",
     location: "",
     bio: "",
     avatar_url: "",
-    role: "Full Stack Developer",
   });
 
   useEffect(() => {
     loadProfile();
   }, []);
 
+  // ===============================
+  // Load Profile
+  // ===============================
   const loadProfile = async () => {
     try {
       const {
@@ -33,102 +38,116 @@ function Profile() {
         .eq("id", user.id)
         .single();
 
-      if (error) {
-        console.log(error);
-
-        setProfile((prev) => ({
-          ...prev,
-          email: user.email,
-        }));
-
-        setLoading(false);
-        return;
+      if (error && error.code !== "PGRST116") {
+        throw error;
       }
 
-      setProfile({
-        name: data.name || "",
-        email: data.email || user.email,
-        phone: data.phone || "",
-        location: data.location || "",
-        bio: data.bio || "",
-        avatar_url: data.avatar_url || "",
-        role: "Full Stack Developer",
-      });
+      if (data) {
+        setProfile(data);
 
-      setLoading(false);
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            name: data.name,
+            email: data.email,
+            profilePic: data.avatar_url,
+          })
+        );
+      } else {
+        setProfile((prev) => ({
+          ...prev,
+          id: user.id,
+          email: user.email,
+        }));
+      }
     } catch (err) {
       console.log(err);
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleUpload = async (e) => {
+  // ===============================
+  // Upload Profile Photo
+  // ===============================
+  const uploadImage = async (e) => {
     const file = e.target.files[0];
 
     if (!file) return;
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      const fileName = `${profile.id}-${Date.now()}-${file.name}`;
 
-    const fileName = `${user.id}-${Date.now()}`;
+      const { error } = await supabase.storage
+        .from("profile-images")
+        .upload(fileName, file, {
+          upsert: true,
+        });
 
-    const { error: uploadError } = await supabase.storage
-      .from("profile-images")
-      .upload(fileName, file);
+      if (error) throw error;
 
-    if (uploadError) {
-      alert(uploadError.message);
-      return;
+      const {
+        data: { publicUrl },
+      } = supabase.storage
+        .from("profile-images")
+        .getPublicUrl(fileName);
+
+      setProfile((prev) => ({
+        ...prev,
+        avatar_url: publicUrl,
+      }));
+    } catch (err) {
+      console.log(err);
+      alert(err.message);
     }
-
-    const { data } = supabase.storage
-      .from("profile-images")
-      .getPublicUrl(fileName);
-
-    const avatar = data.publicUrl;
-
-    setProfile((prev) => ({
-      ...prev,
-      avatar_url: avatar,
-    }));
   };
 
+  // ===============================
+  // Save Profile
+  // ===============================
   const saveProfile = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    try {
+      setSaving(true);
 
-    const { error } = await supabase.from("profiles").upsert({
-      id: user.id,
-      name: profile.name,
-      email: profile.email,
-      phone: profile.phone,
-      location: profile.location,
-      bio: profile.bio,
-      avatar_url: profile.avatar_url,
-    });
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({
+          id: profile.id,
+          name: profile.name,
+          role: profile.role,
+          email: profile.email,
+          phone: profile.phone,
+          location: profile.location,
+          bio: profile.bio,
+          avatar_url: profile.avatar_url,
+        });
 
-    if (error) {
-      alert(error.message);
-      return;
+      if (error) throw error;
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          name: profile.name,
+          email: profile.email,
+          profilePic: profile.avatar_url,
+        })
+      );
+
+      window.dispatchEvent(
+        new Event("profileUpdated")
+      );
+
+      alert("Profile Updated Successfully!");
+    } catch (err) {
+      console.log(err);
+      alert(err.message);
+    } finally {
+      setSaving(false);
     }
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        ...profile,
-        profilePic: profile.avatar_url,
-      })
-    );
-
-    window.dispatchEvent(new Event("profileUpdated"));
-
-    alert("Profile Updated Successfully!");
   };
 
   if (loading) {
-    return <h2 style={{ padding: 40 }}>Loading Profile...</h2>;
+    return <h2>Loading Profile...</h2>;
   }
 
   return (
@@ -143,19 +162,21 @@ function Profile() {
               profile.avatar_url ||
               "https://i.pravatar.cc/300"
             }
-            alt=""
+            alt="Profile"
+          />
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={uploadImage}
           />
 
           <div>
 
             <input
-              type="file"
-              onChange={handleUpload}
-            />
-
-            <input
+              type="text"
+              placeholder="Full Name"
               value={profile.name}
-              placeholder="Name"
               onChange={(e) =>
                 setProfile({
                   ...profile,
@@ -164,12 +185,34 @@ function Profile() {
               }
             />
 
-            <p>{profile.role}</p>
-
-            <div className="profile-actions">
+            <input
+              type="text"
+              placeholder="Role"
+              value={profile.role}
+              onChange={(e) =>
+                setProfile({
+                  ...profile,
+                  role: e.target.value,
+                })
+              }
+            />
+                        <div className="profile-actions">
 
               <button onClick={saveProfile}>
-                Save Profile
+                {saving ? "Saving..." : "Save Profile"}
+              </button>
+
+              <button
+                onClick={() =>
+                  navigator.share
+                    ? navigator.share({
+                        title: profile.name,
+                        text: "Check out my profile!",
+                      })
+                    : alert("Sharing not supported")
+                }
+              >
+                Share Profile
               </button>
 
             </div>
@@ -182,13 +225,15 @@ function Profile() {
 
       <div className="profile-grid">
 
+        {/* About */}
+
         <div className="card">
 
           <h2>About Me</h2>
 
           <textarea
+            rows="5"
             value={profile.bio}
-            rows={5}
             onChange={(e) =>
               setProfile({
                 ...profile,
@@ -199,18 +244,28 @@ function Profile() {
 
         </div>
 
+        {/* Contact */}
+
         <div className="card">
 
           <h2>Contact Information</h2>
 
           <input
+            type="email"
+            placeholder="Email"
             value={profile.email}
-            disabled
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                email: e.target.value,
+              })
+            }
           />
 
           <input
-            value={profile.phone}
+            type="text"
             placeholder="Phone"
+            value={profile.phone}
             onChange={(e) =>
               setProfile({
                 ...profile,
@@ -220,8 +275,9 @@ function Profile() {
           />
 
           <input
-            value={profile.location}
+            type="text"
             placeholder="Location"
+            value={profile.location}
             onChange={(e) =>
               setProfile({
                 ...profile,
@@ -232,11 +288,14 @@ function Profile() {
 
         </div>
 
+        {/* Skills */}
+
         <div className="card">
 
           <h2>Skills</h2>
 
           <div className="skills">
+
             <span>React</span>
             <span>Node.js</span>
             <span>MongoDB</span>
@@ -244,10 +303,14 @@ function Profile() {
             <span>Java</span>
             <span>Kotlin</span>
             <span>Firebase</span>
+            <span>Supabase</span>
             <span>AI</span>
+
           </div>
 
         </div>
+
+        {/* Statistics */}
 
         <div className="card">
 
@@ -274,28 +337,39 @@ function Profile() {
 
         </div>
 
+        {/* Recent Projects */}
+
         <div className="card">
 
           <h2>Recent Projects</h2>
 
           <ul>
+
             <li>TaskFlow AI</li>
-            <li>Smart AI Ecommerce</li>
+
+            <li>AI Attendance Management</li>
+
             <li>Student Attendance App</li>
+
             <li>Flashcard Quiz App</li>
+
           </ul>
 
         </div>
+
+        {/* AI Score */}
 
         <div className="card">
 
           <h2>AI Productivity Score</h2>
 
           <div className="progress">
+
             <div
               className="progress-fill"
               style={{ width: "92%" }}
             ></div>
+
           </div>
 
           <h3>92%</h3>
