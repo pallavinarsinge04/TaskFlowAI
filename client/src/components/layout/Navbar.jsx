@@ -2,94 +2,92 @@ import { useState, useEffect } from "react";
 import {
   FaSearch,
   FaBell,
-  FaCog
+  FaCog,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../../supabase/supabaseClient";
 import "./Navbar.css";
 
 function Navbar() {
-
   const navigate = useNavigate();
 
   const [time, setTime] = useState(new Date());
 
-  const [profilePic, setProfilePic] = useState(
-    JSON.parse(localStorage.getItem("user"))?.profilePic ||
-      "https://i.pravatar.cc/150?img=12"
-  );
-
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user")) || {
-      name: "Guest User",
-      email: "guest@taskflow.ai"
-    }
-  );
+  const [user, setUser] = useState({
+    name: "Guest User",
+    email: "",
+    profilePic: "",
+  });
 
   useEffect(() => {
+    loadProfile();
 
-    const interval = setInterval(() => {
-
+    const timer = setInterval(() => {
       setTime(new Date());
-
     }, 1000);
 
-    const updateProfile = () => {
-
-      const current =
-        JSON.parse(localStorage.getItem("user")) || {};
-
-      setUser(current);
-
-      setProfilePic(
-        current.profilePic ||
-          "https://i.pravatar.cc/150?img=12"
-      );
-
-    };
-
-    window.addEventListener(
-      "profileUpdated",
-      updateProfile
-    );
+    window.addEventListener("profileUpdated", loadProfile);
 
     return () => {
-
-      clearInterval(interval);
-
+      clearInterval(timer);
       window.removeEventListener(
         "profileUpdated",
-        updateProfile
+        loadProfile
       );
-
     };
-
   }, []);
 
-  return (
+  const loadProfile = async () => {
+    try {
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
 
+      if (!authUser) return;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", authUser.id)
+        .single();
+
+      const profile = {
+        name: data?.name || "Guest User",
+        email: data?.email || authUser.email,
+        profilePic: data?.avatar_url || "",
+      };
+
+      setUser(profile);
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify(profile)
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  return (
     <header className="navbar">
 
       {/* Search */}
 
       <div className="navbar-search">
-
         <FaSearch />
 
         <input
           type="text"
           placeholder="Search projects, tasks..."
         />
-
       </div>
 
-      {/* Right Side */}
+      {/* Right */}
 
       <div className="navbar-right">
 
         <div className="navbar-time">
-
           {time.toLocaleTimeString()}
-
         </div>
 
         <button
@@ -98,11 +96,8 @@ function Navbar() {
             navigate("/notifications")
           }
         >
-
           <FaBell />
-
           <span className="badge">3</span>
-
         </button>
 
         <button
@@ -111,41 +106,34 @@ function Navbar() {
             navigate("/settings")
           }
         >
-
           <FaCog />
-
         </button>
 
         <div
           className="navbar-profile"
           onClick={() =>
-            navigate("/settings")
+            navigate("/profile")
           }
         >
-
           <img
-            src={profilePic}
+            src={
+              user.profilePic
+                ? user.profilePic
+                : "https://i.pravatar.cc/150?img=12"
+            }
             alt="Profile"
           />
 
           <div>
-
-            <h4>{user.name || "Guest User"}</h4>
-
-            <span>
-              {user.email || ""}
-            </span>
-
+            <h4>{user.name}</h4>
+            <span>{user.email}</span>
           </div>
-
         </div>
 
       </div>
 
     </header>
-
   );
-
 }
 
 export default Navbar;
