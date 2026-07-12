@@ -1,29 +1,60 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "./TeamPage.css";
 import { FaPlus, FaTrash, FaUsers } from "react-icons/fa";
+import { supabase } from "../../supabase/supabaseClient";
 
 function TeamPage() {
-
-  // Load saved members
-  const [members, setMembers] = useState(() => {
-    const saved = localStorage.getItem("teamMembers");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [showForm, setShowForm] = useState(false);
+
   const [search, setSearch] = useState("");
+
   const [form, setForm] = useState({
     name: "",
     role: "",
   });
 
-  // Save automatically whenever members change
   useEffect(() => {
-    localStorage.setItem(
-      "teamMembers",
-      JSON.stringify(members)
-    );
-  }, [members]);
+    loadMembers();
+  }, []);
+
+  // ------------------------
+  // Load Members
+  // ------------------------
+
+  const loadMembers = async () => {
+    try {
+      setLoading(true);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("team_members")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (error) throw error;
+
+      setMembers(data || []);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ------------------------
+  // Input Change
+  // ------------------------
 
   const handleChange = (e) => {
     setForm({
@@ -32,94 +63,133 @@ function TeamPage() {
     });
   };
 
-  const addMember = (e) => {
+  // ------------------------
+  // Add Member
+  // ------------------------
 
+  const addMember = async (e) => {
     e.preventDefault();
 
-    if (!form.name.trim() || !form.role.trim()) {
-      alert("Please fill all fields.");
+    if (!form.name.trim()) {
+      alert("Enter member name");
       return;
     }
 
-    const newMember = {
-      id: Date.now(),
-      name: form.name,
-      role: form.role,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    if (!form.role.trim()) {
+      alert("Enter role");
+      return;
+    }
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        alert("Please login.");
+        return;
+      }
+
+      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
         form.name
-      )}&background=2563eb&color=ffffff`,
-    };
+      )}&background=2563eb&color=ffffff`;
 
-    setMembers((prev) => [newMember, ...prev]);
+      const { data, error } = await supabase
+        .from("team_members")
+        .insert([
+          {
+            user_id: user.id,
+            name: form.name,
+            role: form.role,
+            status: "Online",
+            profile_image: avatar,
+          },
+        ])
+        .select()
+        .single();
 
-    setForm({
-      name: "",
-      role: "",
-    });
+      if (error) throw error;
 
-    setShowForm(false);
+      setMembers((prev) => [data, ...prev]);
+
+      setForm({
+        name: "",
+        role: "",
+      });
+
+      setShowForm(false);
+    } catch (err) {
+      console.log(err);
+      alert(err.message);
+    }
   };
 
-  const removeMember = (id) => {
+  // ------------------------
+  // Delete Member
+  // ------------------------
 
-    if (window.confirm("Remove this member?")) {
+  const removeMember = async (id) => {
+    if (!window.confirm("Delete this member?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("team_members")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
 
       setMembers((prev) =>
         prev.filter((m) => m.id !== id)
       );
-
+    } catch (err) {
+      console.log(err);
+      alert(err.message);
     }
-
   };
 
+  // ------------------------
+  // Search
+  // ------------------------
+
   const filtered = useMemo(() => {
-
-    return members.filter((m) =>
-
-      m.name
-        .toLowerCase()
-        .includes(search.toLowerCase()) ||
-
-      m.role
-        .toLowerCase()
-        .includes(search.toLowerCase())
-
+    return members.filter(
+      (m) =>
+        m.name
+          .toLowerCase()
+          .includes(search.toLowerCase()) ||
+        m.role
+          .toLowerCase()
+          .includes(search.toLowerCase())
     );
-
   }, [members, search]);
 
   return (
-
     <div className="team-page">
 
       <div className="team-header">
-
         <div>
-
           <h1>
             <FaUsers /> Team Management
           </h1>
 
-          <p>
-            Manage your project members.
-          </p>
-
+          <p>Manage your project members.</p>
         </div>
 
         <button
           className="add-btn"
           onClick={() => setShowForm(true)}
         >
-          <FaPlus /> Add Member
+          <FaPlus />
+          Add Member
         </button>
-
       </div>
 
       <div className="team-toolbar">
 
         <input
           type="text"
-          placeholder="Search member..."
+          placeholder="Search Member..."
           value={search}
           onChange={(e) =>
             setSearch(e.target.value)
@@ -133,7 +203,6 @@ function TeamPage() {
       </div>
 
       {showForm && (
-
         <div className="add-member-card">
 
           <h3>Add Team Member</h3>
@@ -177,23 +246,21 @@ function TeamPage() {
           </form>
 
         </div>
-
       )}
 
-      {filtered.length === 0 ? (
-
+      {loading ? (
+        <div className="empty-card">
+          <h2>Loading...</h2>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="empty-card">
 
           <h2>No Team Members</h2>
 
-          <p>
-            Add your first member to get started.
-          </p>
+          <p>Add your first member.</p>
 
         </div>
-
       ) : (
-
         <div className="member-grid">
 
           {filtered.map((m) => (
@@ -204,7 +271,10 @@ function TeamPage() {
             >
 
               <img
-                src={m.avatar}
+                src={
+                  m.profile_image ||
+                  "https://i.pravatar.cc/150?img=1"
+                }
                 alt={m.name}
                 className="avatar"
               />
@@ -228,11 +298,9 @@ function TeamPage() {
           ))}
 
         </div>
-
       )}
 
     </div>
-
   );
 }
 
