@@ -1,27 +1,30 @@
-function getAISuggestion(task) {
-  if (!task) return "Low";
+import axios from "axios";
 
-  const text = task.toLowerCase();
+const API = axios.create({
+  baseURL: "http://localhost:5000/api/ai",
+});
 
-  if (
-    text.includes("bug") ||
-    text.includes("urgent") ||
-    text.includes("critical")
-  ) {
-    return "High";
-  }
+export const sendMessage = async (message) => {
+  const { data } = await API.post("/chat", {
+    message,
+  });
 
-  if (
-    text.includes("api") ||
-    text.includes("backend") ||
-    text.includes("database")
-  ) {
-    return "Medium";
-  }
+  return data.response;
+};
 
-  return "Low";
-}
+export const analyzeImage = async (
+  image,
+  prompt
+) => {
+  const formData = new FormData();
 
-module.exports = {
-  getAISuggestion,
+  formData.append("image", image);
+  formData.append("prompt", prompt);
+
+  const { data } = await API.post(
+    "/vision",
+    formData
+  );
+
+  return data.response;
 };

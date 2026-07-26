@@ -29,6 +29,11 @@ import TestSupabase from "./pages/TestSupabase";
 import {  useEffect } from "react";
 import { supabase } from "./supabase/supabaseClient";
 import ProjectDetails from "./pages/Projects/ProjectDetails";
+import { Toaster } from "react-hot-toast";
+<>
+  <Toaster position="top-right" />
+  {/* Your Routes */}
+</>
 function App() {
  useEffect(() => {
 

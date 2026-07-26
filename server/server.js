@@ -15,7 +15,9 @@ dotenv.config();
 // ✅ Create app FIRST
 const app = express();
 const server = http.createServer(app);
+const aiRoutes = require("./routes/aiRoutes");
 
+app.use("/api/ai", aiRoutes);
 // Socket
 initSocket(server);
 
