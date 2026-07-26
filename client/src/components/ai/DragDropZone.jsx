@@ -3,22 +3,24 @@ import {
   FaCloudUploadAlt,
   FaFile,
   FaImage,
-  FaTimes,
+  FaTrash,
 } from "react-icons/fa";
 
 function DragDropZone({
-  onFilesSelected,
+  onFilesChange,
 }) {
-  const [dragging, setDragging] = useState(false);
+  const [dragging, setDragging] =
+    useState(false);
 
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] =
+    useState([]);
 
-  const handleFiles = (selectedFiles) => {
-    const list = Array.from(selectedFiles);
+  const handleFiles = (fileList) => {
+    const selected = Array.from(fileList);
 
-    setFiles(list);
+    setFiles(selected);
 
-    onFilesSelected?.(list);
+    onFilesChange?.(selected);
   };
 
   const handleDrop = (e) => {
@@ -26,7 +28,7 @@ function DragDropZone({
 
     setDragging(false);
 
-    if (e.dataTransfer.files.length) {
+    if (e.dataTransfer.files.length > 0) {
       handleFiles(e.dataTransfer.files);
     }
   };
@@ -38,15 +40,15 @@ function DragDropZone({
 
     setFiles(updated);
 
-    onFilesSelected?.(updated);
+    onFilesChange?.(updated);
   };
 
   return (
     <div>
 
       <div
-        className={`drop-zone ${
-          dragging ? "drag-active" : ""
+        className={`drag-drop ${
+          dragging ? "active" : ""
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -58,13 +60,11 @@ function DragDropZone({
         onDrop={handleDrop}
       >
 
-        <FaCloudUploadAlt
-          className="drop-icon"
-        />
+        <FaCloudUploadAlt className="drop-icon" />
 
-        <h3>
-          Drag & Drop Files Here
-        </h3>
+        <h2>
+          Drag & Drop Files
+        </h2>
 
         <p>
           Upload Images, PDFs,
@@ -72,15 +72,15 @@ function DragDropZone({
         </p>
 
         <label
-          htmlFor="upload-files"
-          className="browse-btn"
+          htmlFor="files"
+          className="browse-button"
         >
           Browse Files
         </label>
 
         <input
-          id="upload-files"
           hidden
+          id="files"
           multiple
           type="file"
           onChange={(e) =>
@@ -93,19 +93,20 @@ function DragDropZone({
       </div>
 
       {files.length > 0 && (
-        <div className="file-list">
+
+        <div className="uploaded-files">
 
           {files.map((file, index) => (
 
             <div
-              className="drop-file-card"
               key={index}
+              className="file-item"
             >
 
-              <div className="drop-left">
+              <div className="file-left">
 
                 {file.type.startsWith(
-                  "image"
+                  "image/"
                 ) ? (
                   <FaImage />
                 ) : (
@@ -120,10 +121,9 @@ function DragDropZone({
 
                   <small>
                     {(
-                      file.size /
-                      1024
-                    ).toFixed(1)}
-                    {" "}KB
+                      file.size / 1024
+                    ).toFixed(2)}
+                    KB
                   </small>
 
                 </div>
@@ -131,12 +131,12 @@ function DragDropZone({
               </div>
 
               <button
-                className="remove-drop-file"
+                className="delete-file"
                 onClick={() =>
                   removeFile(index)
                 }
               >
-                <FaTimes />
+                <FaTrash />
               </button>
 
             </div>
@@ -144,6 +144,7 @@ function DragDropZone({
           ))}
 
         </div>
+
       )}
 
     </div>
