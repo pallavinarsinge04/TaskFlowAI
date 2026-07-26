@@ -1,32 +1,37 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const {
+  GoogleGenerativeAI,
+} = require("@google/generative-ai");
 
-const genAI = new GoogleGenerativeAI(
+const genAI =
+new GoogleGenerativeAI(
   process.env.GEMINI_API_KEY
 );
 
-const model = genAI.getGenerativeModel({
+const model =
+genAI.getGenerativeModel({
   model: "gemini-2.5-flash",
 });
 
-async function streamChat(message, onChunk) {
-  try {
-    const result = await model.generateContentStream(message);
+async function streamReply(
+  prompt,
+  onChunk
+) {
 
-    for await (const chunk of result.stream) {
-      const text = chunk.text();
+  const result =
+    await model.generateContentStream(
+      prompt
+    );
 
-      if (text) {
-        onChunk(text);
-      }
-    }
+  for await (
+    const chunk of result.stream
+  ) {
 
-    onChunk("[DONE]");
-  } catch (error) {
-    console.error(error);
-    throw error;
+    onChunk(chunk.text());
+
   }
+
 }
 
 module.exports = {
-  streamChat,
+  streamReply,
 };
