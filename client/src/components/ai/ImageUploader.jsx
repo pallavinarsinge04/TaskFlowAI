@@ -1,31 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   FaImage,
   FaTrash,
   FaUpload,
-  FaEye,
+  FaSearchPlus,
 } from "react-icons/fa";
 
 function ImageUploader({
   onImageSelect,
-  uploadProgress = 100,
 }) {
-  const fileInputRef = useRef(null);
+  const inputRef = useRef(null);
 
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState("");
 
-  useEffect(() => {
-    if (!image) return;
-
-    const url = URL.createObjectURL(image);
-
-    setPreview(url);
-
-    return () => URL.revokeObjectURL(url);
-  }, [image]);
-
-  const handleImage = (e) => {
+  const handleSelect = (e) => {
     const file = e.target.files[0];
 
     if (!file) return;
@@ -37,6 +26,10 @@ function ImageUploader({
 
     setImage(file);
 
+    setPreview(
+      URL.createObjectURL(file)
+    );
+
     onImageSelect?.(file);
   };
 
@@ -44,27 +37,29 @@ function ImageUploader({
     setImage(null);
     setPreview("");
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+    if (inputRef.current) {
+      inputRef.current.value = "";
     }
+
+    onImageSelect?.(null);
   };
 
   return (
-    <div className="image-upload-card">
+    <div className="image-card">
 
       <input
-        ref={fileInputRef}
+        ref={inputRef}
         hidden
         type="file"
         accept="image/*"
-        onChange={handleImage}
+        onChange={handleSelect}
       />
 
       {!image ? (
         <div
-          className="upload-area"
+          className="upload-box"
           onClick={() =>
-            fileInputRef.current.click()
+            inputRef.current.click()
           }
         >
           <FaUpload className="upload-icon" />
@@ -72,8 +67,8 @@ function ImageUploader({
           <h3>Upload Image</h3>
 
           <p>
-            Click here to upload an image for
-            Gemini Vision analysis.
+            Click to upload an image
+            for AI analysis
           </p>
 
         </div>
@@ -81,19 +76,19 @@ function ImageUploader({
         <>
           <img
             src={preview}
-            alt="Preview"
-            className="preview-image"
+            alt="preview"
+            className="image-preview"
           />
 
-          <div className="image-info">
+          <div className="image-footer">
 
             <div>
 
               <h4>{image.name}</h4>
 
               <small>
-                {(image.size / 1024).toFixed(1)}
-                {" "}KB
+                {(image.size / 1024).toFixed(2)}
+                KB
               </small>
 
             </div>
@@ -101,16 +96,14 @@ function ImageUploader({
             <div className="image-actions">
 
               <button
-                title="Preview"
                 onClick={() =>
                   window.open(preview)
                 }
               >
-                <FaEye />
+                <FaSearchPlus />
               </button>
 
               <button
-                title="Delete"
                 className="delete-btn"
                 onClick={removeImage}
               >
@@ -124,17 +117,14 @@ function ImageUploader({
           <div className="upload-progress">
 
             <div
-              className="upload-bar"
-              style={{
-                width: `${uploadProgress}%`,
-              }}
-            />
+              className="upload-fill"
+            ></div>
 
           </div>
 
-          <div className="upload-status">
-            {uploadProgress}% Uploaded
-          </div>
+          <span className="upload-status">
+            Upload Complete
+          </span>
         </>
       )}
 
