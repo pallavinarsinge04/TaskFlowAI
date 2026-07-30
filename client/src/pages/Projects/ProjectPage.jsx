@@ -8,7 +8,7 @@ import {
   FaFolderOpen,
   FaCheckCircle,
   FaClock,
-  FaSpinner
+  FaSpinner,
 } from "react-icons/fa";
 
 import ProjectCard from "./ProjectCard";
@@ -18,164 +18,143 @@ import "./ProjectPage.css";
 const API = "http://localhost:5000/api/projects";
 
 function ProjectPage() {
-
   const [projects, setProjects] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
+  // ==========================
+  // Load Projects
+  // ==========================
 
+  const loadProjects = async () => {
+    try {
+      const res = await axios.get(API);
+
+      const projectList = Array.isArray(res.data)
+        ? res.data
+        : res.data.projects || [];
+
+      setProjects(projectList);
+    } catch (err) {
+      console.error("Load Projects Error:", err);
+
+      setProjects([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ==========================
+  // Socket Events
+  // ==========================
+
+  useEffect(() => {
     loadProjects();
 
     socket.on("projectCreated", (project) => {
+      setProjects((prev) => {
+        const safePrev = Array.isArray(prev) ? prev : [];
 
-      setProjects(prev => {
+        const exists = safePrev.find((p) => p.id === project.id);
 
-        const exists = prev.find(
-  p => p.id === project.id
-);
+        if (exists) return safePrev;
 
-        if (exists) return prev;
-
-        return [project, ...prev];
-
+        return [project, ...safePrev];
       });
-
     });
+
     socket.on("projectDeleted", (id) => {
+      setProjects((prev) => {
+        const safePrev = Array.isArray(prev) ? prev : [];
 
-  setProjects(prev =>
-
-    prev.filter(project =>
-
-     project.id !== id
-
-    )
-
-  );
-
-});
+        return safePrev.filter((project) => project.id !== id);
+      });
+    });
 
     return () => {
-
       socket.off("projectCreated");
       socket.off("projectDeleted");
     };
-
   }, []);
 
-  const loadProjects = async () => {
-
-    try {
-
-      const res = await axios.get(API);
-
-      setProjects(res.data);
-
-    } catch (err) {
-
-      console.log(err);
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  };
+  // ==========================
+  // Search Filter
+  // ==========================
 
   const filteredProjects = useMemo(() => {
+    const safeProjects = Array.isArray(projects)
+      ? projects
+      : [];
 
-    return projects.filter(project =>
-
+    return safeProjects.filter((project) =>
       project.name
         ?.toLowerCase()
         .includes(search.toLowerCase())
-
     );
-
   }, [projects, search]);
 
+  // ==========================
+  // Dashboard Stats
+  // ==========================
+
   const stats = {
+    total: filteredProjects.length,
 
-    total: projects.length,
-
-    planning: projects.filter(
-      p => p.status === "Planning"
+    planning: filteredProjects.filter(
+      (p) => p.status === "Planning"
     ).length,
 
-    active: projects.filter(
-      p => p.status === "Active"
+    active: filteredProjects.filter(
+      (p) => p.status === "Active"
     ).length,
 
-    completed: projects.filter(
-      p => p.status === "Completed"
-    ).length
-
+    completed: filteredProjects.filter(
+      (p) => p.status === "Completed"
+    ).length,
   };
- const handleDelete = async (id) => {
 
-  console.log("Deleting Project ID:", id);
+  // ==========================
+  // Delete Project
+  // ==========================
 
-  if (!window.confirm("Delete this project?")) return;
-
-  try {
-
-    const res = await axios.delete(
-      `http://localhost:5000/api/projects/${id}`
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Delete this project?"
     );
 
-    console.log(res.data);
+    if (!confirmDelete) return;
 
-    setProjects(prev =>
-    prev.filter(project => project.id !== id)
-);
-  } catch (err) {
+    try {
+      await axios.delete(`${API}/${id}`);
 
-    console.log(err.response?.data);
-    console.log(err);
+      setProjects((prev) =>
+        prev.filter((project) => project.id !== id)
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete project.");
+    }
+  };
 
-  }
-
-};
-
-const deleteProject = async (id) => {
-  const confirmDelete = window.confirm("Delete this project?");
-
-  if (!confirmDelete) return;
-
-  const { error } = await supabase
-    .from("projects")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  loadProjects();
-};
+  // ==========================
+  // UI
+  // ==========================
 
   return (
-
     <div className="project-page">
 
-      {/* HEADER */}
+      {/* Header */}
 
       <div className="project-header">
 
         <div>
-
           <h1>📁 Project Management</h1>
 
           <p>
-
-            Create, manage and monitor all your projects.
-
+            Create, manage and monitor all your
+            projects.
           </p>
-
         </div>
 
         <button
@@ -188,104 +167,79 @@ const deleteProject = async (id) => {
 
       </div>
 
-      {/* DASHBOARD */}
+      {/* Dashboard */}
 
       <div className="project-stats">
 
         <div className="stat-card">
-
           <FaFolderOpen />
-
           <h2>{stats.total}</h2>
-
           <p>Total Projects</p>
-
         </div>
 
         <div className="stat-card">
-
           <FaClock />
-
           <h2>{stats.planning}</h2>
-
           <p>Planning</p>
-
         </div>
 
         <div className="stat-card">
-
           <FaSpinner />
-
           <h2>{stats.active}</h2>
-
           <p>Active</p>
-
         </div>
 
         <div className="stat-card">
-
           <FaCheckCircle />
-
           <h2>{stats.completed}</h2>
-
           <p>Completed</p>
-
         </div>
 
       </div>
 
-      {/* SEARCH */}
+      {/* Search */}
 
       <div className="project-search">
 
         <FaSearch />
 
         <input
-
           type="text"
-
-          placeholder="Search project..."
-
+          placeholder="Search Project..."
           value={search}
-
           onChange={(e) =>
             setSearch(e.target.value)
           }
-
         />
 
       </div>
 
-      {/* PROJECT GRID */}
+      {/* Project List */}
 
       {loading ? (
 
         <div className="empty-project">
-
           Loading Projects...
-
         </div>
 
       ) : filteredProjects.length === 0 ? (
 
         <div className="empty-project">
-
           <h2>No Projects Found</h2>
-
           <p>Create your first project.</p>
-
         </div>
 
       ) : (
 
         <div className="project-grid">
 
-          {filteredProjects.map(project => (
-<ProjectCard
-    key={project.id}
-    project={project}
-    onDelete={handleDelete}
-/>
+          {filteredProjects.map((project) => (
+
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onDelete={handleDelete}
+            />
 
           ))}
 
@@ -293,34 +247,24 @@ const deleteProject = async (id) => {
 
       )}
 
-      {/* MODAL */}
+      {/* Modal */}
 
       {open && (
 
         <CreateProjectModal
-
           close={() => setOpen(false)}
-
           addProject={(project) =>
-
-            setProjects(prev => [
-
+            setProjects((prev) => [
               project,
-
-              ...prev
-
+              ...prev,
             ])
-
           }
-
         />
 
       )}
 
     </div>
-
   );
-
 }
 
 export default ProjectPage;
