@@ -1,64 +1,109 @@
-import openai from "../config/openai.js";
+import model from "../config/gemini.js";
 import supabase from "../config/supabase.js";
 
-export const chatWithAI = async (req, res) => {
-
+// Chat
+export const chat = async (req, res) => {
   try {
+    const { message, userId } = req.body;
 
-    const { prompt, userId } = req.body;
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        message: "Message is required",
+      });
+    }
 
-    const completion = await openai.chat.completions.create({
+    const result = await model.generateContent(message);
 
-      model: "gpt-4.1-mini",
+    const reply = result.response.text();
 
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-
-    });
-
-    const response = completion.choices[0].message.content;
-
-    await supabase
-      .from("ai_chats")
-      .insert([
+    if (userId) {
+      await supabase.from("ai_chats").insert([
         {
           user_id: userId,
-          prompt,
-          response,
+          prompt: message,
+          response: reply,
         },
       ]);
+    }
 
     res.json({
-      response,
+      success: true,
+      reply,
     });
 
   } catch (err) {
 
+    console.error(err);
+
     res.status(500).json({
+      success: false,
       message: err.message,
     });
 
   }
-
 };
+
+// Image Analysis
+export const analyzeImage = async (req, res) => {
+
+  try {
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Image required",
+      });
+    }
+
+    const prompt =
+      req.body.prompt ||
+      "Describe this image.";
+
+    const result =
+      await model.generateContent([
+        prompt,
+        {
+          inlineData: {
+            mimeType: req.file.mimetype,
+            data: req.file.buffer.toString("base64"),
+          },
+        },
+      ]);
+
+    res.json({
+      success: true,
+      reply: result.response.text(),
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+
+  }
+};
+
+// Chat History
 export const getHistory = async (req, res) => {
 
   try {
 
-    const { data, error } = await supabase
-      .from("ai_chats")
-      .select("*")
-      .eq("user_id", req.params.userId)
-      .order("created_at", {
-        ascending: false,
-      });
+    const { userId } = req.params;
 
-    if (error)
-      return res.status(500).json(error);
+    const { data, error } =
+      await supabase
+        .from("ai_chats")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", {
+          ascending: false,
+        });
+
+    if (error) throw error;
 
     res.json(data);
 

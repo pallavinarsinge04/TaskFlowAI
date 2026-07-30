@@ -1,37 +1,39 @@
-const {
-  GoogleGenerativeAI,
-} = require("@google/generative-ai");
+const { createClient } = require("@supabase/supabase-js");
 
-const genAI =
-new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY
+const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const model =
-genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
-});
+module.exports = async (req, res, next) => {
 
-async function streamReply(
-  prompt,
-  onChunk
-) {
+    const token =
+        req.headers.authorization?.replace(
+            "Bearer ",
+            ""
+        );
 
-  const result =
-    await model.generateContentStream(
-      prompt
-    );
+    if (!token) {
 
-  for await (
-    const chunk of result.stream
-  ) {
+        return res.status(401).json({
+            message: "Unauthorized",
+        });
 
-    onChunk(chunk.text());
+    }
 
-  }
+    const {
+        data,
+        error,
+    } = await supabase.auth.getUser(token);
 
-}
+    if (error) {
 
-module.exports = {
-  streamReply,
+        return res.status(401).json(error);
+
+    }
+
+    req.user = data.user;
+
+    next();
+
 };

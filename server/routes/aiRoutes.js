@@ -1,6 +1,11 @@
-const express = require("express");
+import express from "express";
+import multer from "multer";
 
-const multer = require("multer");
+import {
+  chat,
+  analyzeImage,
+  getHistory,
+} from "../controllers/aiController.js";
 
 const router = express.Router();
 
@@ -8,15 +13,7 @@ const upload = multer({
   storage: multer.memoryStorage(),
 });
 
-const {
-  chat,
-  analyzeImage,
-} = require("../controllers/aiController");
-
-router.post(
-  "/chat",
-  chat
-);
+router.post("/chat", chat);
 
 router.post(
   "/vision",
@@ -24,4 +21,9 @@ router.post(
   analyzeImage
 );
 
-module.exports = router;
+router.get(
+  "/history/:userId",
+  getHistory
+);
+
+export default router;

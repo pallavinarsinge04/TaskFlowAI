@@ -1,54 +1,35 @@
 import { useState } from "react";
-import MessageBubble from "../components/AIAssistant/MessageBubble";
-import MessageInput from "../components/AIAssistant/MessageInput";
-import TypingIndicator from "../components/AIAssistant/TypingIndicator";
-import "./AIAssistant.css";
+import { sendMessage } from "./../../services/chatService";
 
 function AIAssistant() {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: "ai",
-      text: "👋 Hi Pallavi! I'm TaskFlow AI. How can I help you today?",
-    },
-  ]);
 
-  const [loading, setLoading] = useState(false);
-const response = await sendMessage(
-  message,
-  [...messages, userMessage]
-);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([]);
+
+  const handleSend = async () => {
+
+    if (!input.trim()) return;
+
+    const reply = await sendMessage(input);
+
+    setMessages(prev => [
+      ...prev,
+      {
+        sender: "user",
+        text: input,
+      },
+      {
+        sender: "ai",
+        text: reply,
+      },
+    ]);
+
+    setInput("");
+  };
+
   return (
-    <div className="ai-page">
-      <div className="chat-card">
-
-        <div className="chat-header">
-          <div>
-            <h1>🤖 TaskFlow AI</h1>
-            <p>Your Smart Productivity Assistant</p>
-          </div>
-
-          <span className="online-badge">
-            ● Online
-          </span>
-        </div>
-
-        <div className="chat-body">
-          {messages.map((msg) => (
-            <MessageBubble key={msg.id} message={msg} />
-          ))}
-
-          {loading && <TypingIndicator />}
-        </div>
-
-        <MessageInput
-  loading={loading}
-  onSend={handleSend}
-  onFileUpload={(file) => {
-    console.log("Uploaded:", file);
-  }}
-/>
-      </div>
+    <div>
+      {/* UI */}
     </div>
   );
 }
