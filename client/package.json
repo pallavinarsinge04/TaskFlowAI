@@ -30,7 +30,7 @@
     "react-speech-recognition": "^4.0.1",
     "react-syntax-highlighter": "^16.1.1",
     "react-toastify": "^11.1.0",
-    "recharts": "^3.9.0",
+    "recharts": "^3.10.1",
     "remark-gfm": "^4.0.1",
     "simple-peer": "^9.11.1",
     "socket.io-client": "^4.8.3",
