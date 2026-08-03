@@ -1,160 +1,227 @@
 import "./Dashboard.css";
 
-import Sidebar from "../../components/sidebar/Sidebar";
-import Navbar from "../../components/layout/Navbar";
-import RightSidebar from "../../components/dashboard/RightSidebar";
+import DashboardHeader from "./DashboardHeader";
+import DashboardCards from "./DashboardCards";
+import DashboardCharts from "./DashboardCharts";
+import DashboardInsights from "./DashboardInsights";
+import DashboardCalendar from "./DashboardCalendar";
+import DashboardActivity from "./DashboardActivity";
+import DashboardTeam from "./DashboardTeam";
+import DashboardQuickActions from "./DashboardQuickActions";
+import DashboardTasks from "./DashboardTasks";
 
-import WelcomeBanner from "../../components/dashboard/WelcomeBanner";
-import StatsCards from "../../components/dashboard/StatsCards";
-import ProductivityChart from "../../components/dashboard/ProductivityChart";
-import ProjectProgress from "../../components/dashboard/ProjectProgress";
-import RecentTasks from "../../components/dashboard/RecentTasks";
-import AIInsights from "../../components/dashboard/AIInsights";
-import TeamMembers from "../../components/dashboard/TeamMembers";
-import Meetings from "../../components/dashboard/Meetings";
-import Notifications from "../../components/dashboard/Notifications";
-import Activity from "../../components/dashboard/Activity";
-import CalendarWidget from "../../components/dashboard/CalendarWidget";
-import QuickActions from "../../components/dashboard/QuickActions";
+import {
+  FaFolderOpen,
+  FaTasks,
+  FaUsers,
+  FaRobot
+} from "react-icons/fa";
 
 import { useState } from "react";
-import { FaBars } from "react-icons/fa";
 
 function Dashboard() {
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [stats] = useState({
+
+    projects: 24,
+
+    activeProjects: 8,
+
+    completedProjects: 16,
+
+    totalTasks: 186,
+
+    completedTasks: 142,
+
+    pendingTasks: 44,
+
+    teamMembers: 12,
+
+    aiScore: 94
+
+  });
+
+  const [recentProjects] = useState([
+
+    {
+
+      id: 1,
+
+      name: "TaskFlowAI",
+
+      progress: 82,
+
+      status: "Active",
+
+      priority: "High"
+
+    },
+
+    {
+
+      id: 2,
+
+      name: "HR Portal",
+
+      progress: 45,
+
+      status: "Planning",
+
+      priority: "Medium"
+
+    },
+
+    {
+
+      id: 3,
+
+      name: "E-Commerce",
+
+      progress: 100,
+
+      status: "Completed",
+
+      priority: "High"
+
+    }
+
+  ]);
+
+  const [todayTasks] = useState([
+
+    {
+
+      id: 1,
+
+      title: "Finish Dashboard UI",
+
+      priority: "High",
+
+      completed: false
+
+    },
+
+    {
+
+      id: 2,
+
+      title: "Review Sprint Board",
+
+      priority: "Medium",
+
+      completed: true
+
+    },
+
+    {
+
+      id: 3,
+
+      title: "Deploy Backend",
+
+      priority: "High",
+
+      completed: false
+
+    }
+
+  ]);
+
+  const dashboardCards = [
+
+    {
+
+      title: "Projects",
+
+      value: stats.projects,
+
+      icon: <FaFolderOpen />,
+
+      color: "#2563eb"
+
+    },
+
+    {
+
+      title: "Tasks",
+
+      value: stats.totalTasks,
+
+      icon: <FaTasks />,
+
+      color: "#10b981"
+
+    },
+
+    {
+
+      title: "Team",
+
+      value: stats.teamMembers,
+
+      icon: <FaUsers />,
+
+      color: "#f59e0b"
+
+    },
+
+    {
+
+      title: "AI Score",
+
+      value: `${stats.aiScore}%`,
+
+      icon: <FaRobot />,
+
+      color: "#8b5cf6"
+
+    }
+
+  ];
 
   return (
 
-    <div className="dashboard-layout">
+    <div className="dashboard">
 
-      {/* Mobile Overlay */}
+      <DashboardHeader />
 
-      {sidebarOpen && (
+      <DashboardCards
 
-        <div
-          className="dashboard-overlay"
-          onClick={() => setSidebarOpen(false)}
-        />
+        cards={dashboardCards}
 
-      )}
-
-      {/* Sidebar */}
-
-      <div className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`}>
-
-        
-
-      </div>
-
-      {/* Main */}
+      />
 
       <div className="dashboard-main">
 
-        <div className="mobile-header">
+        <div className="dashboard-left">
 
-        
-          <h2>TaskFlow AI</h2>
+          <DashboardCharts
 
-        </div>
+            projects={recentProjects}
 
-        
+          />
 
-        <div className="dashboard-container">
+          <DashboardTasks
 
-          <WelcomeBanner />
+            tasks={todayTasks}
 
-          <StatsCards />
+          />
 
-          <div className="dashboard-grid">
-
-            <div className="dashboard-card chart">
-
-              <ProductivityChart />
-
-            </div>
-
-            <div className="dashboard-card">
-
-              <AIInsights />
-
-            </div>
-
-          </div>
-
-          <div className="dashboard-grid">
-
-            <div className="dashboard-card">
-
-              <ProjectProgress />
-
-            </div>
-
-            <div className="dashboard-card">
-
-              <RecentTasks />
-
-            </div>
-
-          </div>
-
-          <div className="dashboard-grid">
-
-            <div className="dashboard-card">
-
-              <TeamMembers />
-
-            </div>
-
-            <div className="dashboard-card">
-
-              <Meetings />
-
-            </div>
-
-          </div>
-
-          <div className="dashboard-grid">
-
-            <div className="dashboard-card">
-
-              <Activity />
-
-            </div>
-
-            <div className="dashboard-card">
-
-              <Notifications />
-
-            </div>
-
-          </div>
-
-          <div className="dashboard-grid">
-
-            <div className="dashboard-card">
-
-              <CalendarWidget />
-
-            </div>
-
-            <div className="dashboard-card">
-
-              <QuickActions />
-
-            </div>
-
-          </div>
+          <DashboardActivity />
 
         </div>
 
-      </div>
+        <div className="dashboard-right">
 
-      {/* Right Sidebar */}
+          <DashboardInsights />
 
-      <div className="dashboard-right">
+          <DashboardQuickActions />
 
-        <RightSidebar />
+          <DashboardCalendar />
+
+          <DashboardTeam />
+
+        </div>
 
       </div>
 
