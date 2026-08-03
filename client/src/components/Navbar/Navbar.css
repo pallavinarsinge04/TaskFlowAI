@@ -1,0 +1,1147 @@
+/* ==========================================================
+   TaskFlowAI Navbar
+   Part 1 - Layout
+========================================================== */
+
+:root{
+
+    --navbar-height:72px;
+
+    --navbar-bg:rgba(255,255,255,.88);
+
+    --navbar-border:#e5e7eb;
+
+    --primary:#2563eb;
+
+    --primary-hover:#1d4ed8;
+
+    --text:#1e293b;
+
+    --text-light:#64748b;
+
+    --transition:.35s;
+
+}
+
+/* =====================================
+   NAVBAR
+===================================== */
+
+.navbar{
+
+    position:sticky;
+
+    top:0;
+
+    left:0;
+
+    width:100%;
+
+    height:var(--navbar-height);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 30px;
+
+    background:var(--navbar-bg);
+
+    backdrop-filter:blur(18px);
+
+    border-bottom:1px solid var(--navbar-border);
+
+    z-index:999;
+
+    box-shadow:0 6px 20px rgba(0,0,0,.05);
+
+}
+
+/* =====================================
+   LEFT
+===================================== */
+
+.navbar-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+}
+
+/* =====================================
+   HAMBURGER
+===================================== */
+
+.hamburger-btn{
+
+    width:46px;
+
+    height:46px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#f8fafc;
+
+    color:var(--text);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    cursor:pointer;
+
+    transition:var(--transition);
+
+    font-size:18px;
+
+}
+
+.hamburger-btn:hover{
+
+    background:var(--primary);
+
+    color:white;
+
+    transform:scale(1.05);
+
+}
+
+/* =====================================
+   LOGO
+===================================== */
+
+.navbar-logo{
+
+    font-size:24px;
+
+    font-weight:700;
+
+    color:var(--text);
+
+    white-space:nowrap;
+
+}
+
+/* =====================================
+   SEARCH
+===================================== */
+
+.navbar-search{
+
+    flex:1;
+
+    max-width:520px;
+
+    margin:0 40px;
+
+    position:relative;
+
+}
+
+.search-icon{
+
+    position:absolute;
+
+    top:50%;
+
+    left:18px;
+
+    transform:translateY(-50%);
+
+    color:#94a3b8;
+
+    font-size:16px;
+
+}
+
+.navbar-search input{
+
+    width:100%;
+
+    height:48px;
+
+    border:1px solid #e2e8f0;
+
+    border-radius:14px;
+
+    padding-left:48px;
+
+    padding-right:18px;
+
+    font-size:15px;
+
+    outline:none;
+
+    transition:.3s;
+
+    background:#f8fafc;
+
+}
+
+.navbar-search input:focus{
+
+    border-color:var(--primary);
+
+    background:white;
+
+    box-shadow:0 0 0 4px rgba(37,99,235,.12);
+
+}
+
+/* =====================================
+   RIGHT
+===================================== */
+
+.navbar-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+}
+
+/* =====================================
+   ICON BUTTON
+===================================== */
+
+.icon-btn{
+
+    width:46px;
+
+    height:46px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#f8fafc;
+
+    color:var(--text);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    position:relative;
+
+    font-size:18px;
+
+}
+
+.icon-btn:hover{
+
+    background:var(--primary);
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+/* =====================================
+   AI BUTTON
+===================================== */
+
+.navbar-ai-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    text-decoration:none;
+
+    padding:12px 18px;
+
+    border-radius:14px;
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    );
+
+    color:white;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.navbar-ai-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 12px 30px rgba(37,99,235,.35);
+
+}
+
+/* =====================================
+   BADGE
+===================================== */
+
+.notification-badge{
+
+    position:absolute;
+
+    top:8px;
+
+    right:8px;
+
+    min-width:18px;
+
+    height:18px;
+
+    border-radius:50%;
+
+    background:#ef4444;
+
+    color:white;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border:2px solid white;
+
+}
+
+/* =====================================
+   ANIMATION
+===================================== */
+
+.navbar{
+
+    animation:navbarFade .5s ease;
+
+}
+
+@keyframes navbarFade{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(-20px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+/* ==========================================================
+   TaskFlowAI Navbar
+   Part 2 - Dropdowns & User Menu
+========================================================== */
+
+/* =====================================
+   DROPDOWN WRAPPERS
+===================================== */
+
+.notification-wrapper,
+.profile-wrapper{
+
+    position:relative;
+
+}
+
+/* =====================================
+   NOTIFICATION DROPDOWN
+===================================== */
+
+.notification-dropdown{
+
+    position:absolute;
+
+    top:60px;
+
+    right:0;
+
+    width:340px;
+
+    background:#ffffff;
+
+    border-radius:18px;
+
+    border:1px solid #e5e7eb;
+
+    box-shadow:0 20px 45px rgba(15,23,42,.18);
+
+    overflow:hidden;
+
+    animation:dropdownFade .25s ease;
+
+    z-index:2000;
+
+}
+
+/* =====================================
+   DROPDOWN TITLE
+===================================== */
+
+.dropdown-title{
+
+    padding:18px 22px;
+
+    font-size:18px;
+
+    font-weight:700;
+
+    border-bottom:1px solid #e5e7eb;
+
+    color:#0f172a;
+
+    background:#f8fafc;
+
+}
+
+/* =====================================
+   NOTIFICATION ITEM
+===================================== */
+
+.notification-item{
+
+    padding:16px 22px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:6px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    border-bottom:1px solid #f1f5f9;
+
+}
+
+.notification-item:last-child{
+
+    border-bottom:none;
+
+}
+
+.notification-item:hover{
+
+    background:#eff6ff;
+
+}
+
+.notification-item strong{
+
+    color:#1e293b;
+
+    font-size:15px;
+
+    font-weight:600;
+
+}
+
+.notification-item small{
+
+    color:#64748b;
+
+    font-size:13px;
+
+}
+
+/* =====================================
+   PROFILE BUTTON
+===================================== */
+
+.profile-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    border:none;
+
+    background:#f8fafc;
+
+    border-radius:14px;
+
+    padding:8px 14px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.profile-btn:hover{
+
+    background:#eff6ff;
+
+}
+
+.profile-btn img{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:50%;
+
+    border:2px solid #2563eb;
+
+    object-fit:cover;
+
+}
+
+.profile-btn span{
+
+    color:#1e293b;
+
+    font-size:15px;
+
+    font-weight:600;
+
+}
+
+/* =====================================
+   PROFILE DROPDOWN
+===================================== */
+
+.profile-dropdown{
+
+    position:absolute;
+
+    right:0;
+
+    top:60px;
+
+    width:240px;
+
+    background:#ffffff;
+
+    border-radius:18px;
+
+    border:1px solid #e5e7eb;
+
+    box-shadow:0 20px 45px rgba(15,23,42,.18);
+
+    overflow:hidden;
+
+    animation:dropdownFade .25s ease;
+
+    z-index:2000;
+
+}
+
+.profile-dropdown a{
+
+    display:flex;
+
+    align-items:center;
+
+    padding:16px 20px;
+
+    color:#1e293b;
+
+    text-decoration:none;
+
+    font-size:15px;
+
+    transition:.25s;
+
+    border-bottom:1px solid #f8fafc;
+
+}
+
+.profile-dropdown a:last-child{
+
+    border-bottom:none;
+
+}
+
+.profile-dropdown a:hover{
+
+    background:#eff6ff;
+
+    color:#2563eb;
+
+    padding-left:26px;
+
+}
+
+/* =====================================
+   DARK MODE
+===================================== */
+
+body.dark-mode{
+
+    background:#0f172a;
+
+    color:#f8fafc;
+
+}
+
+body.dark-mode .navbar{
+
+    background:rgba(15,23,42,.92);
+
+    border-bottom:1px solid #1e293b;
+
+}
+
+body.dark-mode .navbar-logo{
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .navbar-search input{
+
+    background:#1e293b;
+
+    border-color:#334155;
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .navbar-search input::placeholder{
+
+    color:#94a3b8;
+
+}
+
+body.dark-mode .icon-btn{
+
+    background:#1e293b;
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .hamburger-btn{
+
+    background:#1e293b;
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .profile-btn{
+
+    background:#1e293b;
+
+}
+
+body.dark-mode .profile-btn span{
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .notification-dropdown,
+
+body.dark-mode .profile-dropdown{
+
+    background:#1e293b;
+
+    border-color:#334155;
+
+}
+
+body.dark-mode .dropdown-title{
+
+    background:#0f172a;
+
+    color:#ffffff;
+
+    border-bottom:1px solid #334155;
+
+}
+
+body.dark-mode .notification-item{
+
+    border-bottom:1px solid #334155;
+
+}
+
+body.dark-mode .notification-item strong{
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .notification-item small{
+
+    color:#cbd5e1;
+
+}
+
+body.dark-mode .notification-item:hover{
+
+    background:#334155;
+
+}
+
+body.dark-mode .profile-dropdown a{
+
+    color:#ffffff;
+
+    border-bottom:1px solid #334155;
+
+}
+
+body.dark-mode .profile-dropdown a:hover{
+
+    background:#334155;
+
+}
+
+/* =====================================
+   DROPDOWN ANIMATION
+===================================== */
+
+@keyframes dropdownFade{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(15px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+/* ==========================================================
+   TaskFlowAI Navbar
+   Part 3 - Responsive Design & Animations
+========================================================== */
+
+/* =====================================
+   MOBILE (≤ 992px)
+===================================== */
+
+@media (max-width:992px){
+
+.navbar{
+
+    padding:0 20px;
+
+}
+
+.navbar-logo{
+
+    display:none;
+
+}
+
+.navbar-search{
+
+    margin:0 20px;
+
+    max-width:none;
+
+}
+
+.navbar-ai-btn span{
+
+    display:none;
+
+}
+
+.navbar-ai-btn{
+
+    width:48px;
+
+    height:48px;
+
+    justify-content:center;
+
+    padding:0;
+
+    border-radius:12px;
+
+}
+
+.profile-btn span{
+
+    display:none;
+
+}
+
+}
+
+/* =====================================
+   TABLET (≤ 768px)
+===================================== */
+
+@media (max-width:768px){
+
+.navbar{
+
+    height:68px;
+
+    padding:0 15px;
+
+    gap:10px;
+
+}
+
+.navbar-search{
+
+    flex:1;
+
+    margin:0 10px;
+
+}
+
+.navbar-search input{
+
+    height:44px;
+
+    font-size:14px;
+
+}
+
+.icon-btn{
+
+    width:42px;
+
+    height:42px;
+
+    font-size:16px;
+
+}
+
+.profile-btn{
+
+    padding:6px 10px;
+
+}
+
+.profile-btn img{
+
+    width:38px;
+
+    height:38px;
+
+}
+
+.notification-dropdown{
+
+    width:300px;
+
+    right:-15px;
+
+}
+
+.profile-dropdown{
+
+    width:220px;
+
+    right:-10px;
+
+}
+
+}
+
+/* =====================================
+   MOBILE (≤ 576px)
+===================================== */
+
+@media (max-width:576px){
+
+.navbar{
+
+    padding:0 10px;
+
+}
+
+.navbar-search{
+
+    display:none;
+
+}
+
+.notification-dropdown{
+
+    width:270px;
+
+    right:-20px;
+
+}
+
+.profile-dropdown{
+
+    width:200px;
+
+}
+
+.profile-btn{
+
+    padding:5px;
+
+}
+
+.profile-btn img{
+
+    width:36px;
+
+    height:36px;
+
+}
+
+.icon-btn{
+
+    width:40px;
+
+    height:40px;
+
+}
+
+}
+
+/* =====================================
+   EXTRA SMALL (≤ 400px)
+===================================== */
+
+@media (max-width:400px){
+
+.navbar{
+
+    padding:0 8px;
+
+}
+
+.icon-btn{
+
+    width:36px;
+
+    height:36px;
+
+    font-size:15px;
+
+}
+
+.profile-btn img{
+
+    width:34px;
+
+    height:34px;
+
+}
+
+.notification-dropdown{
+
+    width:240px;
+
+    right:-15px;
+
+}
+
+.profile-dropdown{
+
+    width:180px;
+
+}
+
+}
+
+/* =====================================
+   BUTTON HOVER EFFECTS
+===================================== */
+
+.icon-btn:hover,
+
+.profile-btn:hover,
+
+.navbar-ai-btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.icon-btn:active,
+
+.profile-btn:active,
+
+.navbar-ai-btn:active{
+
+    transform:scale(.96);
+
+}
+
+/* =====================================
+   SEARCH ANIMATION
+===================================== */
+
+.navbar-search input{
+
+    transition:
+
+        width .3s,
+
+        background .3s,
+
+        box-shadow .3s,
+
+        border-color .3s;
+
+}
+
+/* =====================================
+   PROFILE IMAGE
+===================================== */
+
+.profile-btn img{
+
+    transition:.3s;
+
+}
+
+.profile-btn:hover img{
+
+    transform:rotate(8deg) scale(1.05);
+
+}
+
+/* =====================================
+   NOTIFICATION BADGE
+===================================== */
+
+.notification-badge{
+
+    animation:pulse 2s infinite;
+
+}
+
+@keyframes pulse{
+
+    0%{
+
+        transform:scale(1);
+
+    }
+
+    50%{
+
+        transform:scale(1.15);
+
+    }
+
+    100%{
+
+        transform:scale(1);
+
+    }
+
+}
+
+/* =====================================
+   GLASS EFFECT
+===================================== */
+
+.notification-dropdown,
+
+.profile-dropdown{
+
+    backdrop-filter:blur(16px);
+
+}
+
+/* =====================================
+   SCROLLBAR
+===================================== */
+
+.notification-dropdown::-webkit-scrollbar,
+
+.profile-dropdown::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb,
+
+.profile-dropdown::-webkit-scrollbar-thumb{
+
+    background:#94a3b8;
+
+    border-radius:20px;
+
+}
+
+/* =====================================
+   ACCESSIBILITY
+===================================== */
+
+.icon-btn:focus,
+
+.profile-btn:focus,
+
+.hamburger-btn:focus,
+
+.navbar-ai-btn:focus{
+
+    outline:2px solid #60a5fa;
+
+    outline-offset:2px;
+
+}
+
+/* =====================================
+   TRANSITIONS
+===================================== */
+
+.navbar *{
+
+    transition:
+
+        background .25s,
+
+        color .25s,
+
+        border-color .25s,
+
+        transform .25s;
+
+}
