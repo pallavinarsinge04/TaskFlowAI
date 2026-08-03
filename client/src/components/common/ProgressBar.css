@@ -1,0 +1,127 @@
+.progress-wrapper{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    width:100%;
+
+}
+
+.progress-track{
+
+    flex:1;
+
+    overflow:hidden;
+
+    position:relative;
+
+}
+
+.progress-track.rounded{
+
+    border-radius:999px;
+
+}
+
+.progress-fill{
+
+    height:100%;
+
+    border-radius:999px;
+
+    transition:width .5s ease;
+
+}
+
+.progress-label{
+
+    min-width:45px;
+
+    text-align:right;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    color:#475569;
+
+}
+
+/* -------------------------
+   Animated Stripes
+------------------------- */
+
+.striped{
+
+    background-image:
+        linear-gradient(
+            45deg,
+            rgba(255,255,255,.25) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255,255,255,.25) 50%,
+            rgba(255,255,255,.25) 75%,
+            transparent 75%,
+            transparent
+        );
+
+    background-size:40px 40px;
+
+    animation:moveStripe 1.5s linear infinite;
+
+}
+
+@keyframes moveStripe{
+
+    from{
+
+        background-position:0 0;
+
+    }
+
+    to{
+
+        background-position:40px 0;
+
+    }
+
+}
+
+/* -------------------------
+   Dark Mode
+------------------------- */
+
+body.dark-mode .progress-track{
+
+    background:#334155 !important;
+
+}
+
+body.dark-mode .progress-label{
+
+    color:#f8fafc;
+
+}
+
+/* -------------------------
+   Responsive
+------------------------- */
+
+@media(max-width:768px){
+
+.progress-label{
+
+    font-size:12px;
+
+}
+
+.progress-wrapper{
+
+    gap:8px;
+
+}
+
+}

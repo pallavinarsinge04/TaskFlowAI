@@ -1,0 +1,1139 @@
+/* ==========================================================
+   Dashboard Header
+   Part 1 - Layout & Search
+========================================================== */
+
+:root{
+  --primary:#2563eb;
+  --primary-hover:#1d4ed8;
+
+  --success:#10b981;
+  --warning:#f59e0b;
+  --danger:#ef4444;
+
+  --text:#0f172a;
+  --text-light:#64748b;
+
+  --border:#e2e8f0;
+
+  --card:#ffffff;
+  --background:#f8fafc;
+
+  --radius:18px;
+
+  --transition:.3s ease;
+}
+
+/* ===========================
+   HEADER
+=========================== */
+
+.dashboard-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:30px;
+
+    margin-bottom:35px;
+
+    padding:30px;
+
+    background:rgba(255,255,255,.85);
+
+    backdrop-filter:blur(18px);
+
+    border:1px solid rgba(255,255,255,.25);
+
+    border-radius:22px;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.08);
+
+}
+
+/* ===========================
+   LEFT
+=========================== */
+
+.dashboard-header-left{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+}
+
+.dashboard-header-left h1{
+
+    font-size:34px;
+
+    font-weight:700;
+
+    color:var(--text);
+
+    margin:0;
+
+}
+
+.dashboard-header-left p{
+
+    color:var(--text-light);
+
+    font-size:15px;
+
+    margin:0;
+
+}
+
+.dashboard-date{
+
+    display:flex;
+
+    gap:18px;
+
+    margin-top:8px;
+
+    font-size:14px;
+
+    color:var(--text-light);
+
+    font-weight:500;
+
+}
+
+/* ===========================
+   RIGHT
+=========================== */
+
+.dashboard-header-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+
+}
+
+/* ===========================
+   SEARCH
+=========================== */
+
+.dashboard-search{
+
+    position:relative;
+
+    width:340px;
+
+}
+
+.dashboard-search input{
+
+    width:100%;
+
+    height:50px;
+
+    border-radius:14px;
+
+    border:1px solid var(--border);
+
+    background:#fff;
+
+    outline:none;
+
+    padding-left:48px;
+
+    padding-right:16px;
+
+    font-size:15px;
+
+    transition:var(--transition);
+
+}
+
+.dashboard-search input:focus{
+
+    border-color:var(--primary);
+
+    box-shadow:
+        0 0 0 4px rgba(37,99,235,.12);
+
+}
+
+.dashboard-search input::placeholder{
+
+    color:#94a3b8;
+
+}
+
+.search-icon{
+
+    position:absolute;
+
+    left:18px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    color:#94a3b8;
+
+    font-size:16px;
+
+}
+
+/* ===========================
+   BUTTONS
+=========================== */
+
+.header-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    border:none;
+
+    outline:none;
+
+    cursor:pointer;
+
+    height:48px;
+
+    padding:0 18px;
+
+    border-radius:14px;
+
+    font-weight:600;
+
+    font-size:14px;
+
+    transition:var(--transition);
+
+}
+
+.ai-btn{
+
+    background:linear-gradient(
+        135deg,
+        #2563eb,
+        #3b82f6
+    );
+
+    color:white;
+
+}
+
+.ai-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+      0 12px 25px rgba(37,99,235,.35);
+
+}
+
+.header-btn:not(.ai-btn){
+
+    background:#f1f5f9;
+
+    color:var(--text);
+
+}
+
+.header-btn:not(.ai-btn):hover{
+
+    background:#e2e8f0;
+
+}
+
+/* ===========================
+   ICON BUTTON
+=========================== */
+
+.header-icon-btn{
+
+    width:48px;
+
+    height:48px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#f8fafc;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    cursor:pointer;
+
+    position:relative;
+
+    transition:var(--transition);
+
+    color:var(--text);
+
+    font-size:18px;
+
+}
+
+.header-icon-btn:hover{
+
+    background:var(--primary);
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+/* ===========================
+   BADGE
+=========================== */
+
+.notification-count{
+
+    position:absolute;
+
+    top:6px;
+
+    right:6px;
+
+    min-width:18px;
+
+    height:18px;
+
+    background:var(--danger);
+
+    color:white;
+
+    font-size:11px;
+
+    border-radius:50%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-weight:700;
+
+    border:2px solid white;
+
+    animation:pulse 2s infinite;
+
+}
+
+@keyframes pulse{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.15);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+
+}
+/* ==========================================================
+   Dashboard Header
+   Part 2 - Notification Dropdown & Hover Effects
+========================================================== */
+
+/* ===========================
+   DROPDOWN WRAPPERS
+=========================== */
+
+.notification-wrapper,
+.profile-wrapper{
+
+    position:relative;
+
+}
+
+/* ===========================
+   NOTIFICATION DROPDOWN
+=========================== */
+
+.notification-dropdown{
+
+    position:absolute;
+
+    top:65px;
+
+    right:0;
+
+    width:360px;
+
+    max-height:420px;
+
+    overflow-y:auto;
+
+    background:#ffffff;
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    box-shadow:
+        0 20px 45px rgba(15,23,42,.18);
+
+    animation:dropdownFade .25s ease;
+
+    z-index:1000;
+
+}
+
+/* ===========================
+   DROPDOWN HEADER
+=========================== */
+
+.dropdown-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:18px 22px;
+
+    border-bottom:1px solid var(--border);
+
+    background:#f8fafc;
+
+}
+
+.dropdown-header h3{
+
+    margin:0;
+
+    font-size:17px;
+
+    color:var(--text);
+
+    font-weight:700;
+
+}
+
+.dropdown-header span{
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:var(--primary);
+
+    background:rgba(37,99,235,.12);
+
+    padding:6px 12px;
+
+    border-radius:20px;
+
+}
+
+/* ===========================
+   NOTIFICATION ITEM
+=========================== */
+
+.notification-item{
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:14px;
+
+    padding:18px 22px;
+
+    cursor:pointer;
+
+    transition:var(--transition);
+
+    border-bottom:1px solid #f1f5f9;
+
+}
+
+.notification-item:last-child{
+
+    border-bottom:none;
+
+}
+
+.notification-item:hover{
+
+    background:#eff6ff;
+
+}
+
+.notification-dot{
+
+    width:12px;
+
+    height:12px;
+
+    border-radius:50%;
+
+    background:var(--primary);
+
+    margin-top:6px;
+
+    flex-shrink:0;
+
+}
+
+.notification-item h4{
+
+    margin:0;
+
+    font-size:15px;
+
+    color:var(--text);
+
+    font-weight:600;
+
+}
+
+.notification-item p{
+
+    margin-top:6px;
+
+    color:var(--text-light);
+
+    font-size:13px;
+
+}
+
+/* ===========================
+   PROFILE BUTTON
+=========================== */
+
+.profile-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:8px 14px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#ffffff;
+
+    cursor:pointer;
+
+    transition:var(--transition);
+
+    box-shadow:
+        0 4px 10px rgba(0,0,0,.05);
+
+}
+
+.profile-btn:hover{
+
+    background:#eff6ff;
+
+    transform:translateY(-2px);
+
+}
+
+.profile-btn img{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    border:2px solid var(--primary);
+
+}
+
+.profile-btn span{
+
+    font-weight:600;
+
+    color:var(--text);
+
+}
+
+/* ===========================
+   PROFILE DROPDOWN
+=========================== */
+
+.profile-dropdown{
+
+    position:absolute;
+
+    top:65px;
+
+    right:0;
+
+    width:240px;
+
+    background:#ffffff;
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+    box-shadow:
+        0 20px 45px rgba(15,23,42,.18);
+
+    animation:dropdownFade .25s ease;
+
+    z-index:1000;
+
+}
+
+.profile-dropdown a{
+
+    display:flex;
+
+    align-items:center;
+
+    padding:16px 20px;
+
+    text-decoration:none;
+
+    color:var(--text);
+
+    font-size:15px;
+
+    transition:var(--transition);
+
+    border-bottom:1px solid #f1f5f9;
+
+}
+
+.profile-dropdown a:last-child{
+
+    border-bottom:none;
+
+}
+
+.profile-dropdown a:hover{
+
+    background:#eff6ff;
+
+    color:var(--primary);
+
+    padding-left:28px;
+
+}
+
+/* ===========================
+   HOVER EFFECTS
+=========================== */
+
+.header-btn:hover,
+
+.header-icon-btn:hover,
+
+.profile-btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.header-btn:active,
+
+.header-icon-btn:active,
+
+.profile-btn:active{
+
+    transform:scale(.96);
+
+}
+
+/* ===========================
+   DROPDOWN ANIMATION
+=========================== */
+
+@keyframes dropdownFade{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(12px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
+
+/* ===========================
+   CUSTOM SCROLLBAR
+=========================== */
+
+.notification-dropdown::-webkit-scrollbar{
+
+    width:6px;
+
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb{
+
+    background:#cbd5e1;
+
+    border-radius:10px;
+
+}
+
+.notification-dropdown::-webkit-scrollbar-thumb:hover{
+
+    background:#94a3b8;
+
+}
+/* ==========================================================
+   Dashboard Header
+   Part 3 - Responsive, Dark Mode & Final Polish
+========================================================== */
+
+/* ===========================
+   DARK MODE
+=========================== */
+
+body.dark-mode .dashboard-header{
+
+    background:rgba(15,23,42,.92);
+
+    border:1px solid #334155;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+
+}
+
+body.dark-mode .dashboard-header-left h1{
+
+    color:#f8fafc;
+
+}
+
+body.dark-mode .dashboard-header-left p,
+
+body.dark-mode .dashboard-date{
+
+    color:#cbd5e1;
+
+}
+
+body.dark-mode .dashboard-search input{
+
+    background:#1e293b;
+
+    border-color:#334155;
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .dashboard-search input::placeholder{
+
+    color:#94a3b8;
+
+}
+
+body.dark-mode .header-btn:not(.ai-btn){
+
+    background:#1e293b;
+
+    color:#f8fafc;
+
+}
+
+body.dark-mode .header-btn:not(.ai-btn):hover{
+
+    background:#334155;
+
+}
+
+body.dark-mode .header-icon-btn{
+
+    background:#1e293b;
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .profile-btn{
+
+    background:#1e293b;
+
+}
+
+body.dark-mode .profile-btn span{
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .notification-dropdown,
+
+body.dark-mode .profile-dropdown{
+
+    background:#1e293b;
+
+    border-color:#334155;
+
+}
+
+body.dark-mode .dropdown-header{
+
+    background:#0f172a;
+
+    border-bottom:1px solid #334155;
+
+}
+
+body.dark-mode .dropdown-header h3{
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .notification-item{
+
+    border-bottom:1px solid #334155;
+
+}
+
+body.dark-mode .notification-item:hover{
+
+    background:#334155;
+
+}
+
+body.dark-mode .notification-item h4{
+
+    color:#ffffff;
+
+}
+
+body.dark-mode .notification-item p{
+
+    color:#cbd5e1;
+
+}
+
+body.dark-mode .profile-dropdown a{
+
+    color:#ffffff;
+
+    border-bottom:1px solid #334155;
+
+}
+
+body.dark-mode .profile-dropdown a:hover{
+
+    background:#334155;
+
+}
+
+/* ===========================
+   TABLET
+=========================== */
+
+@media (max-width:992px){
+
+.dashboard-header{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+}
+
+.dashboard-header-right{
+
+    width:100%;
+
+    justify-content:space-between;
+
+    flex-wrap:wrap;
+
+}
+
+.dashboard-search{
+
+    width:100%;
+
+    order:1;
+
+}
+
+}
+
+/* ===========================
+   MOBILE
+=========================== */
+
+@media (max-width:768px){
+
+.dashboard-header{
+
+    padding:20px;
+
+    gap:20px;
+
+}
+
+.dashboard-header-left h1{
+
+    font-size:28px;
+
+}
+
+.dashboard-search{
+
+    width:100%;
+
+}
+
+.dashboard-search input{
+
+    height:46px;
+
+}
+
+.header-btn{
+
+    height:44px;
+
+    padding:0 14px;
+
+    font-size:13px;
+
+}
+
+.header-btn span{
+
+    display:none;
+
+}
+
+.header-icon-btn{
+
+    width:44px;
+
+    height:44px;
+
+}
+
+.notification-dropdown{
+
+    width:300px;
+
+    right:-20px;
+
+}
+
+.profile-dropdown{
+
+    width:220px;
+
+}
+
+}
+
+/* ===========================
+   SMALL MOBILE
+=========================== */
+
+@media (max-width:576px){
+
+.dashboard-header{
+
+    padding:16px;
+
+}
+
+.dashboard-header-right{
+
+    gap:10px;
+
+}
+
+.dashboard-search{
+
+    width:100%;
+
+}
+
+.dashboard-search input{
+
+    font-size:14px;
+
+}
+
+.notification-dropdown{
+
+    width:260px;
+
+}
+
+.profile-dropdown{
+
+    width:200px;
+
+}
+
+}
+
+/* ===========================
+   EXTRA SMALL
+=========================== */
+
+@media (max-width:400px){
+
+.dashboard-header-left h1{
+
+    font-size:24px;
+
+}
+
+.dashboard-date{
+
+    flex-direction:column;
+
+    gap:4px;
+
+}
+
+.notification-dropdown{
+
+    width:230px;
+
+}
+
+.profile-dropdown{
+
+    width:180px;
+
+}
+
+}
+
+/* ===========================
+   ACCESSIBILITY
+=========================== */
+
+.header-btn:focus,
+
+.header-icon-btn:focus,
+
+.profile-btn:focus,
+
+.dashboard-search input:focus{
+
+    outline:2px solid #60a5fa;
+
+    outline-offset:2px;
+
+}
+
+/* ===========================
+   IMAGE EFFECTS
+=========================== */
+
+.profile-btn img{
+
+    transition:transform .3s ease;
+
+}
+
+.profile-btn:hover img{
+
+    transform:rotate(6deg) scale(1.08);
+
+}
+
+/* ===========================
+   GLASS EFFECT
+=========================== */
+
+.notification-dropdown,
+
+.profile-dropdown{
+
+    backdrop-filter:blur(16px);
+
+}
+
+/* ===========================
+   TRANSITIONS
+=========================== */
+
+.dashboard-header *{
+
+    transition:
+        background .25s ease,
+        color .25s ease,
+        border-color .25s ease,
+        transform .25s ease,
+        box-shadow .25s ease;
+
+}
+
+/* ===========================
+   FINAL FADE ANIMATION
+=========================== */
+
+.dashboard-header{
+
+    animation:headerFade .5s ease;
+
+}
+
+@keyframes headerFade{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(-15px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
