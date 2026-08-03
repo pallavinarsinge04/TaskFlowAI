@@ -1,0 +1,174 @@
+.kpi-card{
+
+    background:#fff;
+
+    border-radius:20px;
+
+    padding:24px;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.08);
+
+    transition:.3s;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+    cursor:pointer;
+
+}
+
+.kpi-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.kpi-icon{
+
+    width:60px;
+
+    height:60px;
+
+    border-radius:18px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:26px;
+
+}
+
+.trend{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:5px;
+
+    padding:6px 12px;
+
+    border-radius:30px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+.positive{
+
+    background:#dcfce7;
+
+    color:#16a34a;
+
+}
+
+.negative{
+
+    background:#fee2e2;
+
+    color:#dc2626;
+
+}
+
+.kpi-value{
+
+    font-size:38px;
+
+    font-weight:700;
+
+    color:#0f172a;
+
+}
+
+.kpi-title{
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+.kpi-subtitle{
+
+    color:#64748b;
+
+    font-size:14px;
+
+}
+
+.progress-container{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.progress-track{
+
+    flex:1;
+
+    height:8px;
+
+    background:#e2e8f0;
+
+    border-radius:50px;
+
+    overflow:hidden;
+
+}
+
+.progress-fill{
+
+    height:100%;
+
+    border-radius:50px;
+
+}
+
+.progress-container span{
+
+    font-weight:600;
+
+    font-size:14px;
+
+}
+
+@media(max-width:768px){
+
+.kpi-card{
+
+    padding:18px;
+
+}
+
+.kpi-value{
+
+    font-size:30px;
+
+}
+
+.kpi-icon{
+
+    width:50px;
+
+    height:50px;
+
+}
+
+}
