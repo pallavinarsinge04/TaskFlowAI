@@ -1,0 +1,487 @@
+/* ==========================================================
+   TaskFlowAI - Global Responsive System
+   Mobile First Responsive Design
+========================================================== */
+
+/* =============== VARIABLES =============== */
+
+:root{
+  --container-width:1400px;
+  --sidebar-width:270px;
+  --navbar-height:72px;
+
+  --radius-sm:10px;
+  --radius-md:16px;
+  --radius-lg:22px;
+
+  --space-xs:8px;
+  --space-sm:12px;
+  --space-md:20px;
+  --space-lg:30px;
+  --space-xl:40px;
+}
+
+/* =============== GLOBAL =============== */
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+img{
+  max-width:100%;
+  height:auto;
+}
+
+button{
+  cursor:pointer;
+}
+
+table{
+  width:100%;
+  overflow-x:auto;
+}
+
+.container{
+  width:min(100%, var(--container-width));
+  margin:auto;
+  padding-inline:24px;
+}
+
+/* =============== GRID HELPERS =============== */
+
+.grid-2{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:24px;
+}
+
+.grid-3{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:24px;
+}
+
+.grid-4{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:24px;
+}
+
+.flex-between{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.flex-center{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.flex-column{
+  display:flex;
+  flex-direction:column;
+}
+
+/* =============== CARD =============== */
+
+.card{
+  background:#fff;
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+/* ==========================================================
+   LARGE DESKTOP
+========================================================== */
+
+@media (max-width:1400px){
+
+.container{
+    max-width:1200px;
+}
+
+.grid-4{
+    grid-template-columns:repeat(3,1fr);
+}
+
+}
+
+/* ==========================================================
+   LAPTOP
+========================================================== */
+
+@media (max-width:1200px){
+
+.container{
+    padding-inline:20px;
+}
+
+.grid-4{
+    grid-template-columns:repeat(2,1fr);
+}
+
+.grid-3{
+    grid-template-columns:repeat(2,1fr);
+}
+
+.dashboard-grid{
+    grid-template-columns:repeat(2,1fr)!important;
+}
+
+.project-grid{
+    grid-template-columns:repeat(2,1fr)!important;
+}
+
+.quick-grid{
+    grid-template-columns:repeat(3,1fr)!important;
+}
+
+}
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width:992px){
+
+.container{
+    padding-inline:18px;
+}
+
+.grid-4,
+.grid-3,
+.grid-2{
+    grid-template-columns:1fr;
+}
+
+.dashboard-grid{
+    grid-template-columns:1fr!important;
+}
+
+.project-grid{
+    grid-template-columns:1fr!important;
+}
+
+.quick-grid{
+    grid-template-columns:repeat(2,1fr)!important;
+}
+
+.insight-grid{
+    grid-template-columns:1fr!important;
+}
+
+.risk-grid{
+    grid-template-columns:1fr!important;
+}
+
+.timeline-item{
+
+    grid-template-columns:1fr;
+
+    gap:10px;
+
+}
+
+.ai-header{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+}
+
+.project-header{
+
+    flex-direction:column;
+
+    align-items:flex-start;
+
+}
+
+.navbar{
+
+    padding:15px;
+
+}
+
+}
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width:768px){
+
+.container{
+    padding-inline:15px;
+}
+
+.quick-grid{
+
+    grid-template-columns:1fr!important;
+
+}
+
+.dashboard-card{
+
+    padding:18px;
+
+}
+
+.card{
+
+    padding:18px;
+
+}
+
+.section{
+
+    padding:18px;
+
+}
+
+.project-page{
+
+    padding:18px!important;
+
+}
+
+.ai-page{
+
+    padding:18px!important;
+
+}
+
+.chat-messages{
+
+    height:350px!important;
+
+}
+
+.chat-input{
+
+    flex-wrap:wrap;
+
+}
+
+.chat-input input{
+
+    width:100%;
+
+    order:1;
+
+}
+
+.icon-btn{
+
+    width:45px;
+
+    height:45px;
+
+}
+
+.send-btn{
+
+    width:45px;
+
+    height:45px;
+
+}
+
+.timeline{
+
+    gap:18px;
+
+}
+
+.timeline-item strong{
+
+    margin-top:8px;
+
+}
+
+}
+
+/* ==========================================================
+   SMALL MOBILE
+========================================================== */
+
+@media (max-width:576px){
+
+body{
+
+    font-size:14px;
+
+}
+
+.container{
+
+    padding-inline:12px;
+
+}
+
+h1{
+
+    font-size:28px!important;
+
+}
+
+h2{
+
+    font-size:22px!important;
+
+}
+
+h3{
+
+    font-size:18px!important;
+
+}
+
+.dashboard-card h2{
+
+    font-size:28px!important;
+
+}
+
+.ai-header h1{
+
+    font-size:26px!important;
+
+}
+
+.section-title h2{
+
+    font-size:20px!important;
+
+}
+
+.chat-bubble{
+
+    max-width:90%!important;
+
+    font-size:14px;
+
+}
+
+.chat-avatar{
+
+    width:40px;
+
+    height:40px;
+
+}
+
+.quick-card{
+
+    min-height:120px;
+
+}
+
+.quick-icon{
+
+    font-size:30px;
+
+}
+
+.project-search input{
+
+    width:100%;
+
+}
+
+}
+
+/* ==========================================================
+   EXTRA SMALL DEVICES
+========================================================== */
+
+@media (max-width:400px){
+
+.container{
+
+    padding-inline:10px;
+
+}
+
+.chat-input{
+
+    gap:8px;
+
+}
+
+.icon-btn,
+.send-btn{
+
+    width:40px;
+
+    height:40px;
+
+}
+
+.dashboard-card{
+
+    padding:15px;
+
+}
+
+.section{
+
+    padding:15px;
+
+}
+
+}
+
+/* ==========================================================
+   LANDSCAPE PHONES
+========================================================== */
+
+@media (max-height:500px){
+
+.chat-messages{
+
+    height:220px!important;
+
+}
+
+}
+
+/* ==========================================================
+   UTILITIES
+========================================================== */
+
+.hide-mobile{
+
+    display:block;
+
+}
+
+.show-mobile{
+
+    display:none;
+
+}
+
+@media (max-width:768px){
+
+.hide-mobile{
+
+    display:none!important;
+
+}
+
+.show-mobile{
+
+    display:block!important;
+
+}
+
+}
