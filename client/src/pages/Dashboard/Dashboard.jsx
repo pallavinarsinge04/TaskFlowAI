@@ -2,13 +2,13 @@ import "./Dashboard.css";
 
 import DashboardHeader from "./DashboardHeader";
 import KpiCard from "./components/KpiCard";
-import DashboardCharts from "./DashboardCharts";
-import DashboardInsights from "./DashboardInsights";
-import DashboardCalendar from "./DashboardCalendar";
-import DashboardActivity from "./DashboardActivity";
-import DashboardTeam from "./DashboardTeam";
-import DashboardQuickActions from "./DashboardQuickActions";
-import DashboardTasks from "./DashboardTasks";
+import DashboardCharts from "./components/DashboardCharts";
+import AIInsights from "../../components/dashboard/AIInsights";
+import CalendarWidget from "../../components/dashboard/CalendarWidget";
+import Activity from "../../components/dashboard/Activity";
+import TeamMembers from "../../components/dashboard/TeamMembers";
+import QuickActions from "../../components/dashboard/QuickActions";
+import RecentTasks from "../../components/dashboard/RecentTasks";
 
 import {
   FaFolderOpen,
@@ -183,19 +183,19 @@ function Dashboard() {
         <div className="dashboard-left">
           <DashboardCharts projects={recentProjects} />
 
-          <DashboardTasks tasks={todayTasks} />
+                    <RecentTasks tasks={todayTasks} />
 
-          <DashboardActivity activity={recentActivity} />
+                    <Activity activity={recentActivity} />
         </div>
 
         <div className="dashboard-right">
-          <DashboardInsights recommendations={[]} />
+          <AIInsights />
 
-          <DashboardQuickActions />
+                    <QuickActions />
 
-          <DashboardCalendar events={todayTasks} />
+                    <CalendarWidget events={todayTasks} />
 
-          <DashboardTeam members={teamMembers} />
+                    <TeamMembers members={teamMembers} />
         </div>
       </div>
     </div>
