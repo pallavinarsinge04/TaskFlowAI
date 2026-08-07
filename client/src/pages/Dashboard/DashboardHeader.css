@@ -483,6 +483,12 @@
 
 }
 
+.notification-item.read{
+
+    opacity:.65;
+
+}
+
 .notification-dot{
 
     width:12px;
