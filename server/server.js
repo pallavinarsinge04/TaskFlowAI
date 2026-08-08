@@ -24,7 +24,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/projects", projectRoutes);
-
+app.use("/api/ai", aiRoutes);
 const server = http.createServer(app);
 
 initializeSocket(server);

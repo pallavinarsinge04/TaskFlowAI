@@ -17,33 +17,21 @@ export const chat = async (req, res) => {
 
     const reply = result.response.text();
 
-    if (userId) {
-      await supabase.from("ai_chats").insert([
-        {
-          user_id: userId,
-          prompt: message,
-          response: reply,
-        },
-      ]);
-    }
-
-    res.json({
+    return res.json({
       success: true,
       reply,
     });
 
-  } catch (err) {
+  } catch (error) {
+    console.error("AI Chat Error:", error);
 
-    console.error(err);
-
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: err.message,
+      message: "AI service failed",
+      error: error.message,
     });
-
   }
 };
-
 // Image Analysis
 export const analyzeImage = async (req, res) => {
 

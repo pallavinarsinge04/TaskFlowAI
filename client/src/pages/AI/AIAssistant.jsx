@@ -186,88 +186,54 @@ function AIAssistant() {
   // Send Prompt
   // ===============================
 
-  const sendPrompt = async (text) => {
+ const handleSendMessage = async () => {
+  if (!input.trim()) return;
 
-    if (!text.trim()) return;
+  const userMessage = input.trim();
 
-    const userMessage = {
-
+  setMessages((prev) => [
+    ...prev,
+    {
       role: "user",
+      content: userMessage,
+    },
+  ]);
 
-      content: text,
+  setInput("");
+  setLoading(true);
 
-    };
+  try {
+    const response = await axios.post(
+      "http://localhost:5000/api/ai/chat",
+      {
+        message: userMessage,
+        userId: "demo-user",
+      }
+    );
+
+    const aiReply = response.data.reply;
 
     setMessages((prev) => [
-
       ...prev,
-
-      userMessage,
-
+      {
+        role: "assistant",
+        content: aiReply || "No response received from AI.",
+      },
     ]);
+  } catch (error) {
+    console.error("AI Service Error:", error);
 
-    setLoading(true);
-
-    try {
-
-      const res = await axios.post(API, {
-
-        message: text,
-
-      });
-
-      setMessages((prev) => [
-
-        ...prev,
-
-        {
-
-          role: "assistant",
-
-          content: res.data.reply,
-
-        },
-
-      ]);
-
-    } catch (err) {
-
-      setMessages((prev) => [
-
-        ...prev,
-
-        {
-
-          role: "assistant",
-
-          content:
-            "❌ Unable to connect to AI service.",
-
-        },
-
-      ]);
-
-      console.error(err);
-
-    } finally {
-
-      setLoading(false);
-
-    }
-
-  };
-
-  // ===============================
-  // Send Chat Message
-  // ===============================
-
-  const handleSend = () => {
-
-    sendPrompt(input);
-
-    setInput("");
-
-  };
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "Unable to connect to AI service.",
+      },
+    ]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ===============================
   // Press Enter
@@ -282,6 +248,60 @@ function AIAssistant() {
     }
 
   };
+  const handleSend = async () => {
+  const text = input?.trim();
+
+  if (!text) return;
+
+  try {
+    // Add user message
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: text,
+      },
+    ]);
+
+    // Clear input
+    setInput("");
+
+    // Show loading
+    setLoading(true);
+
+    const response = await axios.post(
+      "http://localhost:5000/api/ai/chat",
+      {
+        message: text,
+        userId: user?.id || null,
+      }
+    );
+
+    // Add AI response
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content:
+          response.data?.reply ||
+          "I couldn't generate a response.",
+      },
+    ]);
+  } catch (error) {
+    console.error("AI request error:", error);
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content:
+          "Unable to connect to AI service.",
+      },
+    ]);
+  } finally {
+    setLoading(false);
+  }
+};
 
    return (
     <div className="ai-page">
