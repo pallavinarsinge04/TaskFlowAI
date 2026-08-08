@@ -18,8 +18,7 @@ import {
 
 import "./Sidebar.css";
 
-function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+function Sidebar({ collapsed, setCollapsed }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
@@ -124,9 +123,7 @@ function Sidebar() {
 
           <button
             className="collapse-btn"
-            onClick={() =>
-              setCollapsed(!collapsed)
-            }
+           onClick={() => setCollapsed(!collapsed)}
           >
             {collapsed ? (
               <FaChevronRight />

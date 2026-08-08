@@ -8,6 +8,7 @@
   flex-direction: column;
   gap: 24px;
   padding-bottom: 32px;
+   box-sizing: border-box;
   animation: dashboardFade 0.45s ease;
 }
 

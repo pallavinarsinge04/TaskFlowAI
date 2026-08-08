@@ -26,17 +26,11 @@
    SIDEBAR
 ===================================== */
 
-.sidebar{
-
-    position:fixed;
-
-    left:0;
-
-    top:0;
-
-    width:var(--sidebar-width);
-
-    height:100vh;
+.sidebar {
+  width: 260px;
+  height: 100vh;
+  transition: width 0.3s ease;
+  overflow: hidden;
 
     background:linear-gradient(
         180deg,
@@ -66,11 +60,11 @@
    COLLAPSED
 ===================================== */
 
-.sidebar.collapsed{
 
-    width:var(--sidebar-collapse-width);
-
+.sidebar.collapsed {
+  width: 80px;
 }
+
 
 /* =====================================
    HEADER
