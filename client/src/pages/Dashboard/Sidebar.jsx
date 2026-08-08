@@ -35,7 +35,7 @@ function Sidebar() {
 
       <nav>
 
-        <NavLink to="/dashboard">
+        <NavLink to="/">
           <FaHome />
           <span>Dashboard</span>
         </NavLink>

@@ -32,8 +32,8 @@ function DashboardCards({ cards = [] }) {
             <div className="stat-card-body">
               <p className="stat-card-label">{card.title}</p>
               <h3 className="stat-card-value">
-                <CountUp end={end} duration={1.6} suffix={suffix} />
-              </h3>
+  {end}{suffix}
+</h3>
               {card.subtitle && (
                 <span className="stat-card-subtitle">{card.subtitle}</span>
               )}

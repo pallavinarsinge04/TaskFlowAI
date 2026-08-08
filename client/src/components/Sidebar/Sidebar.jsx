@@ -39,7 +39,7 @@ function Sidebar() {
     {
       title: "Dashboard",
       icon: <FaHome />,
-      path: "/",
+      path: "/dashboard",
     },
     {
       title: "Projects",
@@ -51,11 +51,11 @@ function Sidebar() {
       icon: <FaTasks />,
       path: "/tasks",
     },
-    {
-      title: "AI Copilot",
-      icon: <FaRobot />,
-      path: "/ai",
-    },
+  {
+  title: "AI Copilot",
+  icon: <FaRobot />,
+  path: "/ai-assistant",
+},
     {
       title: "Calendar",
       icon: <FaCalendarAlt />,

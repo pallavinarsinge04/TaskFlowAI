@@ -72,7 +72,7 @@ function App() {
         {/* PROTECTED APP */}
         <Route element={<AppLayout />}>
 
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard/>} />
           <Route path="/projects" element={<Projects />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/tasks/:id" element={<TaskDetails />} />
