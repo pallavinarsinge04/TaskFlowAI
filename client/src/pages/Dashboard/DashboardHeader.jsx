@@ -87,14 +87,7 @@ function DashboardHeader() {
           />
         </div>
 
-        <button
-          type="button"
-          className="header-btn ai-btn"
-          onClick={() => navigate("/ai-assistant")}
-        >
-          <FaRobot />
-          <span>AI Assistant</span>
-        </button>
+       
 
         <button
           type="button"
