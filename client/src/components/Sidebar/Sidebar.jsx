@@ -34,48 +34,48 @@ function Sidebar({ collapsed, setCollapsed }) {
     };
   }, []);
 
-  const menu = [
-    {
-      title: "Dashboard",
-      icon: <FaHome />,
-      path: "/dashboard",
-    },
-    {
-      title: "Projects",
-      icon: <FaFolderOpen />,
-      path: "/projects",
-    },
-    {
-      title: "Tasks",
-      icon: <FaTasks />,
-      path: "/tasks",
-    },
-    {
-      title: "Calendar",
-      icon: <FaCalendarAlt />,
-      path: "/calendar",
-    },
-    {
-      title: "Analytics",
-      icon: <FaChartBar />,
-      path: "/analytics",
-    },
-    {
-      title: "Team",
-      icon: <FaUsers />,
-      path: "/team",
-    },
-    {
-      title: "Notifications",
-      icon: <FaBell />,
-      path: "/notifications",
-    },
-    {
-      title: "Settings",
-      icon: <FaCog />,
-      path: "/settings",
-    },
-  ];
+const menu = [
+  {
+    title: "Dashboard",
+    icon: <FaHome />,
+    path: "/dashboard",
+  },
+  {
+    title: "Projects",
+    icon: <FaFolderOpen />,
+    path: "/projects",
+  },
+  {
+    title: "Tasks",
+    icon: <FaTasks />,
+    path: "/tasks",
+  },
+  {
+    title: "Calendar",
+    icon: <FaCalendarAlt />,
+    path: "/calendar",
+  },
+  {
+    title: "Analytics",
+    icon: <FaChartBar />,
+    path: "/analytics",
+  },
+  {
+    title: "Team",
+    icon: <FaUsers />,
+    path: "/team",
+  },
+  {
+    title: "Notifications",
+    icon: <FaBell />,
+    path: "/notifications",
+  },
+  {
+    title: "Settings",
+    icon: <FaCog />,
+    path: "/settings",
+  },
+];
 
   return (
     <>
@@ -110,22 +110,14 @@ function Sidebar({ collapsed, setCollapsed }) {
           )}
 
           {/* Desktop collapse button */}
-          <button
-            type="button"
-            className="collapse-btn"
-            onClick={() => setCollapsed((prev) => !prev)}
-            aria-label={
-              collapsed
-                ? "Expand sidebar"
-                : "Collapse sidebar"
-            }
-          >
-            {collapsed ? (
-              <FaChevronRight />
-            ) : (
-              <FaChevronLeft />
-            )}
-          </button>
+         <button
+  className="collapse-btn"
+  onClick={() => setCollapsed((prev) => !prev)}
+  type="button"
+  aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+>
+  {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
+</button>
 
           {/* Mobile close */}
           <button
