@@ -1,30 +1,64 @@
 /* =========================================
-   MAIN APP LAYOUT
+   GLOBAL BOX SIZING
+========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+
+/* =========================================
+   HTML / BODY / ROOT
+========================================= */
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+
+/* =========================================
+   APP LAYOUT
 ========================================= */
 
 .app-layout {
-  min-height: 100vh;
   width: 100%;
+  min-height: 100vh;
   display: flex;
   background: #f5f7fb;
 }
 
+
 /* =========================================
-   MAIN CONTENT
+   MAIN AREA
 ========================================= */
 
 .app-main {
+  width: calc(100% - 360px);
   min-width: 0;
   min-height: 100vh;
-  flex: 1;
-  margin-left: 280px;
-  transition: margin-left 0.3s ease;
+
+  margin-left: 360px;
+
+  transition:
+    margin-left 0.3s ease,
+    width 0.3s ease;
 }
 
-/* When sidebar is collapsed */
+
+/* =========================================
+   MAIN AREA WHEN SIDEBAR COLLAPSED
+========================================= */
+
 .app-main.collapsed {
-  margin-left: 120px;
+  width: calc(100% - 90px);
+  margin-left: 90px;
 }
+
 
 /* =========================================
    PAGE CONTENT
@@ -33,17 +67,27 @@
 .page-content {
   width: 100%;
   min-height: calc(100vh - 80px);
+
+  padding: 32px;
+
   box-sizing: border-box;
 }
 
+
 /* =========================================
-   RESPONSIVE
+   MOBILE
 ========================================= */
 
 @media (max-width: 992px) {
+
   .app-main,
   .app-main.collapsed {
-    margin-left: 0;
     width: 100%;
+    margin-left: 0;
   }
+
+  .page-content {
+    padding: 20px;
+  }
+
 }
