@@ -11,22 +11,22 @@ export default function AppLayout() {
 
   return (
     <div className="app-layout">
+
       <Sidebar
         collapsed={collapsed}
         setCollapsed={setCollapsed}
       />
 
-      <div
-        className={`app-main ${
-          collapsed ? "collapsed" : ""
-        }`}
-      >
+      <div className={`app-main ${collapsed ? "collapsed" : ""}`}>
+
         <Navbar />
 
         <main className="page-content">
           <Outlet />
         </main>
+
       </div>
+
     </div>
   );
 }
