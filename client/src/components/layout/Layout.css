@@ -1,28 +1,49 @@
+/* =========================================
+   MAIN APP LAYOUT
+========================================= */
+
 .app-layout {
-  display: flex;
-  width: 100%;
   min-height: 100vh;
-  overflow: hidden;
+  width: 100%;
+  display: flex;
+  background: #f5f7fb;
 }
 
-/* Main website area */
+/* =========================================
+   MAIN CONTENT
+========================================= */
+
 .app-main {
-  flex: 1;
   min-width: 0;
-  width: calc(100% - 260px);
-  margin-left: 260px;
-  transition: margin-left 0.3s ease, width 0.3s ease;
+  min-height: 100vh;
+  flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
 }
 
 /* When sidebar is collapsed */
 .app-main.collapsed {
-  width: calc(100% - 120px);
   margin-left: 120px;
 }
 
-/* Page content */
+/* =========================================
+   PAGE CONTENT
+========================================= */
+
 .page-content {
   width: 100%;
   min-height: calc(100vh - 80px);
-  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 992px) {
+  .app-main,
+  .app-main.collapsed {
+    margin-left: 0;
+    width: 100%;
+  }
 }

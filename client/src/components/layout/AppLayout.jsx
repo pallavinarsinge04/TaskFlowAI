@@ -1,7 +1,9 @@
 import { Outlet } from "react-router-dom";
+import { useState } from "react";
+
 import Sidebar from "../sidebar/Sidebar";
 import Navbar from "./Navbar";
-import { useState } from "react";
+
 import "./layout.css";
 
 export default function AppLayout() {
@@ -9,22 +11,22 @@ export default function AppLayout() {
 
   return (
     <div className="app-layout">
-
       <Sidebar
         collapsed={collapsed}
         setCollapsed={setCollapsed}
       />
 
-      <div className={`app-main ${collapsed ? "collapsed" : ""}`}>
-        
+      <div
+        className={`app-main ${
+          collapsed ? "collapsed" : ""
+        }`}
+      >
         <Navbar />
 
         <main className="page-content">
           <Outlet />
         </main>
-
       </div>
-
     </div>
   );
 }

@@ -6,7 +6,6 @@ import {
   FaHome,
   FaFolderOpen,
   FaTasks,
-  FaRobot,
   FaCalendarAlt,
   FaChartBar,
   FaUsers,
@@ -30,8 +29,9 @@ function Sidebar({ collapsed, setCollapsed }) {
 
     window.addEventListener("resize", handleResize);
 
-    return () =>
+    return () => {
       window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const menu = [
@@ -50,7 +50,6 @@ function Sidebar({ collapsed, setCollapsed }) {
       icon: <FaTasks />,
       path: "/tasks",
     },
-  
     {
       title: "Calendar",
       icon: <FaCalendarAlt />,
@@ -80,8 +79,7 @@ function Sidebar({ collapsed, setCollapsed }) {
 
   return (
     <>
-      {/* Mobile Toggle */}
-
+      {/* Mobile menu button */}
       <button
         className="mobile-menu-btn"
         onClick={() => setMobileOpen(true)}
@@ -89,8 +87,7 @@ function Sidebar({ collapsed, setCollapsed }) {
         <FaBars />
       </button>
 
-      {/* Overlay */}
-
+      {/* Mobile overlay */}
       {mobileOpen && (
         <div
           className="sidebar-overlay"
@@ -99,17 +96,12 @@ function Sidebar({ collapsed, setCollapsed }) {
       )}
 
       {/* Sidebar */}
-
       <aside
-        className={`sidebar
-
-        ${collapsed ? "collapsed" : ""}
-
-        ${mobileOpen ? "mobile-open" : ""}
-        `}
+        className={`sidebar ${
+          collapsed ? "collapsed" : ""
+        } ${mobileOpen ? "mobile-open" : ""}`}
       >
         {/* Header */}
-
         <div className="sidebar-header">
           {!collapsed && (
             <div className="sidebar-logo">
@@ -117,10 +109,15 @@ function Sidebar({ collapsed, setCollapsed }) {
             </div>
           )}
 
+          {/* Desktop collapse button */}
           <button
+            type="button"
             className="collapse-btn"
-            onClick={() =>
-              setCollapsed(!collapsed)
+            onClick={() => setCollapsed((prev) => !prev)}
+            aria-label={
+              collapsed
+                ? "Expand sidebar"
+                : "Collapse sidebar"
             }
           >
             {collapsed ? (
@@ -130,7 +127,9 @@ function Sidebar({ collapsed, setCollapsed }) {
             )}
           </button>
 
+          {/* Mobile close */}
           <button
+            type="button"
             className="mobile-close-btn"
             onClick={() => setMobileOpen(false)}
           >
@@ -139,24 +138,21 @@ function Sidebar({ collapsed, setCollapsed }) {
         </div>
 
         {/* User */}
-
         {!collapsed && (
           <div className="sidebar-user">
             <img
-              src="https://ui-avatars.com/api/?name=TaskFlowAI"
+              src="https://ui-avatars.com/api/?name=Pallavi&background=ffffff&color=111827"
               alt="User"
             />
 
             <div>
               <h4>Pallavi</h4>
-
               <p>Project Manager</p>
             </div>
           </div>
         )}
 
         {/* Menu */}
-
         <nav className="sidebar-menu">
           {menu.map((item) => (
             <NavLink
@@ -167,23 +163,23 @@ function Sidebar({ collapsed, setCollapsed }) {
                   ? "sidebar-link active"
                   : "sidebar-link"
               }
-              onClick={() =>
-                setMobileOpen(false)
-              }
+              onClick={() => setMobileOpen(false)}
+              title={collapsed ? item.title : ""}
             >
               <span className="icon">
                 {item.icon}
               </span>
 
               {!collapsed && (
-                <span>{item.title}</span>
+                <span className="sidebar-link-text">
+                  {item.title}
+                </span>
               )}
             </NavLink>
           ))}
         </nav>
 
         {/* Footer */}
-
         {!collapsed && (
           <div className="sidebar-footer">
             <h4>AI Productivity</h4>
@@ -191,9 +187,7 @@ function Sidebar({ collapsed, setCollapsed }) {
             <div className="progress">
               <div
                 className="progress-fill"
-                style={{
-                  width: "82%",
-                }}
+                style={{ width: "82%" }}
               />
             </div>
 
