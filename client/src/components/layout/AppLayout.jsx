@@ -1,13 +1,30 @@
 import { Outlet } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Sidebar from "../sidebar/Sidebar";
 import Navbar from "./Navbar";
+
+import socket from "../../socket";
 
 import "./layout.css";
 
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("🟢 Connected to Socket.IO:", socket.id);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("🔴 Disconnected from Socket.IO");
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+    };
+  }, []);
 
   return (
     <div className="app-layout">
