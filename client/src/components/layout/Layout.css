@@ -1,25 +1,20 @@
 /* =========================================
-   GLOBAL BOX SIZING
+   GLOBAL
 ========================================= */
 
 * {
   box-sizing: border-box;
 }
 
-
-/* =========================================
-   HTML / BODY / ROOT
-========================================= */
-
 html,
 body,
 #root {
   margin: 0;
   padding: 0;
+
   width: 100%;
   min-height: 100%;
 }
-
 
 /* =========================================
    APP LAYOUT
@@ -28,51 +23,49 @@ body,
 .app-layout {
   width: 100%;
   min-height: 100vh;
-  display: flex;
+
   background: #f5f7fb;
 }
 
-
 /* =========================================
-   MAIN AREA
+   MAIN
 ========================================= */
 
 .app-main {
-  width: calc(100% - 360px);
-  min-width: 0;
   min-height: 100vh;
 
-  margin-left: 360px;
+  margin-left: 280px;
+
+  width: calc(100% - 280px);
 
   transition:
     margin-left 0.3s ease,
     width 0.3s ease;
 }
 
-
 /* =========================================
-   MAIN AREA WHEN SIDEBAR COLLAPSED
+   COLLAPSED
 ========================================= */
 
 .app-main.collapsed {
-  width: calc(100% - 90px);
   margin-left: 90px;
+
+  width: calc(100% - 90px);
 }
 
-
 /* =========================================
-   PAGE CONTENT
+   PAGE
 ========================================= */
 
 .page-content {
   width: 100%;
+
   min-height: calc(100vh - 80px);
 
   padding: 32px;
 
   box-sizing: border-box;
 }
-
 
 /* =========================================
    MOBILE
@@ -82,12 +75,12 @@ body,
 
   .app-main,
   .app-main.collapsed {
-    width: 100%;
     margin-left: 0;
+
+    width: 100%;
   }
 
   .page-content {
     padding: 20px;
   }
-
 }
