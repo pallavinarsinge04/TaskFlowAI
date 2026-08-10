@@ -18,7 +18,7 @@ import {
 
 import "./Sidebar.css";
 
-function Sidebar() {
+function Sidebar({ collapsed, setCollapsed }) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
