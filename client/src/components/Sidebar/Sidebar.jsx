@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+
 import {
   FaBars,
   FaTimes,
@@ -34,48 +35,48 @@ function Sidebar({ collapsed, setCollapsed }) {
     };
   }, []);
 
-const menu = [
-  {
-    title: "Dashboard",
-    icon: <FaHome />,
-    path: "/dashboard",
-  },
-  {
-    title: "Projects",
-    icon: <FaFolderOpen />,
-    path: "/projects",
-  },
-  {
-    title: "Tasks",
-    icon: <FaTasks />,
-    path: "/tasks",
-  },
-  {
-    title: "Calendar",
-    icon: <FaCalendarAlt />,
-    path: "/calendar",
-  },
-  {
-    title: "Analytics",
-    icon: <FaChartBar />,
-    path: "/analytics",
-  },
-  {
-    title: "Team",
-    icon: <FaUsers />,
-    path: "/team",
-  },
-  {
-    title: "Notifications",
-    icon: <FaBell />,
-    path: "/notifications",
-  },
-  {
-    title: "Settings",
-    icon: <FaCog />,
-    path: "/settings",
-  },
-];
+  const menu = [
+    {
+      title: "Dashboard",
+      icon: <FaHome />,
+      path: "/dashboard",
+    },
+    {
+      title: "Projects",
+      icon: <FaFolderOpen />,
+      path: "/projects",
+    },
+    {
+      title: "Tasks",
+      icon: <FaTasks />,
+      path: "/tasks",
+    },
+    {
+      title: "Calendar",
+      icon: <FaCalendarAlt />,
+      path: "/calendar",
+    },
+    {
+      title: "Analytics",
+      icon: <FaChartBar />,
+      path: "/analytics",
+    },
+    {
+      title: "Team",
+      icon: <FaUsers />,
+      path: "/team",
+    },
+    {
+      title: "Notifications",
+      icon: <FaBell />,
+      path: "/notifications",
+    },
+    {
+      title: "Settings",
+      icon: <FaCog />,
+      path: "/settings",
+    },
+  ];
 
   return (
     <>
@@ -97,27 +98,31 @@ const menu = [
 
       {/* Sidebar */}
       <aside
-        className={`sidebar ${
-          collapsed ? "collapsed" : ""
-        } ${mobileOpen ? "mobile-open" : ""}`}
+        className={`sidebar ${collapsed ? "collapsed" : ""} ${
+          mobileOpen ? "mobile-open" : ""
+        }`}
       >
         {/* Header */}
         <div className="sidebar-header">
+
           {!collapsed && (
             <div className="sidebar-logo">
               🚀 TaskFlowAI
             </div>
           )}
 
-          {/* Desktop collapse button */}
-         <button
-  className="collapse-btn"
-  onClick={() => setCollapsed((prev) => !prev)}
-  type="button"
-  aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
->
-  {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
-</button>
+          {/* COLLAPSE BUTTON */}
+          <button
+            type="button"
+            className="collapse-btn"
+            onClick={() => {
+              console.log("Collapse clicked");
+              setCollapsed((prev) => !prev);
+            }}
+            aria-label="Toggle sidebar"
+          >
+            {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
+          </button>
 
           {/* Mobile close */}
           <button
@@ -134,7 +139,7 @@ const menu = [
           <div className="sidebar-user">
             <img
               src="https://ui-avatars.com/api/?name=Pallavi&background=ffffff&color=111827"
-              alt="User"
+              alt="Pallavi"
             />
 
             <div>
@@ -156,7 +161,6 @@ const menu = [
                   : "sidebar-link"
               }
               onClick={() => setMobileOpen(false)}
-              title={collapsed ? item.title : ""}
             >
               <span className="icon">
                 {item.icon}
