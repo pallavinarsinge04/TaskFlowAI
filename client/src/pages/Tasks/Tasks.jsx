@@ -2,100 +2,211 @@ import { useState, useEffect, useMemo } from "react";
 import "./Tasks.css";
 import TaskCard from "./TaskCard";
 import TaskModal from "./TaskModal";
-import KanbanBoard from "../../components/kanban/KanbanBoard";
-import { FaPlus, FaSearch, FaList, FaColumns } from "react-icons/fa";
+import { FaPlus, FaSearch } from "react-icons/fa";
+
 import socket from "../../socket/socket";
 import { supabase } from "../../supabase/supabaseClient";
 
 function Tasks() {
   const [tasks, setTasks] = useState([]);
+
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [priority, setPriority] = useState("All");
   const [sort, setSort] = useState("Newest");
-  const [view, setView] = useState("list");
-  const [showFav, setShowFav] = useState(false);
+
   const [openModal, setOpenModal] = useState(false);
   const [editTask, setEditTask] = useState(null);
+
   const [loading, setLoading] = useState(true);
+
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [user, setUser] = useState(null);
 
-  // LOAD USER + PROJECT
-  useEffect(() => {
-    init();
-  }, []);
+  // =========================================
+  // INITIALIZE USER + PROJECT
+  // =========================================
 
-  const init = async () => {
-    const { data: userData } = await supabase.auth.getUser();
+useEffect(() => {
+  if (!user?.id) return;
 
-    if (!userData?.user) return;
+  socket.emit("join_user", user.id);
 
-    setUser(userData.user);
+  const handleTaskCreated = (task) => {
+    if (task.user_id !== user.id) return;
 
-    const { data: projectData } = await supabase
-      .from("projects")
-      .select("id")
-      .eq("user_id", userData.user.id)
-      .limit(1)
-      .single();
+    setTasks((prev) => {
+      const exists = prev.some((t) => t.id === task.id);
 
-    if (projectData) {
-      setSelectedProjectId(projectData.id);
-    }
+      if (exists) return prev;
 
-    loadTasks(userData.user.id);
+      return [task, ...prev];
+    });
   };
 
-  // SOCKET EVENTS
-  useEffect(() => {
-    socket.on("task_created", (task) =>
-      setTasks((prev) => [task, ...prev])
-    );
+  const handleTaskUpdated = (updatedTask) => {
+    if (updatedTask.user_id !== user.id) return;
 
-    socket.on("task_updated", (updated) =>
-      setTasks((prev) =>
-        prev.map((t) => (t.id === updated.id ? updated : t))
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === updatedTask.id
+          ? updatedTask
+          : task
       )
     );
-
-    socket.on("task_deleted", (id) =>
-      setTasks((prev) => prev.filter((t) => t.id !== id))
-    );
-
-    return () => {
-      socket.off("task_created");
-      socket.off("task_updated");
-      socket.off("task_deleted");
-    };
-  }, []);
-
-  // LOAD TASKS
-  const loadTasks = async (userId) => {
-    setLoading(true);
-
-    const { data, error } = await supabase
-      .from("tasks")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.log(error);
-      setLoading(false);
-      return;
-    }
-
-    setTasks(data || []);
-    setLoading(false);
   };
 
-  // SAVE TASK (CREATE / UPDATE)
+  const handleTaskDeleted = (taskId) => {
+    setTasks((prev) =>
+      prev.filter((task) => task.id !== taskId)
+    );
+  };
+
+  socket.on("task_created", handleTaskCreated);
+  socket.on("task_updated", handleTaskUpdated);
+  socket.on("task_deleted", handleTaskDeleted);
+
+  return () => {
+    socket.off("task_created", handleTaskCreated);
+    socket.off("task_updated", handleTaskUpdated);
+    socket.off("task_deleted", handleTaskDeleted);
+  };
+}, [user]);
+  const init = async () => {
+    try {
+      setLoading(true);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      setUser(user);
+
+      // Get user's first project
+      const { data: projectData, error: projectError } =
+        await supabase
+          .from("projects")
+          .select("id")
+          .eq("user_id", user.id)
+          .order("created_at", {
+            ascending: true,
+          })
+          .limit(1)
+          .maybeSingle();
+
+      if (projectError) {
+        console.log("Project error:", projectError);
+      }
+
+      if (projectData) {
+        setSelectedProjectId(projectData.id);
+      }
+
+      await loadTasks(user.id);
+    } catch (error) {
+      console.log("Initialization error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =========================================
+  // LOAD TASKS
+  // =========================================
+
+  const loadTasks = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", {
+          ascending: false,
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      setTasks(data || []);
+    } catch (error) {
+      console.log("Load tasks error:", error);
+    }
+  };
+
+  // =========================================
+  // REAL-TIME SOCKET EVENTS
+  // =========================================
+
+  useEffect(() => {
+    if (!user) return;
+
+    const handleTaskCreated = (newTask) => {
+      // Only show tasks belonging to current user
+      if (newTask.user_id !== user.id) return;
+
+      setTasks((prev) => {
+        const exists = prev.some(
+          (task) => task.id === newTask.id
+        );
+
+        if (exists) {
+          return prev;
+        }
+
+        return [newTask, ...prev];
+      });
+    };
+
+    const handleTaskUpdated = (updatedTask) => {
+      if (updatedTask.user_id !== user.id) return;
+
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === updatedTask.id
+            ? updatedTask
+            : task
+        )
+      );
+    };
+
+    const handleTaskDeleted = (deletedId) => {
+      setTasks((prev) =>
+        prev.filter((task) => task.id !== deletedId)
+      );
+    };
+
+    socket.on("task_created", handleTaskCreated);
+    socket.on("task_updated", handleTaskUpdated);
+    socket.on("task_deleted", handleTaskDeleted);
+
+    return () => {
+      socket.off("task_created", handleTaskCreated);
+      socket.off("task_updated", handleTaskUpdated);
+      socket.off("task_deleted", handleTaskDeleted);
+    };
+  }, [user]);
+
+  // =========================================
+  // SAVE TASK
+  // =========================================
+
   const handleSaveTask = async (task) => {
     try {
-      if (!user) return;
+      if (!user) {
+        alert("Please login.");
+        return;
+      }
 
-      // UPDATE TASK
+      // =====================================
+      // UPDATE
+      // =====================================
+
       if (editTask) {
         const { data, error } = await supabase
           .from("tasks")
@@ -108,18 +219,36 @@ function Tasks() {
             assignee: task.assignee,
           })
           .eq("id", editTask.id)
+          .eq("user_id", user.id)
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
         setTasks((prev) =>
-          prev.map((t) => (t.id === editTask.id ? data : t))
+          prev.map((item) =>
+            item.id === editTask.id ? data : item
+          )
         );
+
+        // Tell other connected clients
+        socket.emit("task_updated", data);
       }
 
-      // CREATE TASK
+      // =====================================
+      // CREATE
+      // =====================================
+
       else {
+        if (!selectedProjectId) {
+          alert(
+            "No project found. Please create a project first."
+          );
+          return;
+        }
+
         const { data, error } = await supabase
           .from("tasks")
           .insert([
@@ -137,65 +266,111 @@ function Tasks() {
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
         setTasks((prev) => [data, ...prev]);
+
+        // Tell other connected clients
+        socket.emit("task_created", data);
       }
 
       setOpenModal(false);
       setEditTask(null);
-    } catch (err) {
-      console.log(err);
-      alert(err.message);
+    } catch (error) {
+      console.log("Save task error:", error);
+      alert(error.message);
     }
   };
 
+  // =========================================
   // DELETE TASK
+  // =========================================
+
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Delete this task?");
+    const confirmDelete = window.confirm(
+      "Delete this task?"
+    );
+
     if (!confirmDelete) return;
 
-    const { error } = await supabase
-      .from("tasks")
-      .delete()
-      .eq("id", id);
+    try {
+      const { error } = await supabase
+        .from("tasks")
+        .delete()
+        .eq("id", id)
+        .eq("user_id", user.id);
 
-    if (error) {
-      console.log(error);
-      return;
+      if (error) {
+        throw error;
+      }
+
+      setTasks((prev) =>
+        prev.filter((task) => task.id !== id)
+      );
+
+      socket.emit("task_deleted", {
+        id,
+        user_id: user.id,
+      });
+    } catch (error) {
+      console.log("Delete task error:", error);
+      alert(error.message);
     }
-
-    setTasks((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // =========================================
   // FILTER + SORT
+  // =========================================
+
   const filteredTasks = useMemo(() => {
-    return tasks
+    return [...tasks]
       .filter((task) => {
         const matchSearch = task.title
           ?.toLowerCase()
           .includes(search.toLowerCase());
 
         const matchStatus =
-          status === "All" || task.status === status;
+          status === "All" ||
+          task.status === status;
 
         const matchPriority =
-          priority === "All" || task.priority === priority;
+          priority === "All" ||
+          task.priority === priority;
 
-        return matchSearch && matchStatus && matchPriority;
+        return (
+          matchSearch &&
+          matchStatus &&
+          matchPriority
+        );
       })
       .sort((a, b) => {
         if (sort === "Newest") {
-          return new Date(b.created_at) - new Date(a.created_at);
+          return (
+            new Date(b.created_at) -
+            new Date(a.created_at)
+          );
         }
 
         if (sort === "Oldest") {
-          return new Date(a.created_at) - new Date(b.created_at);
+          return (
+            new Date(a.created_at) -
+            new Date(b.created_at)
+          );
         }
 
         if (sort === "Priority") {
-          const p = { High: 3, Medium: 2, Low: 1 };
-          return p[b.priority] - p[a.priority];
+          const priorityValue = {
+            High: 3,
+            Medium: 2,
+            Low: 1,
+          };
+
+          return (
+            priorityValue[b.priority] -
+            priorityValue[a.priority]
+          );
         }
 
         if (sort === "Status") {
@@ -204,19 +379,42 @@ function Tasks() {
 
         return 0;
       });
-  }, [tasks, search, status, priority, sort]);
+  }, [
+    tasks,
+    search,
+    status,
+    priority,
+    sort,
+  ]);
 
-  if (loading)
-    return <div className="loading">Loading Tasks...</div>;
+  // =========================================
+  // LOADING
+  // =========================================
+
+  if (loading) {
+    return (
+      <div className="loading-tasks">
+        Loading Tasks...
+      </div>
+    );
+  }
+
+  // =========================================
+  // UI
+  // =========================================
 
   return (
     <div className="tasks-page">
 
       {/* HEADER */}
+
       <div className="tasks-header">
         <div>
           <h1>Task Management</h1>
-          <p>Manage project tasks professionally</p>
+
+          <p>
+            Manage project tasks professionally
+          </p>
         </div>
 
         <span className="task-count">
@@ -231,67 +429,97 @@ function Tasks() {
               setOpenModal(true);
             }}
           >
-            <FaPlus /> Add Task
+            <FaPlus />
+            Add Task
           </button>
         </div>
       </div>
 
       {/* FILTERS */}
+
       <div className="task-filters">
 
         <div className="search-box">
           <FaSearch />
+
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
             placeholder="Search task..."
           />
         </div>
 
-        <select value={status} onChange={(e) => setStatus(e.target.value)}>
+        <select
+          value={status}
+          onChange={(e) =>
+            setStatus(e.target.value)
+          }
+        >
           <option>All</option>
           <option>Pending</option>
           <option>In Progress</option>
           <option>Completed</option>
         </select>
 
-        <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+        <select
+          value={priority}
+          onChange={(e) =>
+            setPriority(e.target.value)
+          }
+        >
           <option>All</option>
           <option>High</option>
           <option>Medium</option>
           <option>Low</option>
         </select>
 
-        <select value={sort} onChange={(e) => setSort(e.target.value)}>
+        <select
+          value={sort}
+          onChange={(e) =>
+            setSort(e.target.value)
+          }
+        >
           <option>Newest</option>
           <option>Oldest</option>
           <option>Priority</option>
           <option>Status</option>
         </select>
+
       </div>
 
       {/* TASK LIST */}
+
       <div className="task-list">
+
         {filteredTasks.length === 0 ? (
           <div className="empty-task">
             <h2>No Tasks Found</h2>
+
+            <p>
+              Click "Add Task" to create your
+              first task.
+            </p>
           </div>
         ) : (
           filteredTasks.map((task) => (
             <TaskCard
               key={task.id}
               task={task}
-              onEdit={(t) => {
-                setEditTask(t);
+              onEdit={(selectedTask) => {
+                setEditTask(selectedTask);
                 setOpenModal(true);
               }}
               onDelete={handleDelete}
             />
           ))
         )}
+
       </div>
 
       {/* MODAL */}
+
       <TaskModal
         open={openModal}
         editTask={editTask}
@@ -301,6 +529,7 @@ function Tasks() {
         }}
         onSave={handleSaveTask}
       />
+
     </div>
   );
 }
