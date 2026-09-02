@@ -59,10 +59,12 @@ export const getProjectMembers = async (req, res) => {
 // ========================================
 // ADD TEAM MEMBER
 // ========================================
-
 export const addTeamMember = async (req, res) => {
   try {
     const { projectId } = req.params;
+
+    // Safely read request body
+    const body = req.body || {};
 
     const {
       userId,
@@ -70,7 +72,23 @@ export const addTeamMember = async (req, res) => {
       role = "member",
       profileImage = "",
       status = "Offline",
-    } = req.body;
+    } = body;
+
+    console.log("Add Team Member Request:", {
+      projectId,
+      body,
+    });
+
+    // -----------------------------------------
+    // VALIDATION
+    // -----------------------------------------
+
+    if (!projectId) {
+      return res.status(400).json({
+        success: false,
+        message: "Project ID is required.",
+      });
+    }
 
     if (!userId) {
       return res.status(400).json({
@@ -93,17 +111,19 @@ export const addTeamMember = async (req, res) => {
       });
     }
 
-    // ----------------------------------------
-    // Check whether user already exists
-    // ----------------------------------------
+    // -----------------------------------------
+    // CHECK DUPLICATE MEMBER
+    // -----------------------------------------
 
-    const { data: existingMember, error: existingError } =
-      await supabase
-        .from("team_members")
-        .select("id")
-        .eq("project_id", projectId)
-        .eq("user_id", userId)
-        .maybeSingle();
+    const {
+      data: existingMember,
+      error: existingError,
+    } = await supabase
+      .from("team_members")
+      .select("id")
+      .eq("project_id", projectId)
+      .eq("user_id", userId)
+      .maybeSingle();
 
     if (existingError) {
       return res.status(500).json({
@@ -120,11 +140,14 @@ export const addTeamMember = async (req, res) => {
       });
     }
 
-    // ----------------------------------------
-    // Insert member
-    // ----------------------------------------
+    // -----------------------------------------
+    // CREATE MEMBER
+    // -----------------------------------------
 
-    const { data, error } = await supabase
+    const {
+      data,
+      error,
+    } = await supabase
       .from("team_members")
       .insert({
         user_id: userId,
@@ -140,7 +163,7 @@ export const addTeamMember = async (req, res) => {
 
     if (error) {
       console.error(
-        "Add team member error:",
+        "Supabase Add Member Error:",
         error
       );
 
@@ -150,12 +173,15 @@ export const addTeamMember = async (req, res) => {
       });
     }
 
-    // ----------------------------------------
-    // Realtime event
-    // ----------------------------------------
+    // -----------------------------------------
+    // REALTIME EVENT
+    // -----------------------------------------
 
     try {
-      getIO().emit("teamMemberAdded", data);
+      getIO().emit(
+        "teamMemberAdded",
+        data
+      );
     } catch (socketError) {
       console.warn(
         "Team socket event skipped:",
@@ -163,9 +189,14 @@ export const addTeamMember = async (req, res) => {
       );
     }
 
+    // -----------------------------------------
+    // RESPONSE
+    // -----------------------------------------
+
     return res.status(201).json({
       success: true,
-      message: "Team member added successfully.",
+      message:
+        "Team member added successfully.",
       member: data,
     });
   } catch (error) {
@@ -176,7 +207,9 @@ export const addTeamMember = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message:
+        error.message ||
+        "Failed to add team member.",
     });
   }
 };

@@ -2,21 +2,33 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import http from "http";
-import teamRoutes from "./routes/teamRoutes.js";
+
+// =========================================
+// ROUTES
+// =========================================
+
 import authRoutes from "./routes/authRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
+import teamRoutes from "./routes/teamRoutes.js";
+
+// =========================================
+// SOCKET.IO
+// =========================================
 
 import { initializeSocket } from "./config/socket.js";
-app.use("/api/team", teamRoutes);
-const app = express();
 
+// =========================================
+// APP INITIALIZATION
+// =========================================
+
+const app = express();
 const server = http.createServer(app);
 
-// ==========================================
-// MIDDLEWARE
-// ==========================================
+// =========================================
+// CORS
+// =========================================
 
 app.use(
   cors({
@@ -25,11 +37,22 @@ app.use(
   })
 );
 
+// =========================================
+// BODY PARSING
+// IMPORTANT: MUST COME BEFORE API ROUTES
+// =========================================
+
 app.use(express.json());
 
-// ==========================================
-// HOME / HEALTH
-// ==========================================
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+
+// =========================================
+// HEALTH / ROOT ROUTES
+// =========================================
 
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -41,42 +64,64 @@ app.get("/", (req, res) => {
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Healthy",
+    message: "TaskFlowAI API is healthy",
   });
 });
 
-// ==========================================
+// =========================================
 // API ROUTES
-// ==========================================
+// =========================================
 
 app.use("/api/auth", authRoutes);
+
 app.use("/api/ai", aiRoutes);
+
 app.use("/api/projects", projectRoutes);
+
 app.use("/api/tasks", taskRoutes);
 
-// ==========================================
-// 404
-// ==========================================
+app.use("/api/team", teamRoutes);
+
+// =========================================
+// 404 HANDLER
+// =========================================
 
 app.use((req, res) => {
   res.status(404).json({
     success: false,
-    message: `Route not found: ${req.method} ${req.originalUrl}`,
+    message: "Route not found",
+    path: req.originalUrl,
   });
 });
 
-// ==========================================
-// SOCKET.IO
-// ==========================================
+// =========================================
+// GLOBAL ERROR HANDLER
+// =========================================
+
+app.use((err, req, res, next) => {
+  console.error("Global Server Error:", err);
+
+  res.status(err.status || 500).json({
+    success: false,
+    message:
+      err.message || "Internal server error.",
+  });
+});
+
+// =========================================
+// SOCKET.IO INITIALIZATION
+// =========================================
 
 initializeSocket(server);
 
-// ==========================================
-// START SERVER
-// ==========================================
+// =========================================
+// SERVER START
+// =========================================
 
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(
+    `🚀 Server running on http://localhost:${PORT}`
+  );
 });

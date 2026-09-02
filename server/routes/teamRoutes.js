@@ -6,57 +6,41 @@ import {
   updateTeamMember,
   deleteTeamMember,
 } from "../controllers/teamController.js";
-import {
-  checkProjectPermission,
-  checkMemberProjectPermission,
-} from "../middleware/teamPermission.js";
+
 import { authenticateUser } from "../middleware/authMiddleware.js";
 
 import {
   checkProjectPermission,
+  checkMemberProjectPermission,
 } from "../middleware/teamPermission.js";
 
 const router = express.Router();
 
-// ========================================
-// Authentication required for all team API
-// ========================================
-
+// Authentication required for all team routes
 router.use(authenticateUser);
 
-// ========================================
-// Get project members
-// Viewer and above
-// ========================================
-
+// Get project team members
 router.get(
   "/project/:projectId",
   checkProjectPermission("viewer"),
   getProjectMembers
 );
 
-// ========================================
-// Add member
-// Admin and owner
-// ========================================
-
+// Add team member
 router.post(
   "/project/:projectId",
   checkProjectPermission("admin"),
   addTeamMember
 );
 
-// ========================================
-// Update member
-// Admin and owner
-// ========================================
-
+// Update team member
 router.put(
   "/:id",
   checkMemberProjectPermission("admin"),
   updateTeamMember
 );
 
+// Delete team member
 router.delete(
   "/:id",
   checkMemberProjectPermission("admin"),
