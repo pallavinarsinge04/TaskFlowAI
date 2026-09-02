@@ -9,7 +9,7 @@ import {
 } from "react-icons/fa";
 
 import { supabase } from "../../supabase/supabaseClient";
-import socket from "../../socket";
+import socket from "../../socket/socket";
 
 const API_URL = "http://localhost:5000/api/team";
 const PROJECT_API = "http://localhost:5000/api/projects";

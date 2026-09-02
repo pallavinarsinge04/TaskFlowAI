@@ -1,7 +1,6 @@
 import express from "express";
 
 import {
-  searchUsers,
   getProjectMembers,
   addTeamMember,
   updateTeamMember,
@@ -17,28 +16,33 @@ import {
 
 const router = express.Router();
 
+/*
+========================================================
+AUTHENTICATION
+========================================================
+*/
+
 router.use(authenticateUser);
 
 /*
 ========================================================
-USER SEARCH
+GET PROJECT MEMBERS
+VIEWER + MEMBER + ADMIN + OWNER
 ========================================================
 */
-router.get(
-  "/users/search",
-  searchUsers
-);
 
-/*
-========================================================
-PROJECT TEAM
-========================================================
-*/
 router.get(
   "/project/:projectId",
   checkProjectPermission("viewer"),
   getProjectMembers
 );
+
+/*
+========================================================
+ADD MEMBER
+ADMIN + OWNER
+========================================================
+*/
 
 router.post(
   "/project/:projectId",
@@ -48,14 +52,23 @@ router.post(
 
 /*
 ========================================================
-MEMBER MANAGEMENT
+UPDATE MEMBER
+ADMIN + OWNER
 ========================================================
 */
+
 router.put(
   "/:id",
   checkMemberProjectPermission("admin"),
   updateTeamMember
 );
+
+/*
+========================================================
+DELETE MEMBER
+ADMIN + OWNER
+========================================================
+*/
 
 router.delete(
   "/:id",
