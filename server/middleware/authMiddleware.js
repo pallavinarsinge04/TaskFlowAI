@@ -1,28 +1,54 @@
-const jwt = require("jsonwebtoken");
+import supabase from "../config/supabase.js";
 
-module.exports = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized",
-    });
-  }
-
+export const authenticateUser = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const authHeader = req.headers.authorization;
 
-    req.user = decoded;
+    // Check Authorization header
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
+
+    // Extract token
+    const token = authHeader.substring(7).trim();
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication token is missing.",
+      });
+    }
+
+    // Verify token with Supabase
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser(token);
+
+    if (error || !user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired authentication token.",
+      });
+    }
+
+    // Store authenticated user
+    req.user = {
+      id: user.id,
+      email: user.email,
+      user_metadata: user.user_metadata || {},
+    };
 
     next();
   } catch (error) {
-    res.status(401).json({
+    console.error("Authentication error:", error);
+
+    return res.status(401).json({
       success: false,
-      message: "Invalid Token",
+      message: "Authentication failed.",
     });
   }
 };

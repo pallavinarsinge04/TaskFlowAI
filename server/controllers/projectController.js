@@ -7,14 +7,19 @@ import { getIO } from "../config/socket.js";
 
 export const getProjects = async (req, res) => {
   try {
+    const userId = req.user.id;
+
     const { data, error } = await supabase
       .from("projects")
       .select("*")
+      .eq("owner", userId)
       .order("created_at", {
         ascending: false,
       });
 
     if (error) {
+      console.error("Supabase Get Projects Error:", error);
+
       return res.status(500).json({
         success: false,
         message: error.message,
@@ -36,11 +41,57 @@ export const getProjects = async (req, res) => {
 };
 
 // =========================
+// Get project by ID
+// =========================
+
+export const getProjectById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Project ID is required.",
+      });
+    }
+
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("id", id)
+      .eq("owner", userId)
+      .single();
+
+    if (error) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found.",
+      });
+    }
+
+    return res.json({
+      success: true,
+      project: data,
+    });
+  } catch (err) {
+    console.error("Get Project By ID Error:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// =========================
 // Create project
 // =========================
 
 export const createProject = async (req, res) => {
   try {
+    const userId = req.user.id;
+
     const {
       name,
       description = "",
@@ -63,6 +114,7 @@ export const createProject = async (req, res) => {
       .from("projects")
       .insert([
         {
+          owner: userId,
           name: name.trim(),
           description,
           status,
@@ -109,12 +161,129 @@ export const createProject = async (req, res) => {
 };
 
 // =========================
+// Update project
+// =========================
+
+export const updateProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Project ID is required.",
+      });
+    }
+
+    const {
+      name,
+      description,
+      status,
+      priority,
+      startDate,
+      endDate,
+      teamMembers,
+      progress,
+    } = req.body;
+
+    const updateData = {};
+
+    if (name !== undefined) {
+      if (!name.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Project name cannot be empty.",
+        });
+      }
+
+      updateData.name = name.trim();
+    }
+
+    if (description !== undefined) {
+      updateData.description = description;
+    }
+
+    if (status !== undefined) {
+      updateData.status = status;
+    }
+
+    if (priority !== undefined) {
+      updateData.priority = priority;
+    }
+
+    if (startDate !== undefined) {
+      updateData.start_date = startDate || null;
+    }
+
+    if (endDate !== undefined) {
+      updateData.end_date = endDate || null;
+    }
+
+    if (teamMembers !== undefined) {
+      updateData.team_members = teamMembers;
+    }
+
+    if (progress !== undefined) {
+      updateData.progress = Number(progress) || 0;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No project data provided for update.",
+      });
+    }
+
+    const { data, error } = await supabase
+      .from("projects")
+      .update(updateData)
+      .eq("id", id)
+      .eq("owner", userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Supabase Update Project Error:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    try {
+      getIO().emit("projectUpdated", data);
+    } catch (socketError) {
+      console.warn(
+        "Socket event skipped:",
+        socketError.message
+      );
+    }
+
+    return res.json({
+      success: true,
+      message: "Project updated successfully.",
+      project: data,
+    });
+  } catch (err) {
+    console.error("Update Project Error:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
+// =========================
 // Delete project
 // =========================
 
 export const deleteProject = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
 
     if (!id) {
       return res.status(400).json({
@@ -127,6 +296,7 @@ export const deleteProject = async (req, res) => {
       .from("projects")
       .delete()
       .eq("id", id)
+      .eq("owner", userId)
       .select()
       .single();
 

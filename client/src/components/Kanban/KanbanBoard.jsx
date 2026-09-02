@@ -2,8 +2,12 @@ import { DragDropContext } from "@hello-pangea/dnd";
 import KanbanColumn from "./KanbanColumn";
 import "./KanbanBoard.css";
 
-function KanbanBoard({ tasks, setTasks }) {
-
+function KanbanBoard({
+  tasks,
+  onStatusChange,
+  onEdit,
+  onDelete,
+}) {
   const todo = tasks.filter(
     (task) => task.status === "Pending"
   );
@@ -16,76 +20,59 @@ function KanbanBoard({ tasks, setTasks }) {
     (task) => task.status === "Completed"
   );
 
-  const handleDragEnd = (result) => {
-
+  const handleDragEnd = async (result) => {
     if (!result.destination) return;
 
-    const { draggableId, destination } = result;
+    const { draggableId, destination, source } = result;
 
-    const updated = tasks.map((task) => {
+    // Same column → nothing to update
+    if (
+      source.droppableId === destination.droppableId
+    ) {
+      return;
+    }
 
-      if (task.id.toString() === draggableId) {
+    const taskId = draggableId;
+    const newStatus = destination.droppableId;
 
-        return {
-
-          ...task,
-
-          status: destination.droppableId
-
-        };
-
-      }
-
-      return task;
-
-    });
-
-    setTasks(updated);
-
+    if (onStatusChange) {
+      await onStatusChange(taskId, newStatus);
+    }
   };
 
   return (
-
-    <DragDropContext onDragEnd={handleDragEnd}>
-
+    <DragDropContext
+      onDragEnd={handleDragEnd}
+    >
       <div className="kanban-board">
 
         <KanbanColumn
-
           title="📋 To Do"
-
           status="Pending"
-
           tasks={todo}
-
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
 
         <KanbanColumn
-
           title="🚀 In Progress"
-
           status="In Progress"
-
           tasks={progress}
-
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
 
         <KanbanColumn
-
           title="✅ Completed"
-
           status="Completed"
-
           tasks={completed}
-
+          onEdit={onEdit}
+          onDelete={onDelete}
         />
 
       </div>
-
     </DragDropContext>
-
   );
-
 }
 
 export default KanbanBoard;

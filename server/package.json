@@ -20,7 +20,7 @@
     "multer": "^2.2.0",
     "resend": "^6.18.1",
     "socket.io": "^4.8.3",
-    "ws": "^8.21.1"
+    "ws": "^8.21.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

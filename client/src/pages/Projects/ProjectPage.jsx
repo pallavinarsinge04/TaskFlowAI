@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import axios from "axios";
 import socket from "../../socket/socket";
 
@@ -11,149 +11,395 @@ import {
   FaSpinner,
 } from "react-icons/fa";
 
+import { supabase } from "../../supabase/supabaseClient";
+
 import ProjectCard from "./ProjectCard";
 import CreateProjectModal from "./CreateProjectModal";
+
 import "./ProjectPage.css";
 
 const API = "http://localhost:5000/api/projects";
 
 function ProjectPage() {
+  // =========================================
+  // STATE
+  // =========================================
+
   const [projects, setProjects] = useState([]);
+
   const [open, setOpen] = useState(false);
+
   const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState("");
 
-  // ==========================
-  // Load Projects
-  // ==========================
+  // =========================================
+  // GET ACCESS TOKEN
+  // =========================================
 
-  const loadProjects = async () => {
+  const getAccessToken = async () => {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      throw error;
+    }
+
+    const token = session?.access_token;
+
+    if (!token) {
+      throw new Error("Authentication required. Please login again.");
+    }
+
+    return token;
+  };
+
+  // =========================================
+  // LOAD PROJECTS
+  // =========================================
+
+  const loadProjects = useCallback(async () => {
     try {
-      const res = await axios.get(API);
+      setLoading(true);
 
-      const projectList = Array.isArray(res.data)
-        ? res.data
-        : res.data.projects || [];
+      const token = await getAccessToken();
+
+      const response = await axios.get(API, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const projectList =
+        response.data?.projects ||
+        response.data?.data ||
+        [];
+
+      if (!Array.isArray(projectList)) {
+        throw new Error("Invalid projects data received.");
+      }
 
       setProjects(projectList);
-    } catch (err) {
-      console.error("Load Projects Error:", err);
+
+      console.log(
+        "Projects loaded:",
+        projectList
+      );
+    } catch (error) {
+      console.error(
+        "Load Projects Error:",
+        error
+      );
+
+      if (error.response?.status === 401) {
+        alert("Session expired. Please login again.");
+      }
 
       setProjects([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // ==========================
-  // Socket Events
-  // ==========================
+  // =========================================
+  // INITIAL LOAD + SOCKET
+  // =========================================
 
   useEffect(() => {
     loadProjects();
 
-    socket.on("projectCreated", (project) => {
+    // =======================================
+    // PROJECT CREATED
+    // =======================================
+
+    const handleProjectCreated = (project) => {
+      if (!project) return;
+
       setProjects((prev) => {
-        const safePrev = Array.isArray(prev) ? prev : [];
+        const safePrev = Array.isArray(prev)
+          ? prev
+          : [];
 
-        const exists = safePrev.find((p) => p.id === project.id);
+        const exists = safePrev.some(
+          (item) => item.id === project.id
+        );
 
-        if (exists) return safePrev;
+        if (exists) {
+          return safePrev;
+        }
 
-        return [project, ...safePrev];
+        return [
+          project,
+          ...safePrev,
+        ];
       });
-    });
+    };
 
-    socket.on("projectDeleted", (id) => {
+    // =======================================
+    // PROJECT UPDATED
+    // =======================================
+
+    const handleProjectUpdated = (project) => {
+      if (!project) return;
+
       setProjects((prev) => {
-        const safePrev = Array.isArray(prev) ? prev : [];
+        const safePrev = Array.isArray(prev)
+          ? prev
+          : [];
 
-        return safePrev.filter((project) => project.id !== id);
+        return safePrev.map((item) =>
+          item.id === project.id
+            ? project
+            : item
+        );
       });
-    });
+    };
+
+    // =======================================
+    // PROJECT DELETED
+    // =======================================
+
+    const handleProjectDeleted = (id) => {
+      if (!id) return;
+
+      setProjects((prev) => {
+        const safePrev = Array.isArray(prev)
+          ? prev
+          : [];
+
+        return safePrev.filter(
+          (project) => project.id !== id
+        );
+      });
+    };
+
+    // =======================================
+    // SOCKET LISTENERS
+    // =======================================
+
+    socket.on(
+      "projectCreated",
+      handleProjectCreated
+    );
+
+    socket.on(
+      "projectUpdated",
+      handleProjectUpdated
+    );
+
+    socket.on(
+      "projectDeleted",
+      handleProjectDeleted
+    );
+
+    // =======================================
+    // CLEANUP
+    // =======================================
 
     return () => {
-      socket.off("projectCreated");
-      socket.off("projectDeleted");
-    };
-  }, []);
+      socket.off(
+        "projectCreated",
+        handleProjectCreated
+      );
 
-  // ==========================
-  // Search Filter
-  // ==========================
+      socket.off(
+        "projectUpdated",
+        handleProjectUpdated
+      );
+
+      socket.off(
+        "projectDeleted",
+        handleProjectDeleted
+      );
+    };
+  }, [loadProjects]);
+
+  // =========================================
+  // SEARCH FILTER
+  // =========================================
 
   const filteredProjects = useMemo(() => {
     const safeProjects = Array.isArray(projects)
       ? projects
       : [];
 
+    const searchText =
+      search.trim().toLowerCase();
+
+    if (!searchText) {
+      return safeProjects;
+    }
+
     return safeProjects.filter((project) =>
       project.name
         ?.toLowerCase()
-        .includes(search.toLowerCase())
+        .includes(searchText)
     );
   }, [projects, search]);
 
-  // ==========================
-  // Dashboard Stats
-  // ==========================
+  // =========================================
+  // PROJECT STATISTICS
+  // =========================================
 
-  const stats = {
-    total: filteredProjects.length,
+  const stats = useMemo(() => {
+    const safeProjects = Array.isArray(projects)
+      ? projects
+      : [];
 
-    planning: filteredProjects.filter(
-      (p) => p.status === "Planning"
-    ).length,
+    return {
+      total: safeProjects.length,
 
-    active: filteredProjects.filter(
-      (p) => p.status === "Active"
-    ).length,
+      planning: safeProjects.filter(
+        (project) =>
+          project.status
+            ?.toString()
+            .trim()
+            .toLowerCase() === "planning"
+      ).length,
 
-    completed: filteredProjects.filter(
-      (p) => p.status === "Completed"
-    ).length,
-  };
+      active: safeProjects.filter(
+        (project) =>
+          project.status
+            ?.toString()
+            .trim()
+            .toLowerCase() === "active"
+      ).length,
 
-  // ==========================
-  // Delete Project
-  // ==========================
+      completed: safeProjects.filter(
+        (project) =>
+          project.status
+            ?.toString()
+            .trim()
+            .toLowerCase() === "completed"
+      ).length,
+    };
+  }, [projects]);
+
+  // =========================================
+  // DELETE PROJECT
+  // =========================================
 
   const handleDelete = async (id) => {
     const confirmDelete = window.confirm(
-      "Delete this project?"
+      "Are you sure you want to delete this project?"
     );
 
-    if (!confirmDelete) return;
+    if (!confirmDelete) {
+      return;
+    }
 
     try {
-      await axios.delete(`${API}/${id}`);
+      const token = await getAccessToken();
+
+      await axios.delete(
+        `${API}/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Socket.IO will normally update the list.
+      // We also remove it locally for immediate UI feedback.
 
       setProjects((prev) =>
-        prev.filter((project) => project.id !== id)
+        prev.filter(
+          (project) => project.id !== id
+        )
       );
-    } catch (err) {
-      console.error(err);
-      alert("Failed to delete project.");
+
+      console.log(
+        "Project deleted:",
+        id
+      );
+    } catch (error) {
+      console.error(
+        "Delete Project Error:",
+        error
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to delete project."
+      );
     }
   };
 
-  // ==========================
+  // =========================================
+  // PROJECT CREATED FROM MODAL
+  // =========================================
+
+  const handleProjectCreated = (project) => {
+    if (!project) {
+      setOpen(false);
+      loadProjects();
+      return;
+    }
+
+    setProjects((prev) => {
+      const safePrev = Array.isArray(prev)
+        ? prev
+        : [];
+
+      const exists = safePrev.some(
+        (item) => item.id === project.id
+      );
+
+      if (exists) {
+        return safePrev;
+      }
+
+      return [
+        project,
+        ...safePrev,
+      ];
+    });
+
+    setOpen(false);
+  };
+
+  // =========================================
+  // PROJECT UPDATED
+  // =========================================
+
+  const handleProjectUpdated = (updatedProject) => {
+    if (!updatedProject) {
+      return;
+    }
+
+    setProjects((prev) =>
+      prev.map((project) =>
+        project.id === updatedProject.id
+          ? updatedProject
+          : project
+      )
+    );
+  };
+
+  // =========================================
   // UI
-  // ==========================
+  // =========================================
 
   return (
     <div className="project-page">
 
-      {/* Header */}
+      {/* ===================================== */}
+      {/* HEADER */}
+      {/* ===================================== */}
 
       <div className="project-header">
 
         <div>
-          <h1>📁 Project Management</h1>
+          <h1>
+            📁 Project Management
+          </h1>
 
           <p>
-            Create, manage and monitor all your
-            projects.
+            Create, manage and monitor all
+            your projects.
           </p>
         </div>
 
@@ -162,42 +408,87 @@ function ProjectPage() {
           onClick={() => setOpen(true)}
         >
           <FaPlus />
+
           Create Project
         </button>
 
       </div>
 
-      {/* Dashboard */}
+      {/* ===================================== */}
+      {/* PROJECT STATISTICS */}
+      {/* ===================================== */}
 
       <div className="project-stats">
 
+        {/* TOTAL */}
+
         <div className="stat-card">
+
           <FaFolderOpen />
-          <h2>{stats.total}</h2>
-          <p>Total Projects</p>
+
+          <h2>
+            {stats.total}
+          </h2>
+
+          <p>
+            Total Projects
+          </p>
+
         </div>
 
+        {/* PLANNING */}
+
         <div className="stat-card">
+
           <FaClock />
-          <h2>{stats.planning}</h2>
-          <p>Planning</p>
+
+          <h2>
+            {stats.planning}
+          </h2>
+
+          <p>
+            Planning
+          </p>
+
         </div>
 
+        {/* ACTIVE */}
+
         <div className="stat-card">
+
           <FaSpinner />
-          <h2>{stats.active}</h2>
-          <p>Active</p>
+
+          <h2>
+            {stats.active}
+          </h2>
+
+          <p>
+            Active
+          </p>
+
         </div>
 
+        {/* COMPLETED */}
+
         <div className="stat-card">
+
           <FaCheckCircle />
-          <h2>{stats.completed}</h2>
-          <p>Completed</p>
+
+          <h2>
+            {stats.completed}
+          </h2>
+
+          <p>
+            Completed
+          </p>
+
         </div>
 
       </div>
 
-      {/* Search */}
+      {/* ===================================== */}
+      {/* SEARCH */}
+      {/* ===================================== */}
 
       <div className="project-search">
 
@@ -207,57 +498,91 @@ function ProjectPage() {
           type="text"
           placeholder="Search Project..."
           value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
+          onChange={(event) =>
+            setSearch(event.target.value)
           }
         />
 
       </div>
 
-      {/* Project List */}
+      {/* ===================================== */}
+      {/* PROJECT LIST */}
+      {/* ===================================== */}
 
       {loading ? (
 
         <div className="empty-project">
-          Loading Projects...
+
+          <h2>
+            Loading Projects...
+          </h2>
+
+          <p>
+            Please wait while we load your
+            projects.
+          </p>
+
         </div>
 
       ) : filteredProjects.length === 0 ? (
 
         <div className="empty-project">
-          <h2>No Projects Found</h2>
-          <p>Create your first project.</p>
+
+          <h2>
+            No Projects Found
+          </h2>
+
+          <p>
+            {search
+              ? "No project matches your search."
+              : "Create your first project."}
+          </p>
+
+          {!search && (
+            <button
+              className="create-btn"
+              onClick={() => setOpen(true)}
+            >
+              <FaPlus />
+              Create Project
+            </button>
+          )}
+
         </div>
 
       ) : (
 
         <div className="project-grid">
 
-          {filteredProjects.map((project) => (
+          {filteredProjects.map(
+            (project) => (
 
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onDelete={handleDelete}
-            />
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onDelete={handleDelete}
+                onUpdated={
+                  handleProjectUpdated
+                }
+              />
 
-          ))}
+            )
+          )}
 
         </div>
 
       )}
 
-      {/* Modal */}
+      {/* ===================================== */}
+      {/* CREATE PROJECT MODAL */}
+      {/* ===================================== */}
 
       {open && (
 
         <CreateProjectModal
           close={() => setOpen(false)}
-          addProject={(project) =>
-            setProjects((prev) => [
-              project,
-              ...prev,
-            ])
+          addProject={
+            handleProjectCreated
           }
         />
 

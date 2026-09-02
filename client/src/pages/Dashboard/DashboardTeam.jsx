@@ -30,18 +30,25 @@ function DashboardTeam() {
   // =========================================
 
   useEffect(() => {
-    let channel;
+    let channel = null;
+    let mounted = true;
 
     const loadTeamMembers = async () => {
       try {
-        setLoading(true);
+        if (mounted) {
+          setLoading(true);
+        }
 
         const {
           data: { user },
         } = await supabase.auth.getUser();
 
         if (!user) {
-          setTeamMembers([]);
+          if (mounted) {
+            setTeamMembers([]);
+            setLoading(false);
+          }
+
           return;
         }
 
@@ -53,41 +60,80 @@ function DashboardTeam() {
             ascending: false,
           });
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
 
-        setTeamMembers(data || []);
-
-        // =========================================
-        // REAL-TIME TEAM UPDATES
-        // =========================================
-
-        channel = supabase
-          .channel(`dashboard-team-${user.id}`)
-          .on(
-            "postgres_changes",
-            {
-              event: "*",
-              schema: "public",
-              table: "team_members",
-              filter: `user_id=eq.${user.id}`,
-            },
-            () => {
-              loadTeamMembers();
-            }
-          )
-          .subscribe();
+        if (mounted) {
+          setTeamMembers(data || []);
+        }
       } catch (error) {
-        console.error("Dashboard team error:", error);
+        console.error(
+          "Dashboard team error:",
+          error
+        );
+
+        if (mounted) {
+          setTeamMembers([]);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
+    // Initial data load
     loadTeamMembers();
 
+    // =========================================
+    // REALTIME TEAM UPDATES
+    // IMPORTANT:
+    // .on() MUST COME BEFORE .subscribe()
+    // =========================================
+
+    const setupRealtime = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user || !mounted) {
+        return;
+      }
+
+      channel = supabase
+        .channel(`dashboard-team-${user.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "team_members",
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            if (mounted) {
+              loadTeamMembers();
+            }
+          }
+        );
+
+      // Subscribe ONLY after .on()
+      await channel.subscribe();
+    };
+
+    setupRealtime();
+
+    // =========================================
+    // CLEANUP
+    // =========================================
+
     return () => {
+      mounted = false;
+
       if (channel) {
         supabase.removeChannel(channel);
+        channel = null;
       }
     };
   }, []);
@@ -191,7 +237,6 @@ function DashboardTeam() {
           </div>
         ) : (
           teamMembers.map((member, index) => {
-
             const status =
               member.status || "Offline";
 
@@ -202,25 +247,20 @@ function DashboardTeam() {
               <motion.div
                 key={member.id}
                 className="team-member-row"
-
                 initial={{
                   opacity: 0,
                   x: 10,
                 }}
-
                 animate={{
                   opacity: 1,
                   x: 0,
                 }}
-
                 transition={{
                   delay: index * 0.06,
                 }}
-
                 whileHover={{
                   x: 4,
                 }}
-
                 onClick={() =>
                   navigate("/team")
                 }
@@ -231,8 +271,7 @@ function DashboardTeam() {
                 <div
                   className="team-avatar"
                   style={{
-                    background:
-                      "#2563eb",
+                    background: "#2563eb",
                   }}
                 >
                   {member.profile_image ? (

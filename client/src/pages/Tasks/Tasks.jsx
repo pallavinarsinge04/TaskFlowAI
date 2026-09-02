@@ -1,533 +1,676 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import "./Tasks.css";
+
 import TaskCard from "./TaskCard";
 import TaskModal from "./TaskModal";
-import { FaPlus, FaSearch } from "react-icons/fa";
 
-import socket from "../../socket/socket";
-import { supabase } from "../../supabase/supabaseClient";
+import { supabase } from "./../../supabase/supabaseClient";
+import socket from "./../../socket/socket";
+
+const TASK_API = "http://localhost:5000/api/tasks";
+const PROJECT_API = "http://localhost:5000/api/projects";
 
 function Tasks() {
   const [tasks, setTasks] = useState([]);
+  const [projects, setProjects] = useState([]);
 
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("All");
-  const [priority, setPriority] = useState("All");
-  const [sort, setSort] = useState("Newest");
-
-  const [openModal, setOpenModal] = useState(false);
-  const [editTask, setEditTask] = useState(null);
+  const [selectedProjectId, setSelectedProjectId] = useState("");
 
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [editingTask, setEditingTask] = useState(null);
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [priorityFilter, setPriorityFilter] = useState("All");
+
   const [user, setUser] = useState(null);
 
-  // =========================================
-  // INITIALIZE USER + PROJECT
-  // =========================================
+  // --------------------------------------------------
+  // Get Supabase access token
+  // --------------------------------------------------
+  const getAuthHeaders = async () => {
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
 
-useEffect(() => {
-  if (!user?.id) return;
+    if (error) {
+      throw error;
+    }
 
-  socket.emit("join_user", user.id);
+    if (!session?.access_token) {
+      throw new Error("Authentication session not found.");
+    }
 
-  const handleTaskCreated = (task) => {
-    if (task.user_id !== user.id) return;
-
-    setTasks((prev) => {
-      const exists = prev.some((t) => t.id === task.id);
-
-      if (exists) return prev;
-
-      return [task, ...prev];
-    });
+    return {
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+    };
   };
 
-  const handleTaskUpdated = (updatedTask) => {
-    if (updatedTask.user_id !== user.id) return;
+  // --------------------------------------------------
+  // Load logged-in user
+  // --------------------------------------------------
+  const loadUser = async () => {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === updatedTask.id
-          ? updatedTask
-          : task
-      )
-    );
+    if (error) {
+      console.error("User error:", error);
+      return null;
+    }
+
+    setUser(user);
+    return user;
   };
 
-  const handleTaskDeleted = (taskId) => {
-    setTasks((prev) =>
-      prev.filter((task) => task.id !== taskId)
-    );
+  // --------------------------------------------------
+  // Load projects
+  // --------------------------------------------------
+  const loadProjects = async () => {
+    try {
+      const headers = await getAuthHeaders();
+
+      const response = await axios.get(PROJECT_API, {
+        headers,
+      });
+
+      const projectList = response.data?.projects || [];
+
+      setProjects(projectList);
+
+      // Select first project automatically
+      if (projectList.length > 0) {
+        setSelectedProjectId((current) => current || projectList[0].id);
+      } else {
+        setSelectedProjectId("");
+      }
+    } catch (error) {
+      console.error(
+        "Failed to load projects:",
+        error.response?.data || error.message
+      );
+    }
   };
 
-  socket.on("task_created", handleTaskCreated);
-  socket.on("task_updated", handleTaskUpdated);
-  socket.on("task_deleted", handleTaskDeleted);
-
-  return () => {
-    socket.off("task_created", handleTaskCreated);
-    socket.off("task_updated", handleTaskUpdated);
-    socket.off("task_deleted", handleTaskDeleted);
-  };
-}, [user]);
-  const init = async () => {
+  // --------------------------------------------------
+  // Load tasks
+  // --------------------------------------------------
+  const loadTasks = async () => {
     try {
       setLoading(true);
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const headers = await getAuthHeaders();
 
-      if (!user) {
-        setLoading(false);
-        return;
-      }
+      const response = await axios.get(TASK_API, {
+        headers,
+      });
 
-      setUser(user);
+      const taskList = response.data?.tasks || [];
 
-      // Get user's first project
-      const { data: projectData, error: projectError } =
-        await supabase
-          .from("projects")
-          .select("id")
-          .eq("user_id", user.id)
-          .order("created_at", {
-            ascending: true,
-          })
-          .limit(1)
-          .maybeSingle();
-
-      if (projectError) {
-        console.log("Project error:", projectError);
-      }
-
-      if (projectData) {
-        setSelectedProjectId(projectData.id);
-      }
-
-      await loadTasks(user.id);
+      setTasks(taskList);
     } catch (error) {
-      console.log("Initialization error:", error);
+      console.error(
+        "Failed to load tasks:",
+        error.response?.data || error.message
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================================
-  // LOAD TASKS
-  // =========================================
-
-  const loadTasks = async (userId) => {
-    try {
-      const { data, error } = await supabase
-        .from("tasks")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", {
-          ascending: false,
-        });
-
-      if (error) {
-        throw error;
-      }
-
-      setTasks(data || []);
-    } catch (error) {
-      console.log("Load tasks error:", error);
-    }
-  };
-
-  // =========================================
-  // REAL-TIME SOCKET EVENTS
-  // =========================================
-
+  // --------------------------------------------------
+  // Initial loading
+  // --------------------------------------------------
   useEffect(() => {
-    if (!user) return;
+    const initialize = async () => {
+      try {
+        const currentUser = await loadUser();
 
-    const handleTaskCreated = (newTask) => {
-      // Only show tasks belonging to current user
-      if (newTask.user_id !== user.id) return;
-
-      setTasks((prev) => {
-        const exists = prev.some(
-          (task) => task.id === newTask.id
-        );
-
-        if (exists) {
-          return prev;
-        }
-
-        return [newTask, ...prev];
-      });
-    };
-
-    const handleTaskUpdated = (updatedTask) => {
-      if (updatedTask.user_id !== user.id) return;
-
-      setTasks((prev) =>
-        prev.map((task) =>
-          task.id === updatedTask.id
-            ? updatedTask
-            : task
-        )
-      );
-    };
-
-    const handleTaskDeleted = (deletedId) => {
-      setTasks((prev) =>
-        prev.filter((task) => task.id !== deletedId)
-      );
-    };
-
-    socket.on("task_created", handleTaskCreated);
-    socket.on("task_updated", handleTaskUpdated);
-    socket.on("task_deleted", handleTaskDeleted);
-
-    return () => {
-      socket.off("task_created", handleTaskCreated);
-      socket.off("task_updated", handleTaskUpdated);
-      socket.off("task_deleted", handleTaskDeleted);
-    };
-  }, [user]);
-
-  // =========================================
-  // SAVE TASK
-  // =========================================
-
-  const handleSaveTask = async (task) => {
-    try {
-      if (!user) {
-        alert("Please login.");
-        return;
-      }
-
-      // =====================================
-      // UPDATE
-      // =====================================
-
-      if (editTask) {
-        const { data, error } = await supabase
-          .from("tasks")
-          .update({
-            title: task.title,
-            description: task.description,
-            priority: task.priority,
-            status: task.status,
-            due_date: task.dueDate,
-            assignee: task.assignee,
-          })
-          .eq("id", editTask.id)
-          .eq("user_id", user.id)
-          .select()
-          .single();
-
-        if (error) {
-          throw error;
-        }
-
-        setTasks((prev) =>
-          prev.map((item) =>
-            item.id === editTask.id ? data : item
-          )
-        );
-
-        // Tell other connected clients
-        socket.emit("task_updated", data);
-      }
-
-      // =====================================
-      // CREATE
-      // =====================================
-
-      else {
-        if (!selectedProjectId) {
-          alert(
-            "No project found. Please create a project first."
-          );
+        if (!currentUser) {
+          setLoading(false);
           return;
         }
 
-        const { data, error } = await supabase
-          .from("tasks")
-          .insert([
-            {
-              project_id: selectedProjectId,
-              user_id: user.id,
-              title: task.title,
-              description: task.description,
-              priority: task.priority,
-              status: task.status,
-              due_date: task.dueDate,
-              assignee: task.assignee,
-            },
-          ])
-          .select()
-          .single();
-
-        if (error) {
-          throw error;
-        }
-
-        setTasks((prev) => [data, ...prev]);
-
-        // Tell other connected clients
-        socket.emit("task_created", data);
+        await loadProjects();
+        await loadTasks();
+      } catch (error) {
+        console.error("Initialization error:", error);
+        setLoading(false);
       }
+    };
 
-      setOpenModal(false);
-      setEditTask(null);
-    } catch (error) {
-      console.log("Save task error:", error);
-      alert(error.message);
+    initialize();
+  }, []);
+
+  // --------------------------------------------------
+  // Socket.IO realtime events
+  // --------------------------------------------------
+ useEffect(() => {
+  if (!user) return;
+
+  const handleTaskCreated = (task) => {
+    if (!task) return;
+
+    if (task.user_id !== user.id) {
+      return;
     }
-  };
 
-  // =========================================
-  // DELETE TASK
-  // =========================================
-
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Delete this task?"
-    );
-
-    if (!confirmDelete) return;
-
-    try {
-      const { error } = await supabase
-        .from("tasks")
-        .delete()
-        .eq("id", id)
-        .eq("user_id", user.id);
-
-      if (error) {
-        throw error;
-      }
-
-      setTasks((prev) =>
-        prev.filter((task) => task.id !== id)
+    setTasks((currentTasks) => {
+      const exists = currentTasks.some(
+        (existingTask) =>
+          existingTask.id === task.id
       );
 
-      socket.emit("task_deleted", {
-        id,
-        user_id: user.id,
+      if (exists) {
+        return currentTasks;
+      }
+
+      return [task, ...currentTasks];
+    });
+  };
+
+  const handleTaskUpdated = (task) => {
+    if (!task) return;
+
+    if (task.user_id !== user.id) {
+      return;
+    }
+
+    setTasks((currentTasks) =>
+      currentTasks.map((existingTask) =>
+        existingTask.id === task.id
+          ? {
+              ...existingTask,
+              ...task,
+            }
+          : existingTask
+      )
+    );
+  };
+
+  const handleTaskDeleted = (taskId) => {
+    setTasks((currentTasks) =>
+      currentTasks.filter(
+        (task) => task.id !== taskId
+      )
+    );
+  };
+
+  socket.on(
+    "taskCreated",
+    handleTaskCreated
+  );
+
+  socket.on(
+    "taskUpdated",
+    handleTaskUpdated
+  );
+
+  socket.on(
+    "taskDeleted",
+    handleTaskDeleted
+  );
+
+  return () => {
+    socket.off(
+      "taskCreated",
+      handleTaskCreated
+    );
+
+    socket.off(
+      "taskUpdated",
+      handleTaskUpdated
+    );
+
+    socket.off(
+      "taskDeleted",
+      handleTaskDeleted
+    );
+  };
+}, [user]);
+
+  // --------------------------------------------------
+  // Create task
+  // --------------------------------------------------
+  const handleCreateTask = async (task) => {
+    try {
+      if (!selectedProjectId) {
+        alert("Please create a project first.");
+        return;
+      }
+
+      setSaving(true);
+
+      const headers = await getAuthHeaders();
+
+      const payload = {
+        projectId: selectedProjectId,
+
+        title: task.title,
+        description: task.description || "",
+
+        priority: task.priority || "Medium",
+        status: task.status || "Pending",
+
+        dueDate: task.dueDate || null,
+        assignee: task.assignee || "",
+
+        completed: task.status === "Completed",
+      };
+
+      const response = await axios.post(TASK_API, payload, {
+        headers,
       });
+
+      const createdTask = response.data?.task;
+
+      if (createdTask) {
+        setTasks((currentTasks) => {
+          const exists = currentTasks.some(
+            (existingTask) => existingTask.id === createdTask.id
+          );
+
+          if (exists) {
+            return currentTasks;
+          }
+
+          return [createdTask, ...currentTasks];
+        });
+      }
+
+      setShowModal(false);
+      setEditingTask(null);
     } catch (error) {
-      console.log("Delete task error:", error);
-      alert(error.message);
+      console.error(
+        "Create task error:",
+        error.response?.data || error.message
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to create task."
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
-  // =========================================
-  // FILTER + SORT
-  // =========================================
+  // --------------------------------------------------
+  // Update task
+  // --------------------------------------------------
+  const handleUpdateTask = async (task) => {
+    try {
+      setSaving(true);
 
-  const filteredTasks = useMemo(() => {
-    return [...tasks]
-      .filter((task) => {
-        const matchSearch = task.title
-          ?.toLowerCase()
-          .includes(search.toLowerCase());
+      const headers = await getAuthHeaders();
 
-        const matchStatus =
-          status === "All" ||
-          task.status === status;
+      const payload = {
+        title: task.title,
+        description: task.description || "",
 
-        const matchPriority =
-          priority === "All" ||
-          task.priority === priority;
+        priority: task.priority || "Medium",
+        status: task.status || "Pending",
 
-        return (
-          matchSearch &&
-          matchStatus &&
-          matchPriority
+        dueDate: task.dueDate || null,
+        assignee: task.assignee || "",
+
+        completed: task.status === "Completed",
+      };
+
+      const response = await axios.put(
+        `${TASK_API}/${task.id}`,
+        payload,
+        {
+          headers,
+        }
+      );
+
+      const updatedTask = response.data?.task;
+
+      if (updatedTask) {
+        setTasks((currentTasks) =>
+          currentTasks.map((existingTask) =>
+            existingTask.id === updatedTask.id
+              ? updatedTask
+              : existingTask
+          )
         );
-      })
-      .sort((a, b) => {
-        if (sort === "Newest") {
-          return (
-            new Date(b.created_at) -
-            new Date(a.created_at)
-          );
-        }
+      }
 
-        if (sort === "Oldest") {
-          return (
-            new Date(a.created_at) -
-            new Date(b.created_at)
-          );
-        }
+      setShowModal(false);
+      setEditingTask(null);
+    } catch (error) {
+      console.error(
+        "Update task error:",
+        error.response?.data || error.message
+      );
 
-        if (sort === "Priority") {
-          const priorityValue = {
-            High: 3,
-            Medium: 2,
-            Low: 1,
-          };
+      alert(
+        error.response?.data?.message ||
+          "Failed to update task."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
 
-          return (
-            priorityValue[b.priority] -
-            priorityValue[a.priority]
-          );
-        }
-
-        if (sort === "Status") {
-          return a.status.localeCompare(b.status);
-        }
-
-        return 0;
+  // --------------------------------------------------
+  // Save task
+  // --------------------------------------------------
+  const handleSaveTask = async (task) => {
+    if (editingTask) {
+      await handleUpdateTask({
+        ...task,
+        id: editingTask.id,
       });
-  }, [
-    tasks,
-    search,
-    status,
-    priority,
-    sort,
-  ]);
+    } else {
+      await handleCreateTask(task);
+    }
+  };
 
-  // =========================================
-  // LOADING
-  // =========================================
+  // --------------------------------------------------
+  // Delete task
+  // --------------------------------------------------
+  const handleDeleteTask = async (taskId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task?"
+    );
 
+    if (!confirmed) return;
+
+    try {
+      const headers = await getAuthHeaders();
+
+      await axios.delete(`${TASK_API}/${taskId}`, {
+        headers,
+      });
+
+      setTasks((currentTasks) =>
+        currentTasks.filter((task) => task.id !== taskId)
+      );
+    } catch (error) {
+      console.error(
+        "Delete task error:",
+        error.response?.data || error.message
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to delete task."
+      );
+    }
+  };
+
+  // --------------------------------------------------
+  // Open edit modal
+  // --------------------------------------------------
+  const handleEditTask = (task) => {
+    setEditingTask(task);
+    setShowModal(true);
+  };
+
+  // --------------------------------------------------
+  // Open create modal
+  // --------------------------------------------------
+  const handleOpenCreate = () => {
+    if (!selectedProjectId) {
+      alert("Please create a project before adding tasks.");
+      return;
+    }
+
+    setEditingTask(null);
+    setShowModal(true);
+  };
+
+  // --------------------------------------------------
+  // Filter tasks
+  // --------------------------------------------------
+  const filteredTasks = useMemo(() => {
+    return tasks.filter((task) => {
+      const searchText = search.toLowerCase();
+
+      const matchesSearch =
+        !searchText ||
+        task.title?.toLowerCase().includes(searchText) ||
+        task.description?.toLowerCase().includes(searchText) ||
+        task.assignee?.toLowerCase().includes(searchText);
+
+      const matchesStatus =
+        statusFilter === "All" ||
+        task.status === statusFilter;
+
+      const matchesPriority =
+        priorityFilter === "All" ||
+        task.priority === priorityFilter;
+
+      return (
+        matchesSearch &&
+        matchesStatus &&
+        matchesPriority
+      );
+    });
+  }, [tasks, search, statusFilter, priorityFilter]);
+
+  // --------------------------------------------------
+  // Statistics
+  // --------------------------------------------------
+  const stats = useMemo(() => {
+    const total = tasks.length;
+
+    const completed = tasks.filter(
+      (task) =>
+        task.completed === true ||
+        task.status === "Completed"
+    ).length;
+
+    const inProgress = tasks.filter(
+      (task) => task.status === "In Progress"
+    ).length;
+
+    const pending = tasks.filter(
+      (task) => task.status === "Pending"
+    ).length;
+
+    return {
+      total,
+      completed,
+      inProgress,
+      pending,
+    };
+  }, [tasks]);
+
+  // --------------------------------------------------
+  // Loading state
+  // --------------------------------------------------
   if (loading) {
     return (
-      <div className="loading-tasks">
-        Loading Tasks...
+      <div className="tasks-page">
+        <div className="tasks-loading">
+          Loading tasks...
+        </div>
       </div>
     );
   }
 
-  // =========================================
+  // --------------------------------------------------
   // UI
-  // =========================================
-
+  // --------------------------------------------------
   return (
     <div className="tasks-page">
 
-      {/* HEADER */}
-
+      {/* Header */}
       <div className="tasks-header">
+
         <div>
-          <h1>Task Management</h1>
+          <h1>Tasks</h1>
 
           <p>
-            Manage project tasks professionally
+            Manage and track your project tasks
           </p>
         </div>
 
-        <span className="task-count">
-          {filteredTasks.length} Tasks
-        </span>
+        <button
+          className="add-task-btn"
+          onClick={handleOpenCreate}
+          disabled={saving}
+        >
+          + Add Task
+        </button>
 
-        <div className="header-buttons">
-          <button
-            className="add-btn"
-            onClick={() => {
-              setEditTask(null);
-              setOpenModal(true);
-            }}
-          >
-            <FaPlus />
-            Add Task
-          </button>
-        </div>
       </div>
 
-      {/* FILTERS */}
+      {/* Project selector */}
+      <div className="task-project-selector">
 
-      <div className="task-filters">
-
-        <div className="search-box">
-          <FaSearch />
-
-          <input
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            placeholder="Search task..."
-          />
-        </div>
+        <label>
+          Project
+        </label>
 
         <select
-          value={status}
+          value={selectedProjectId}
           onChange={(e) =>
-            setStatus(e.target.value)
+            setSelectedProjectId(e.target.value)
           }
         >
-          <option>All</option>
-          <option>Pending</option>
-          <option>In Progress</option>
-          <option>Completed</option>
-        </select>
-
-        <select
-          value={priority}
-          onChange={(e) =>
-            setPriority(e.target.value)
-          }
-        >
-          <option>All</option>
-          <option>High</option>
-          <option>Medium</option>
-          <option>Low</option>
-        </select>
-
-        <select
-          value={sort}
-          onChange={(e) =>
-            setSort(e.target.value)
-          }
-        >
-          <option>Newest</option>
-          <option>Oldest</option>
-          <option>Priority</option>
-          <option>Status</option>
+          {projects.length === 0 ? (
+            <option value="">
+              No projects available
+            </option>
+          ) : (
+            projects.map((project) => (
+              <option
+                key={project.id}
+                value={project.id}
+              >
+                {project.name}
+              </option>
+            ))
+          )}
         </select>
 
       </div>
 
-      {/* TASK LIST */}
+      {/* Statistics */}
+      <div className="task-stats">
 
-      <div className="task-list">
+        <div className="task-stat-card">
+          <span>Total Tasks</span>
+          <strong>{stats.total}</strong>
+        </div>
+
+        <div className="task-stat-card">
+          <span>Pending</span>
+          <strong>{stats.pending}</strong>
+        </div>
+
+        <div className="task-stat-card">
+          <span>In Progress</span>
+          <strong>{stats.inProgress}</strong>
+        </div>
+
+        <div className="task-stat-card">
+          <span>Completed</span>
+          <strong>{stats.completed}</strong>
+        </div>
+
+      </div>
+
+      {/* Filters */}
+      <div className="tasks-filters">
+
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          value={search}
+          onChange={(e) =>
+            setSearch(e.target.value)
+          }
+        />
+
+        <select
+          value={statusFilter}
+          onChange={(e) =>
+            setStatusFilter(e.target.value)
+          }
+        >
+          <option value="All">All Status</option>
+          <option value="Pending">Pending</option>
+          <option value="In Progress">
+            In Progress
+          </option>
+          <option value="Completed">
+            Completed
+          </option>
+        </select>
+
+        <select
+          value={priorityFilter}
+          onChange={(e) =>
+            setPriorityFilter(e.target.value)
+          }
+        >
+          <option value="All">All Priority</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+
+      </div>
+
+      {/* Tasks */}
+      <div className="tasks-grid">
 
         {filteredTasks.length === 0 ? (
-          <div className="empty-task">
-            <h2>No Tasks Found</h2>
+
+          <div className="no-tasks">
+
+            <h3>No tasks found</h3>
 
             <p>
-              Click "Add Task" to create your
-              first task.
+              {tasks.length === 0
+                ? "Create your first task to get started."
+                : "Try changing your search or filters."}
             </p>
+
           </div>
+
         ) : (
+
           filteredTasks.map((task) => (
+
             <TaskCard
               key={task.id}
               task={task}
-              onEdit={(selectedTask) => {
-                setEditTask(selectedTask);
-                setOpenModal(true);
-              }}
-              onDelete={handleDelete}
+              onEdit={() =>
+                handleEditTask(task)
+              }
+              onDelete={() =>
+                handleDeleteTask(task.id)
+              }
             />
+
           ))
+
         )}
 
       </div>
 
-      {/* MODAL */}
-
+      {/* Modal */}
       <TaskModal
-        open={openModal}
-        editTask={editTask}
+        open={showModal}
         onClose={() => {
-          setOpenModal(false);
-          setEditTask(null);
+          setShowModal(false);
+          setEditingTask(null);
         }}
         onSave={handleSaveTask}
+        editTask={editingTask}
       />
 
     </div>

@@ -18,42 +18,104 @@ function Login() {
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const { email, password } = form;
+    const { email, password } = form;
 
-  const { data, error } =
-    await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      // =========================
+      // Supabase Login
+      // =========================
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
+      const { data, error } =
+        await supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        });
 
-  // Get user profile
-  const { data: profile, error: profileError } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", data.user.id)
-    .single();
+      if (error) {
+        alert(error.message);
+        return;
+      }
 
-  if (profileError) {
-    console.log(profileError);
-  }
+      // =========================
+      // Check Session
+      // =========================
 
-  localStorage.setItem(
-    "user",
-    JSON.stringify(profile)
-  );
+      if (!data.session) {
+        alert(
+          "Login successful, but no session was created."
+        );
+        return;
+      }
 
-  alert("Login Successful!");
+      // =========================
+      // Save Access Token
+      // =========================
 
-  navigate("/dashboard");
-};
+      const accessToken =
+        data.session.access_token;
+
+      localStorage.setItem(
+        "access_token",
+        accessToken
+      );
+
+      // =========================
+      // Save Auth User
+      // =========================
+
+      localStorage.setItem(
+        "auth_user",
+        JSON.stringify(data.user)
+      );
+
+      // =========================
+      // Get User Profile
+      // =========================
+
+      const {
+        data: profile,
+        error: profileError,
+      } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profileError) {
+        console.warn(
+          "Profile fetch warning:",
+          profileError.message
+        );
+      }
+
+      // =========================
+      // Save Profile
+      // =========================
+
+      if (profile) {
+        localStorage.setItem(
+          "user",
+          JSON.stringify(profile)
+        );
+      }
+
+      // =========================
+      // Navigate
+      // =========================
+
+      alert("Login Successful!");
+
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login Error:", error);
+
+      alert("Something went wrong during login.");
+    }
+  };
+
   return (
     <div className="login-page">
 
@@ -63,7 +125,9 @@ const handleSubmit = async (e) => {
 
           <h1>TaskFlow AI</h1>
 
-          <p>Sign in to your workspace</p>
+          <p>
+            Sign in to your workspace
+          </p>
 
         </div>
 
@@ -99,7 +163,10 @@ const handleSubmit = async (e) => {
 
           </div>
 
-          <button type="submit" className="login-btn">
+          <button
+            type="submit"
+            className="login-btn"
+          >
             Login
           </button>
 
@@ -113,7 +180,9 @@ const handleSubmit = async (e) => {
 
           <p>
             Don't have an account?
-            <Link to="/register"> Register</Link>
+            <Link to="/register">
+              {" "}Register
+            </Link>
           </p>
 
         </div>

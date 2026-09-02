@@ -1,88 +1,195 @@
 import "./TaskCard.css";
+
 import {
   FaCalendarAlt,
   FaFlag,
   FaUserCircle,
   FaEdit,
   FaTrash,
-  FaCheckCircle
+  FaCheckCircle,
 } from "react-icons/fa";
+
 import DueDateCountdown from "./DueDateCountdown";
 
 function TaskCard({ task, onEdit, onDelete }) {
+  // ---------------------------------------------
+  // Calculate progress from task status
+  // ---------------------------------------------
+  const getProgress = () => {
+    if (task.completed || task.status === "Completed") {
+      return 100;
+    }
+
+    if (task.status === "In Progress") {
+      return 50;
+    }
+
+    return 0;
+  };
+
+  const progress = getProgress();
+
+  // ---------------------------------------------
+  // Status CSS class
+  // ---------------------------------------------
+  const statusClass = task.status
+    ?.toLowerCase()
+    .replace(/\s+/g, "-");
+
+  // ---------------------------------------------
+  // Priority CSS class
+  // ---------------------------------------------
+  const priorityClass = task.priority
+    ?.toLowerCase();
+
   return (
     <div className="task-card">
 
-      {/* HEADER */}
+      {/* =========================================
+          HEADER
+      ========================================= */}
+
       <div className="task-card-header">
 
-        <div>
-          <h2>{task.title}</h2>
-          <p>{task.description}</p>
+        <div className="task-card-title">
+
+          <h2>
+            {task.title}
+          </h2>
+
+          {task.description && (
+            <p>
+              {task.description}
+            </p>
+          )}
+
         </div>
+
+        {/* ACTIONS */}
 
         <div className="task-actions">
 
           <button
+            type="button"
             className="edit-btn"
             onClick={() => onEdit(task)}
+            title="Edit task"
           >
             <FaEdit />
           </button>
 
           <button
+            type="button"
             className="delete-btn"
             onClick={() => onDelete(task.id)}
+            title="Delete task"
           >
             <FaTrash />
           </button>
 
         </div>
+
       </div>
 
-      {/* STATUS + PRIORITY */}
+
+      {/* =========================================
+          STATUS + PRIORITY
+      ========================================= */}
+
       <div className="task-info">
 
-        <span className={`status ${task.status?.replace(/\s/g, "")}`}>
+        <span
+          className={`status ${statusClass}`}
+        >
           <FaCheckCircle />
-          {task.status}
+
+          <span>
+            {task.status || "Pending"}
+          </span>
         </span>
 
-        <span className={`priority ${task.priority}`}>
+
+        <span
+          className={`priority ${priorityClass}`}
+        >
           <FaFlag />
-          {task.priority}
+
+          <span>
+            {task.priority || "Medium"}
+          </span>
         </span>
 
       </div>
 
-      {/* PROGRESS */}
+
+      {/* =========================================
+          PROGRESS
+      ========================================= */}
+
       <div className="progress-section">
 
         <div className="progress-header">
-          <span>Progress</span>
-          <span>{task.progress || 0}%</span>
+
+          <span>
+            Progress
+          </span>
+
+          <span>
+            {progress}%
+          </span>
+
         </div>
 
+
         <div className="progress-bar">
+
           <div
             className="progress-fill"
-            style={{ width: `${task.progress || 0}%` }}
+            style={{
+              width: `${progress}%`,
+            }}
           />
+
         </div>
 
       </div>
 
-      {/* FOOTER */}
+
+      {/* =========================================
+          FOOTER
+      ========================================= */}
+
       <div className="task-footer">
 
-        <span>
+        {/* DUE DATE */}
+
+        <span className="task-footer-item">
+
           <FaCalendarAlt />
-          <DueDateCountdown dueDate={task.due_date} />
+
+          {task.due_date ? (
+            <DueDateCountdown
+              dueDate={task.due_date}
+            />
+          ) : (
+            <span>
+              No due date
+            </span>
+          )}
+
         </span>
 
-        <span>
+
+        {/* ASSIGNEE */}
+
+        <span className="task-footer-item">
+
           <FaUserCircle />
-          {task.assignee}
+
+          <span>
+            {task.assignee || "Unassigned"}
+          </span>
+
         </span>
 
       </div>

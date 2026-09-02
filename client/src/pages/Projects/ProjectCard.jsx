@@ -1,114 +1,236 @@
-import { FaTrash , FaEdit } from "react-icons/fa";
+import { FaTrash, FaEdit } from "react-icons/fa";
 import { useState } from "react";
+
 import EditProjectModal from "./EditProjectModal";
-function ProjectCard({ project ,  onDelete}) {
-const [showEdit, setShowEdit] = useState(false);
-return(
 
-<div className="project-card">
+function ProjectCard({
+  project,
+  onDelete,
+  onUpdated,
+}) {
+  const [showEdit, setShowEdit] =
+    useState(false);
 
-<div className="card-top">
+  // =========================================
+  // SAFE VALUES
+  // =========================================
 
-<h2>{project.name}</h2>
+  const progress =
+    Math.min(
+      100,
+      Math.max(
+        0,
+        Number(project.progress) || 0
+      )
+    );
 
-<span className={`status ${project.status}`}>
-{project.status}
-</span>
+  const teamMembers =
+    project.team_members ?? 0;
 
-</div>
+  // =========================================
+  // UPDATED PROJECT
+  // =========================================
 
-<p>{project.description}</p>
+  const handleUpdated = (updatedProject) => {
+    setShowEdit(false);
 
-<div className="project-progress">
+    if (onUpdated) {
+      onUpdated(updatedProject);
+    }
+  };
 
-<div
-className="progress-fill"
-style={{
-width:`${project.progress}%`
-}}
-></div>
+  return (
+    <div className="project-card">
 
-</div>
+      {/* ===================================== */}
+      {/* CARD TOP */}
+      {/* ===================================== */}
 
-<p className="progress-text">
-{project.progress}% Completed
-</p>
+      <div className="card-top">
 
-<div className="project-details">
+        <h2>
+          {project.name}
+        </h2>
 
-  <div>
-    📅
-    <p>Start</p>
-    <strong>
-      {project.start_date
-        ? new Date(project.start_date).toLocaleDateString()
-        : "-"}
-    </strong>
-  </div>
+        <span
+          className={`status ${project.status}`}
+        >
+          {project.status || "Planning"}
+        </span>
 
-  <div>
-    🏁
-    <p>End</p>
-    <strong>
-      {project.end_date
-        ? new Date(project.end_date).toLocaleDateString()
-        : "-"}
-    </strong>
-  </div>
+      </div>
 
-  <div>
-    👥
-    <p>Members</p>
-    <strong>
-      {project.team_members}
-    </strong>
-  </div>
+      {/* ===================================== */}
+      {/* DESCRIPTION */}
+      {/* ===================================== */}
 
-  <div>
-    🔥
-    <p>Priority</p>
-    <strong>
-      {project.priority}
-    </strong>
-  </div>
+      <p>
+        {project.description ||
+          "No description provided."}
+      </p>
 
-</div>
+      {/* ===================================== */}
+      {/* PROGRESS */}
+      {/* ===================================== */}
 
+      <div className="project-progress">
 
-<div className="project-actions">
+        <div
+          className="progress-fill"
+          style={{
+            width: `${progress}%`,
+          }}
+        />
 
-  <button
-    className="edit-project-btn"
-    onClick={() => setShowEdit(true)}
-  >
-    <FaEdit />
-    Edit
-  </button>
+      </div>
 
-  <button
-    className="delete-project-btn"
-    onClick={() => onDelete(project.id)}
-  >
-    <FaTrash />
-    Delete
-  </button>
+      <p className="progress-text">
+        {progress}% Completed
+      </p>
 
-</div>
-{showEdit && (
-  <EditProjectModal
-    project={project}
-    close={() => setShowEdit(false)}
-    reload={() => {
-      setShowEdit(false);
-      window.location.reload();
-    }}
-  />
-)}
+      {/* ===================================== */}
+      {/* PROJECT DETAILS */}
+      {/* ===================================== */}
 
-</div>
+      <div className="project-details">
 
-);
+        {/* START DATE */}
 
+        <div>
+
+          <span>
+            📅
+          </span>
+
+          <p>
+            Start
+          </p>
+
+          <strong>
+            {project.start_date
+              ? new Date(
+                  project.start_date
+                ).toLocaleDateString()
+              : "-"}
+          </strong>
+
+        </div>
+
+        {/* END DATE */}
+
+        <div>
+
+          <span>
+            🏁
+          </span>
+
+          <p>
+            End
+          </p>
+
+          <strong>
+            {project.end_date
+              ? new Date(
+                  project.end_date
+                ).toLocaleDateString()
+              : "-"}
+          </strong>
+
+        </div>
+
+        {/* MEMBERS */}
+
+        <div>
+
+          <span>
+            👥
+          </span>
+
+          <p>
+            Members
+          </p>
+
+          <strong>
+            {teamMembers}
+          </strong>
+
+        </div>
+
+        {/* PRIORITY */}
+
+        <div>
+
+          <span>
+            🔥
+          </span>
+
+          <p>
+            Priority
+          </p>
+
+          <strong>
+            {project.priority ||
+              "Medium"}
+          </strong>
+
+        </div>
+
+      </div>
+
+      {/* ===================================== */}
+      {/* ACTIONS */}
+      {/* ===================================== */}
+
+      <div className="project-actions">
+
+        {/* EDIT */}
+
+        <button
+          className="edit-project-btn"
+          onClick={() =>
+            setShowEdit(true)
+          }
+        >
+          <FaEdit />
+
+          Edit
+        </button>
+
+        {/* DELETE */}
+
+        <button
+          className="delete-project-btn"
+          onClick={() =>
+            onDelete(project.id)
+          }
+        >
+          <FaTrash />
+
+          Delete
+        </button>
+
+      </div>
+
+      {/* ===================================== */}
+      {/* EDIT MODAL */}
+      {/* ===================================== */}
+
+      {showEdit && (
+
+        <EditProjectModal
+          project={project}
+
+          close={() =>
+            setShowEdit(false)
+          }
+
+          onUpdated={handleUpdated}
+        />
+
+      )}
+
+    </div>
+  );
 }
 
 export default ProjectCard;

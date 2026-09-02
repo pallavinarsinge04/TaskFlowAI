@@ -1,60 +1,108 @@
-const User = require("../models/User");
+import supabase from "../config/supabase.js";
 
-exports.getProfile = async (req, res) => {
+/*
+|--------------------------------------------------------------------------
+| Get current user's profile
+|--------------------------------------------------------------------------
+*/
+
+export const getProfile = async (req, res) => {
   try {
+    const userId = req.user.id;
 
-    const user = await User.findById(req.params.id)
-      .select("-password");
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
 
-    res.json({
+    if (error || !data) {
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found.",
+      });
+    }
+
+    // Never return password
+    delete data.password;
+
+    return res.status(200).json({
       success: true,
-      user,
+      user: data,
     });
+  } catch (error) {
+    console.error("Get profile error:", error);
 
-  } catch (err) {
-
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: err.message,
+      message: "Failed to fetch profile.",
     });
-
   }
 };
 
-exports.updateProfile = async (req, res) => {
+/*
+|--------------------------------------------------------------------------
+| Update current user's profile
+|--------------------------------------------------------------------------
+*/
 
+export const updateProfile = async (req, res) => {
   try {
+    const userId = req.user.id;
 
-    const user = await User.findByIdAndUpdate(
+    const allowedFields = [
+      "name",
+      "full_name",
+      "avatar",
+      "bio",
+      "phone",
+      "location",
+    ];
 
-      req.params.id,
+    const updates = {};
 
-      req.body,
-
-      {
-        new: true,
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
       }
+    }
 
-    );
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid profile fields provided.",
+      });
+    }
 
-    res.json({
+    const { data, error } = await supabase
+      .from("users")
+      .update(updates)
+      .eq("id", userId)
+      .select("*")
+      .single();
 
+    if (error) {
+      console.error("Update profile error:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    delete data.password;
+
+    return res.status(200).json({
       success: true,
-
-      user,
-
+      message: "Profile updated successfully.",
+      user: data,
     });
+  } catch (error) {
+    console.error("Update profile error:", error);
 
-  } catch (err) {
-
-    res.status(500).json({
-
+    return res.status(500).json({
       success: false,
-
-      message: err.message,
-
+      message: "Failed to update profile.",
     });
-
   }
-
 };

@@ -2,8 +2,13 @@ import { Droppable } from "@hello-pangea/dnd";
 import TaskItem from "./TaskItem";
 import "./KanbanColumn.css";
 
-function KanbanColumn({ title, status, tasks }) {
-
+function KanbanColumn({
+  title,
+  status,
+  tasks,
+  onEdit,
+  onDelete,
+}) {
   return (
     <div className="kanban-column">
 
@@ -28,9 +33,7 @@ function KanbanColumn({ title, status, tasks }) {
             {tasks.length === 0 ? (
 
               <div className="empty-column">
-
                 <p>No Tasks</p>
-
               </div>
 
             ) : (
@@ -41,6 +44,8 @@ function KanbanColumn({ title, status, tasks }) {
                   key={task.id}
                   task={task}
                   index={index}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
                 />
 
               ))
@@ -57,7 +62,6 @@ function KanbanColumn({ title, status, tasks }) {
 
     </div>
   );
-
 }
 
 export default KanbanColumn;
