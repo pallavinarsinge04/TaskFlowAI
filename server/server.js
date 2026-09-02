@@ -2,14 +2,14 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import http from "http";
-
+import teamRoutes from "./routes/teamRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 
 import { initializeSocket } from "./config/socket.js";
-
+app.use("/api/team", teamRoutes);
 const app = express();
 
 const server = http.createServer(app);
