@@ -1,6 +1,7 @@
 import express from "express";
 
 import {
+  searchUsers,
   getProjectMembers,
   addTeamMember,
   updateTeamMember,
@@ -16,31 +17,46 @@ import {
 
 const router = express.Router();
 
-// Authentication required for all team routes
 router.use(authenticateUser);
 
-// Get project team members
+/*
+========================================================
+USER SEARCH
+========================================================
+*/
+router.get(
+  "/users/search",
+  searchUsers
+);
+
+/*
+========================================================
+PROJECT TEAM
+========================================================
+*/
 router.get(
   "/project/:projectId",
   checkProjectPermission("viewer"),
   getProjectMembers
 );
 
-// Add team member
 router.post(
   "/project/:projectId",
   checkProjectPermission("admin"),
   addTeamMember
 );
 
-// Update team member
+/*
+========================================================
+MEMBER MANAGEMENT
+========================================================
+*/
 router.put(
   "/:id",
   checkMemberProjectPermission("admin"),
   updateTeamMember
 );
 
-// Delete team member
 router.delete(
   "/:id",
   checkMemberProjectPermission("admin"),

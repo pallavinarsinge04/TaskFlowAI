@@ -1,4 +1,5 @@
 import "dotenv/config";
+
 import express from "express";
 import cors from "cors";
 import http from "http";
@@ -17,14 +18,18 @@ import teamRoutes from "./routes/teamRoutes.js";
 // SOCKET.IO
 // =========================================
 
-import { initializeSocket } from "./config/socket.js";
+import {
+  initializeSocket,
+} from "./config/socket.js";
 
 // =========================================
-// APP INITIALIZATION
+// APP
 // =========================================
 
 const app = express();
-const server = http.createServer(app);
+
+const server =
+  http.createServer(app);
 
 // =========================================
 // CORS
@@ -32,17 +37,20 @@ const server = http.createServer(app);
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin:
+      "http://localhost:5173",
     credentials: true,
   })
 );
 
 // =========================================
-// BODY PARSING
-// IMPORTANT: MUST COME BEFORE API ROUTES
+// BODY PARSER
+// MUST BE BEFORE API ROUTES
 // =========================================
 
-app.use(express.json());
+app.use(
+  express.json()
+);
 
 app.use(
   express.urlencoded({
@@ -51,77 +59,116 @@ app.use(
 );
 
 // =========================================
-// HEALTH / ROOT ROUTES
+// ROOT
 // =========================================
 
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "TaskFlowAI Backend Running",
+    message:
+      "TaskFlowAI Backend Running",
   });
 });
 
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "TaskFlowAI API is healthy",
-  });
-});
+// =========================================
+// HEALTH
+// =========================================
+
+app.get(
+  "/api/health",
+  (req, res) => {
+    res.status(200).json({
+      success: true,
+      message:
+        "TaskFlowAI API is healthy",
+    });
+  }
+);
 
 // =========================================
 // API ROUTES
 // =========================================
 
-app.use("/api/auth", authRoutes);
+app.use(
+  "/api/auth",
+  authRoutes
+);
 
-app.use("/api/ai", aiRoutes);
+app.use(
+  "/api/ai",
+  aiRoutes
+);
 
-app.use("/api/projects", projectRoutes);
+app.use(
+  "/api/projects",
+  projectRoutes
+);
 
-app.use("/api/tasks", taskRoutes);
+app.use(
+  "/api/tasks",
+  taskRoutes
+);
 
-app.use("/api/team", teamRoutes);
+app.use(
+  "/api/team",
+  teamRoutes
+);
 
 // =========================================
-// 404 HANDLER
+// 404
 // =========================================
 
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-    path: req.originalUrl,
-  });
-});
+app.use(
+  (req, res) => {
+    res.status(404).json({
+      success: false,
+      message:
+        "Route not found",
+      path: req.originalUrl,
+    });
+  }
+);
 
 // =========================================
 // GLOBAL ERROR HANDLER
 // =========================================
 
-app.use((err, req, res, next) => {
-  console.error("Global Server Error:", err);
+app.use(
+  (err, req, res, next) => {
+    console.error(
+      "Global Server Error:",
+      err
+    );
 
-  res.status(err.status || 500).json({
-    success: false,
-    message:
-      err.message || "Internal server error.",
-  });
-});
+    res.status(
+      err.status || 500
+    ).json({
+      success: false,
+      message:
+        err.message ||
+        "Internal server error.",
+    });
+  }
+);
 
 // =========================================
-// SOCKET.IO INITIALIZATION
+// SOCKET.IO
 // =========================================
 
 initializeSocket(server);
 
 // =========================================
-// SERVER START
+// START SERVER
 // =========================================
 
-const PORT = process.env.PORT || 5000;
+const PORT =
+  process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(
-    `🚀 Server running on http://localhost:${PORT}`
-  );
-});
+server.listen(
+  PORT,
+  () => {
+    console.log(
+      `🚀 Server running on http://localhost:${PORT}`
+    );
+  }
+);

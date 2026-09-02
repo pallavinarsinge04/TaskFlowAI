@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import "./TeamPage.css";
 import {
   FaPlus,
   FaTrash,
   FaUsers,
-  FaEdit,
   FaTimes,
 } from "react-icons/fa";
-import axios from "axios";
-import { supabase } from "../../supabase/supabaseClient";
 
-const API_URL = "http://localhost:5000/api";
+import { supabase } from "../../supabase/supabaseClient";
+import socket from "../../socket";
+
+const API_URL = "http://localhost:5000/api/team";
+const PROJECT_API = "http://localhost:5000/api/projects";
 
 function TeamPage() {
   const [members, setMembers] = useState([]);
@@ -19,11 +21,7 @@ function TeamPage() {
   const [selectedProjectId, setSelectedProjectId] = useState("");
 
   const [loading, setLoading] = useState(true);
-  const [projectsLoading, setProjectsLoading] = useState(true);
-
   const [showForm, setShowForm] = useState(false);
-
-  const [editingMember, setEditingMember] = useState(null);
 
   const [search, setSearch] = useState("");
 
@@ -34,9 +32,9 @@ function TeamPage() {
     status: "Online",
   });
 
-  // =========================================
+  // =====================================================
   // AUTH HEADERS
-  // =========================================
+  // =====================================================
 
   const getAuthHeaders = async () => {
     const {
@@ -44,66 +42,54 @@ function TeamPage() {
     } = await supabase.auth.getSession();
 
     if (!session?.access_token) {
-      throw new Error("Authentication session not found.");
+      throw new Error(
+        "Your session has expired. Please login again."
+      );
     }
 
     return {
       Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
     };
   };
 
-  // =========================================
+  // =====================================================
   // LOAD PROJECTS
-  // =========================================
+  // =====================================================
 
   const loadProjects = async () => {
     try {
-      setProjectsLoading(true);
-
       const headers = await getAuthHeaders();
 
-      const response = await axios.get(
-        `${API_URL}/projects`,
-        { headers }
-      );
+      const response = await axios.get(PROJECT_API, {
+        headers,
+      });
 
       const projectList =
         response.data?.projects || [];
 
       setProjects(projectList);
 
-      if (projectList.length > 0) {
-        setSelectedProjectId((currentId) => {
-          if (
-            currentId &&
-            projectList.some(
-              (project) => project.id === currentId
-            )
-          ) {
-            return currentId;
-          }
-
-          return projectList[0].id;
-        });
-      } else {
-        setSelectedProjectId("");
+      if (
+        projectList.length > 0 &&
+        !selectedProjectId
+      ) {
+        setSelectedProjectId(
+          projectList[0].id
+        );
       }
     } catch (error) {
       console.error(
         "Load projects error:",
-        error.response?.data || error.message
+        error.response?.data ||
+          error.message
       );
-
-      setProjects([]);
-      setSelectedProjectId("");
-    } finally {
-      setProjectsLoading(false);
     }
   };
 
-  // =========================================
-  // LOAD TEAM MEMBERS
-  // =========================================
+  // =====================================================
+  // LOAD MEMBERS
+  // =====================================================
 
   const loadMembers = async (projectId) => {
     if (!projectId) {
@@ -115,18 +101,24 @@ function TeamPage() {
     try {
       setLoading(true);
 
-      const headers = await getAuthHeaders();
+      const headers =
+        await getAuthHeaders();
 
       const response = await axios.get(
-        `${API_URL}/team/project/${projectId}`,
-        { headers }
+        `${API_URL}/project/${projectId}`,
+        {
+          headers,
+        }
       );
 
-      setMembers(response.data?.members || []);
+      setMembers(
+        response.data?.members || []
+      );
     } catch (error) {
       console.error(
-        "Load team members error:",
-        error.response?.data || error.message
+        "Load members error:",
+        error.response?.data ||
+          error.message
       );
 
       setMembers([]);
@@ -135,17 +127,13 @@ function TeamPage() {
     }
   };
 
-  // =========================================
+  // =====================================================
   // INITIAL LOAD
-  // =========================================
+  // =====================================================
 
   useEffect(() => {
     loadProjects();
   }, []);
-
-  // =========================================
-  // PROJECT CHANGE
-  // =========================================
 
   useEffect(() => {
     if (selectedProjectId) {
@@ -153,183 +141,240 @@ function TeamPage() {
     }
   }, [selectedProjectId]);
 
-  // =========================================
-  // REALTIME
-  // =========================================
+  // =====================================================
+  // REALTIME TEAM UPDATES
+  // =====================================================
 
   useEffect(() => {
-    if (!selectedProjectId) return;
+    if (!selectedProjectId) {
+      return;
+    }
 
-    let channel = null;
-    let mounted = true;
+    const handleMemberAdded = (member) => {
+      if (!member) return;
 
-    const setupRealtime = async () => {
-      channel = supabase
-        .channel(
-          `team-page-${selectedProjectId}`
-        )
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "team_members",
-            filter: `project_id=eq.${selectedProjectId}`,
-          },
-          () => {
-            if (mounted) {
-              loadMembers(selectedProjectId);
-            }
-          }
-        );
+      if (
+        member.project_id !==
+        selectedProjectId
+      ) {
+        return;
+      }
 
-      await channel.subscribe();
+      setMembers((currentMembers) => {
+        const exists =
+          currentMembers.some(
+            (item) =>
+              item.id === member.id
+          );
+
+        if (exists) {
+          return currentMembers;
+        }
+
+        return [
+          member,
+          ...currentMembers,
+        ];
+      });
     };
 
-    setupRealtime();
+    const handleMemberUpdated = (
+      member
+    ) => {
+      if (!member) return;
+
+      if (
+        member.project_id !==
+        selectedProjectId
+      ) {
+        return;
+      }
+
+      setMembers((currentMembers) =>
+        currentMembers.map((item) =>
+          item.id === member.id
+            ? {
+                ...item,
+                ...member,
+              }
+            : item
+        )
+      );
+    };
+
+    const handleMemberRemoved = (
+      data
+    ) => {
+      if (!data) return;
+
+      if (
+        data.projectId &&
+        data.projectId !==
+          selectedProjectId
+      ) {
+        return;
+      }
+
+      setMembers((currentMembers) =>
+        currentMembers.filter(
+          (item) =>
+            item.id !== data.id
+        )
+      );
+    };
+
+    socket.on(
+      "teamMemberAdded",
+      handleMemberAdded
+    );
+
+    socket.on(
+      "teamMemberUpdated",
+      handleMemberUpdated
+    );
+
+    socket.on(
+      "teamMemberRemoved",
+      handleMemberRemoved
+    );
 
     return () => {
-      mounted = false;
+      socket.off(
+        "teamMemberAdded",
+        handleMemberAdded
+      );
 
-      if (channel) {
-        supabase.removeChannel(channel);
-        channel = null;
-      }
+      socket.off(
+        "teamMemberUpdated",
+        handleMemberUpdated
+      );
+
+      socket.off(
+        "teamMemberRemoved",
+        handleMemberRemoved
+      );
     };
   }, [selectedProjectId]);
 
-  // =========================================
-  // INPUT CHANGE
-  // =========================================
+  // =====================================================
+  // FORM CHANGE
+  // =====================================================
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const {
+      name,
+      value,
+    } = event.target;
 
-    setForm((currentForm) => ({
-      ...currentForm,
+    setForm((previous) => ({
+      ...previous,
       [name]: value,
     }));
   };
 
-  // =========================================
-  // OPEN ADD FORM
-  // =========================================
-
-  const openAddForm = () => {
-    setEditingMember(null);
-
-    setForm({
-      userId: "",
-      name: "",
-      role: "member",
-      status: "Online",
-    });
-
-    setShowForm(true);
-  };
-
-  // =========================================
-  // OPEN EDIT FORM
-  // =========================================
-
-  const openEditForm = (member) => {
-    setEditingMember(member);
-
-    setForm({
-      userId: member.user_id || "",
-      name: member.name || "",
-      role:
-        member.role === "owner"
-          ? "owner"
-          : member.role || "member",
-      status: member.status || "Offline",
-    });
-
-    setShowForm(true);
-  };
-
-  // =========================================
-  // CLOSE FORM
-  // =========================================
-
-  const closeForm = () => {
-    setShowForm(false);
-    setEditingMember(null);
-
-    setForm({
-      userId: "",
-      name: "",
-      role: "member",
-      status: "Online",
-    });
-  };
-
-  // =========================================
+  // =====================================================
   // ADD MEMBER
-  // =========================================
+  // =====================================================
 
   const addMember = async (event) => {
     event.preventDefault();
 
     if (!selectedProjectId) {
-      alert("Please select a project first.");
+      alert(
+        "Please select a project first."
+      );
       return;
     }
 
     if (!form.userId.trim()) {
-      alert("Enter the user's Supabase User ID.");
+      alert(
+        "Enter the Supabase User ID."
+      );
       return;
     }
 
     if (!form.name.trim()) {
-      alert("Enter member name.");
+      alert(
+        "Enter member name."
+      );
       return;
     }
 
     try {
-      const headers = await getAuthHeaders();
+      const headers =
+        await getAuthHeaders();
 
-      const avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-        form.name
-      )}&background=2563eb&color=ffffff`;
+      const response =
+        await axios.post(
+          `${API_URL}/project/${selectedProjectId}`,
+          {
+            userId:
+              form.userId.trim(),
 
-      const response = await axios.post(
-        `${API_URL}/team/project/${selectedProjectId}`,
-        {
-          userId: form.userId.trim(),
-          name: form.name.trim(),
-          role: form.role,
-          status: form.status,
-          profileImage: avatar,
-        },
-        {
-          headers,
-        }
-      );
+            name:
+              form.name.trim(),
 
-      const newMember = response.data?.member;
+            role:
+              form.role,
+
+            status:
+              form.status,
+
+            profileImage: "",
+          },
+          {
+            headers,
+          }
+        );
+
+      const newMember =
+        response.data?.member;
+
+      /*
+       Socket.IO will also send the event.
+       We do not manually insert here if
+       the socket event will handle it.
+      */
 
       if (newMember) {
-        setMembers((currentMembers) => {
-          const exists = currentMembers.some(
-            (member) => member.id === newMember.id
-          );
+        setMembers(
+          (currentMembers) => {
+            const exists =
+              currentMembers.some(
+                (item) =>
+                  item.id ===
+                  newMember.id
+              );
 
-          if (exists) {
-            return currentMembers;
+            if (exists) {
+              return currentMembers;
+            }
+
+            return [
+              newMember,
+              ...currentMembers,
+            ];
           }
-
-          return [newMember, ...currentMembers];
-        });
+        );
       }
 
-      closeForm();
+      setForm({
+        userId: "",
+        name: "",
+        role: "member",
+        status: "Online",
+      });
 
-      alert("Team member added successfully.");
+      setShowForm(false);
+
+      alert(
+        "Team member added successfully."
+      );
     } catch (error) {
       console.error(
         "Add member error:",
-        error.response?.data || error.message
+        error.response?.data ||
+          error.message
       );
 
       alert(
@@ -339,152 +384,94 @@ function TeamPage() {
     }
   };
 
-  // =========================================
-  // UPDATE MEMBER
-  // =========================================
-
-  const updateMember = async (event) => {
-    event.preventDefault();
-
-    if (!editingMember) return;
-
-    if (!form.name.trim()) {
-      alert("Enter member name.");
-      return;
-    }
-
-    try {
-      const headers = await getAuthHeaders();
-
-      const response = await axios.put(
-        `${API_URL}/team/${editingMember.id}`,
-        {
-          name: form.name.trim(),
-          role:
-            editingMember.role === "owner"
-              ? "owner"
-              : form.role,
-          status: form.status,
-        },
-        {
-          headers,
-        }
-      );
-
-      const updatedMember =
-        response.data?.member;
-
-      if (updatedMember) {
-        setMembers((currentMembers) =>
-          currentMembers.map((member) =>
-            member.id === updatedMember.id
-              ? updatedMember
-              : member
-          )
-        );
-      }
-
-      closeForm();
-
-      alert("Team member updated successfully.");
-    } catch (error) {
-      console.error(
-        "Update member error:",
-        error.response?.data || error.message
-      );
-
-      alert(
-        error.response?.data?.message ||
-          "Failed to update team member."
-      );
-    }
-  };
-
-  // =========================================
-  // REMOVE MEMBER
-  // =========================================
+  // =====================================================
+  // DELETE MEMBER
+  // =====================================================
 
   const removeMember = async (id) => {
-    const member = members.find(
-      (item) => item.id === id
-    );
-
-    if (member?.role === "owner") {
-      alert("Project owner cannot be removed.");
-      return;
-    }
-
     if (
       !window.confirm(
-        "Are you sure you want to remove this member?"
+        "Delete this team member?"
       )
     ) {
       return;
     }
 
     try {
-      const headers = await getAuthHeaders();
+      const headers =
+        await getAuthHeaders();
 
       await axios.delete(
-        `${API_URL}/team/${id}`,
+        `${API_URL}/${id}`,
         {
           headers,
         }
       );
 
-      setMembers((currentMembers) =>
-        currentMembers.filter(
-          (memberItem) =>
-            memberItem.id !== id
-        )
+      /*
+       Socket event also removes it.
+       We remove locally immediately for
+       faster UI response.
+      */
+
+      setMembers(
+        (currentMembers) =>
+          currentMembers.filter(
+            (member) =>
+              member.id !== id
+          )
       );
     } catch (error) {
       console.error(
         "Remove member error:",
-        error.response?.data || error.message
+        error.response?.data ||
+          error.message
       );
 
       alert(
         error.response?.data?.message ||
-          "Failed to remove team member."
+          "Failed to remove member."
       );
     }
   };
 
-  // =========================================
-  // SEARCH
-  // =========================================
+  // =====================================================
+  // CLOSE FORM
+  // =====================================================
+
+  const closeForm = () => {
+    setShowForm(false);
+
+    setForm({
+      userId: "",
+      name: "",
+      role: "member",
+      status: "Online",
+    });
+  };
+
+  // =====================================================
+  // FILTER MEMBERS
+  // =====================================================
 
   const filtered = useMemo(() => {
-    const searchText = search
-      .toLowerCase()
-      .trim();
+    const searchText =
+      search.toLowerCase();
 
-    if (!searchText) {
-      return members;
-    }
-
-    return members.filter((member) => {
-      const name =
-        member.name?.toLowerCase() || "";
-
-      const role =
-        member.role?.toLowerCase() || "";
-
-      const status =
-        member.status?.toLowerCase() || "";
-
-      return (
-        name.includes(searchText) ||
-        role.includes(searchText) ||
-        status.includes(searchText)
-      );
-    });
+    return members.filter(
+      (member) =>
+        (member.name || "")
+          .toLowerCase()
+          .includes(searchText) ||
+        (member.role || "")
+          .toLowerCase()
+          .includes(searchText)
+    );
   }, [members, search]);
 
-  // =========================================
+  // =====================================================
   // UI
-  // =========================================
+  // =====================================================
 
   return (
     <div className="team-page">
@@ -495,19 +482,21 @@ function TeamPage() {
 
         <div>
           <h1>
-            <FaUsers /> Team Management
+            <FaUsers />
+            Team Management
           </h1>
 
           <p>
-            Manage your project members,
-            roles, and status.
+            Manage your project members.
           </p>
         </div>
 
         <button
           className="add-btn"
-          onClick={openAddForm}
-          disabled={!selectedProjectId}
+          type="button"
+          onClick={() =>
+            setShowForm(true)
+          }
         >
           <FaPlus />
           Add Member
@@ -515,75 +504,42 @@ function TeamPage() {
 
       </div>
 
-      {/* PROJECT SELECTOR */}
+      {/* TOOLBAR */}
 
-      <div
-        style={{
-          marginBottom: "20px",
-          padding: "16px",
-          background: "#ffffff",
-          borderRadius: "12px",
-          border: "1px solid #e2e8f0",
-        }}
-      >
+      <div className="team-toolbar">
 
-        <label
-          style={{
-            display: "block",
-            marginBottom: "8px",
-            fontWeight: "600",
-          }}
+        <select
+          value={selectedProjectId}
+          onChange={(event) =>
+            setSelectedProjectId(
+              event.target.value
+            )
+          }
         >
-          Select Project
-        </label>
+          <option value="">
+            Select Project
+          </option>
 
-        {projectsLoading ? (
-          <p>Loading projects...</p>
-        ) : projects.length === 0 ? (
-          <p>
-            No projects found. Create a project
-            first.
-          </p>
-        ) : (
-          <select
-            value={selectedProjectId}
-            onChange={(event) =>
-              setSelectedProjectId(
-                event.target.value
-              )
-            }
-            style={{
-              width: "100%",
-              padding: "11px 12px",
-              borderRadius: "8px",
-              border: "1px solid #cbd5e1",
-              background: "#fff",
-              fontSize: "15px",
-            }}
-          >
-            {projects.map((project) => (
+          {projects.map(
+            (project) => (
               <option
                 key={project.id}
                 value={project.id}
               >
                 {project.name}
               </option>
-            ))}
-          </select>
-        )}
-
-      </div>
-
-      {/* TOOLBAR */}
-
-      <div className="team-toolbar">
+            )
+          )}
+        </select>
 
         <input
           type="text"
-          placeholder="Search Member..."
+          placeholder="Search existing members..."
           value={search}
           onChange={(event) =>
-            setSearch(event.target.value)
+            setSearch(
+              event.target.value
+            )
           }
         />
 
@@ -593,34 +549,21 @@ function TeamPage() {
 
       </div>
 
-      {/* ADD / EDIT FORM */}
+      {/* ADD MEMBER */}
 
       {showForm && (
         <div className="add-member-card">
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
+          <div className="add-member-header">
 
             <h3>
-              {editingMember
-                ? "Edit Team Member"
-                : "Add Team Member"}
+              Add Team Member
             </h3>
 
             <button
               type="button"
               onClick={closeForm}
-              style={{
-                border: "none",
-                background: "transparent",
-                cursor: "pointer",
-                fontSize: "18px",
-              }}
+              title="Close"
             >
               <FaTimes />
             </button>
@@ -628,41 +571,31 @@ function TeamPage() {
           </div>
 
           <form
-            onSubmit={
-              editingMember
-                ? updateMember
-                : addMember
-            }
+            onSubmit={addMember}
           >
 
-            {/* USER ID ONLY FOR ADD */}
+            {/* USER ID */}
 
-            {!editingMember && (
-              <>
-                <label>
-                  Supabase User ID
-                </label>
+            <label>
+              Supabase User ID
+            </label>
 
-                <input
-                  type="text"
-                  name="userId"
-                  placeholder="Enter user's UUID"
-                  value={form.userId}
-                  onChange={handleChange}
-                />
+            <input
+              type="text"
+              name="userId"
+              placeholder="Enter Supabase Authentication UUID"
+              value={form.userId}
+              onChange={
+                handleChange
+              }
+            />
 
-                <small
-                  style={{
-                    display: "block",
-                    marginBottom: "12px",
-                    color: "#64748b",
-                  }}
-                >
-                  This is the user's Supabase
-                  Authentication UUID.
-                </small>
-              </>
-            )}
+            <small>
+              Enter the UUID of the
+              registered Supabase user.
+            </small>
+
+            {/* NAME */}
 
             <label>
               Member Name
@@ -673,8 +606,12 @@ function TeamPage() {
               name="name"
               placeholder="Member Name"
               value={form.name}
-              onChange={handleChange}
+              onChange={
+                handleChange
+              }
             />
+
+            {/* ROLE */}
 
             <label>
               Role
@@ -683,31 +620,24 @@ function TeamPage() {
             <select
               name="role"
               value={form.role}
-              onChange={handleChange}
-              disabled={
-                editingMember?.role === "owner"
+              onChange={
+                handleChange
               }
             >
-              {editingMember?.role === "owner" ? (
-                <option value="owner">
-                  Owner
-                </option>
-              ) : (
-                <>
-                  <option value="member">
-                    Member
-                  </option>
+              <option value="member">
+                Member
+              </option>
 
-                  <option value="viewer">
-                    Viewer
-                  </option>
+              <option value="viewer">
+                Viewer
+              </option>
 
-                  <option value="admin">
-                    Admin
-                  </option>
-                </>
-              )}
+              <option value="admin">
+                Admin
+              </option>
             </select>
+
+            {/* STATUS */}
 
             <label>
               Status
@@ -716,7 +646,9 @@ function TeamPage() {
             <select
               name="status"
               value={form.status}
-              onChange={handleChange}
+              onChange={
+                handleChange
+              }
             >
               <option value="Online">
                 Online
@@ -735,18 +667,20 @@ function TeamPage() {
               </option>
             </select>
 
+            {/* BUTTONS */}
+
             <div className="form-buttons">
 
               <button type="submit">
-                {editingMember
-                  ? "Update"
-                  : "Save"}
+                Add Member
               </button>
 
               <button
                 type="button"
                 className="cancel-btn"
-                onClick={closeForm}
+                onClick={
+                  closeForm
+                }
               >
                 Cancel
               </button>
@@ -758,95 +692,69 @@ function TeamPage() {
         </div>
       )}
 
-      {/* MEMBERS */}
+      {/* MEMBER LIST */}
 
       {loading ? (
         <div className="empty-card">
-          <h2>Loading...</h2>
+          <h2>
+            Loading team...
+          </h2>
         </div>
       ) : filtered.length === 0 ? (
         <div className="empty-card">
 
-          <h2>No Team Members</h2>
+          <h2>
+            No Team Members
+          </h2>
 
           <p>
-            Add your first member to this
-            project.
+            Add your first member.
           </p>
 
         </div>
       ) : (
         <div className="member-grid">
 
-          {filtered.map((member) => (
-
-            <div
-              className="member-card"
-              key={member.id}
-            >
-
-              <img
-                src={
-                  member.profile_image ||
-                  "https://i.pravatar.cc/150?img=1"
-                }
-                alt={member.name}
-                className="avatar"
-              />
-
-              <h3>
-                {member.name || "Team Member"}
-              </h3>
-
-              <p>
-                {member.role || "member"}
-              </p>
-
-              <p>
-                <span
-                  style={{
-                    display: "inline-block",
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    background:
-                      member.status === "Online"
-                        ? "#22c55e"
-                        : member.status === "Busy"
-                        ? "#ef4444"
-                        : member.status === "Away"
-                        ? "#f59e0b"
-                        : "#94a3b8",
-                    marginRight: "6px",
-                  }}
-                />
-
-                {member.status || "Offline"}
-              </p>
-
+          {filtered.map(
+            (member) => (
               <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  justifyContent: "center",
-                }}
+                className="member-card"
+                key={member.id}
               >
 
-                <button
-                  className="delete-btn"
-                  onClick={() =>
-                    openEditForm(member)
+                <img
+                  src={
+                    member.profile_image ||
+                    "https://i.pravatar.cc/150?img=1"
                   }
-                >
-                  <FaEdit />
-                  Edit
-                </button>
+                  alt={
+                    member.name
+                  }
+                  className="avatar"
+                />
 
-                {member.role !== "owner" && (
+                <h3>
+                  {member.name}
+                </h3>
+
+                <p>
+                  {member.role}
+                </p>
+
+                <span>
+                  {member.status ||
+                    "Offline"}
+                </span>
+
+                {member.role !==
+                  "owner" && (
                   <button
                     className="delete-btn"
+                    type="button"
                     onClick={() =>
-                      removeMember(member.id)
+                      removeMember(
+                        member.id
+                      )
                     }
                   >
                     <FaTrash />
@@ -855,10 +763,8 @@ function TeamPage() {
                 )}
 
               </div>
-
-            </div>
-
-          ))}
+            )
+          )}
 
         </div>
       )}

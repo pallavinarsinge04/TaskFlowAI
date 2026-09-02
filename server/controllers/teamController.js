@@ -1,10 +1,94 @@
 import supabase from "../config/supabase.js";
 import { getIO } from "../config/socket.js";
 
-// ========================================
-// GET PROJECT TEAM MEMBERS
-// ========================================
+/*
+========================================================
+SEARCH REGISTERED USERS
+GET /api/team/users/search?q=pallavi
+========================================================
+*/
+export const searchUsers = async (req, res) => {
+  try {
+    const query = (req.query.q || "").trim().toLowerCase();
 
+    if (!query) {
+      return res.status(200).json({
+        success: true,
+        users: [],
+      });
+    }
+
+    /*
+      Supabase Auth users are not normally accessible from
+      the frontend.
+
+      The backend uses SERVICE_ROLE_KEY, so admin.listUsers()
+      can safely search registered users.
+    */
+    const { data, error } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
+    if (error) {
+      console.error("Search users error:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    const users = (data?.users || [])
+      .filter((user) => {
+        const email = user.email || "";
+
+        const fullName =
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          "";
+
+        return (
+          email.toLowerCase().includes(query) ||
+          fullName.toLowerCase().includes(query)
+        );
+      })
+      .slice(0, 10)
+      .map((user) => ({
+        id: user.id,
+        email: user.email,
+        name:
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          user.email?.split("@")[0] ||
+          "User",
+        profileImage:
+          user.user_metadata?.avatar_url ||
+          user.user_metadata?.picture ||
+          null,
+      }));
+
+    return res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    console.error("Search users exception:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to search users.",
+    });
+  }
+};
+
+
+/*
+========================================================
+GET PROJECT MEMBERS
+GET /api/team/project/:projectId
+========================================================
+*/
 export const getProjectMembers = async (req, res) => {
   try {
     const { projectId } = req.params;
@@ -28,11 +112,6 @@ export const getProjectMembers = async (req, res) => {
       });
 
     if (error) {
-      console.error(
-        "Get project members error:",
-        error
-      );
-
       return res.status(500).json({
         success: false,
         message: error.message,
@@ -44,10 +123,7 @@ export const getProjectMembers = async (req, res) => {
       members: data || [],
     });
   } catch (error) {
-    console.error(
-      "Get Project Members Error:",
-      error
-    );
+    console.error("Get Project Members Error:", error);
 
     return res.status(500).json({
       success: false,
@@ -56,15 +132,16 @@ export const getProjectMembers = async (req, res) => {
   }
 };
 
-// ========================================
-// ADD TEAM MEMBER
-// ========================================
+
+/*
+========================================================
+ADD TEAM MEMBER
+POST /api/team/project/:projectId
+========================================================
+*/
 export const addTeamMember = async (req, res) => {
   try {
     const { projectId } = req.params;
-
-    // Safely read request body
-    const body = req.body || {};
 
     const {
       userId,
@@ -72,23 +149,7 @@ export const addTeamMember = async (req, res) => {
       role = "member",
       profileImage = "",
       status = "Offline",
-    } = body;
-
-    console.log("Add Team Member Request:", {
-      projectId,
-      body,
-    });
-
-    // -----------------------------------------
-    // VALIDATION
-    // -----------------------------------------
-
-    if (!projectId) {
-      return res.status(400).json({
-        success: false,
-        message: "Project ID is required.",
-      });
-    }
+    } = req.body || {};
 
     if (!userId) {
       return res.status(400).json({
@@ -111,10 +172,40 @@ export const addTeamMember = async (req, res) => {
       });
     }
 
-    // -----------------------------------------
-    // CHECK DUPLICATE MEMBER
-    // -----------------------------------------
+    /*
+    ----------------------------------------------------
+    Verify that the selected user actually exists
+    ----------------------------------------------------
+    */
+    const { data: authUsers, error: authError } =
+      await supabase.auth.admin.listUsers({
+        page: 1,
+        perPage: 1000,
+      });
 
+    if (authError) {
+      return res.status(500).json({
+        success: false,
+        message: authError.message,
+      });
+    }
+
+    const selectedUser = (authUsers?.users || []).find(
+      (user) => user.id === userId
+    );
+
+    if (!selectedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Selected user does not exist.",
+      });
+    }
+
+    /*
+    ----------------------------------------------------
+    Check duplicate member
+    ----------------------------------------------------
+    */
     const {
       data: existingMember,
       error: existingError,
@@ -140,32 +231,35 @@ export const addTeamMember = async (req, res) => {
       });
     }
 
-    // -----------------------------------------
-    // CREATE MEMBER
-    // -----------------------------------------
-
-    const {
-      data,
-      error,
-    } = await supabase
+    /*
+    ----------------------------------------------------
+    Insert member
+    ----------------------------------------------------
+    */
+    const { data, error } = await supabase
       .from("team_members")
       .insert({
         user_id: userId,
         project_id: projectId,
         role,
-        name: name || "Team Member",
+        name:
+          name ||
+          selectedUser.user_metadata?.full_name ||
+          selectedUser.user_metadata?.name ||
+          selectedUser.email?.split("@")[0] ||
+          "Team Member",
         status,
         profile_image:
-          profileImage || null,
+          profileImage ||
+          selectedUser.user_metadata?.avatar_url ||
+          selectedUser.user_metadata?.picture ||
+          null,
       })
       .select()
       .single();
 
     if (error) {
-      console.error(
-        "Supabase Add Member Error:",
-        error
-      );
+      console.error("Insert team member error:", error);
 
       return res.status(500).json({
         success: false,
@@ -173,15 +267,13 @@ export const addTeamMember = async (req, res) => {
       });
     }
 
-    // -----------------------------------------
-    // REALTIME EVENT
-    // -----------------------------------------
-
+    /*
+    ----------------------------------------------------
+    Realtime event
+    ----------------------------------------------------
+    */
     try {
-      getIO().emit(
-        "teamMemberAdded",
-        data
-      );
+      getIO().emit("teamMemberAdded", data);
     } catch (socketError) {
       console.warn(
         "Team socket event skipped:",
@@ -189,35 +281,28 @@ export const addTeamMember = async (req, res) => {
       );
     }
 
-    // -----------------------------------------
-    // RESPONSE
-    // -----------------------------------------
-
     return res.status(201).json({
       success: true,
-      message:
-        "Team member added successfully.",
+      message: "Team member added successfully.",
       member: data,
     });
   } catch (error) {
-    console.error(
-      "Add Team Member Error:",
-      error
-    );
+    console.error("Add Team Member Error:", error);
 
     return res.status(500).json({
       success: false,
-      message:
-        error.message ||
-        "Failed to add team member.",
+      message: error.message,
     });
   }
 };
 
-// ========================================
-// UPDATE TEAM MEMBER
-// ========================================
 
+/*
+========================================================
+UPDATE TEAM MEMBER
+PUT /api/team/:id
+========================================================
+*/
 export const updateTeamMember = async (req, res) => {
   try {
     const { id } = req.params;
@@ -268,16 +353,14 @@ export const updateTeamMember = async (req, res) => {
       });
     }
 
-    // ----------------------------------------
-    // Get member
-    // ----------------------------------------
-
-    const { data: existingMember, error: memberError } =
-      await supabase
-        .from("team_members")
-        .select("*")
-        .eq("id", id)
-        .single();
+    const {
+      data: existingMember,
+      error: memberError,
+    } = await supabase
+      .from("team_members")
+      .select("*")
+      .eq("id", id)
+      .single();
 
     if (memberError || !existingMember) {
       return res.status(404).json({
@@ -286,7 +369,6 @@ export const updateTeamMember = async (req, res) => {
       });
     }
 
-    // Never change owner through this endpoint
     if (
       existingMember.role === "owner" &&
       updateData.role
@@ -306,11 +388,6 @@ export const updateTeamMember = async (req, res) => {
       .single();
 
     if (error) {
-      console.error(
-        "Update team member error:",
-        error
-      );
-
       return res.status(500).json({
         success: false,
         message: error.message,
@@ -328,8 +405,7 @@ export const updateTeamMember = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message:
-        "Team member updated successfully.",
+      message: "Team member updated successfully.",
       member: data,
     });
   } catch (error) {
@@ -345,20 +421,25 @@ export const updateTeamMember = async (req, res) => {
   }
 };
 
-// ========================================
-// DELETE TEAM MEMBER
-// ========================================
 
+/*
+========================================================
+DELETE TEAM MEMBER
+DELETE /api/team/:id
+========================================================
+*/
 export const deleteTeamMember = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { data: member, error: memberError } =
-      await supabase
-        .from("team_members")
-        .select("*")
-        .eq("id", id)
-        .single();
+    const {
+      data: member,
+      error: memberError,
+    } = await supabase
+      .from("team_members")
+      .select("*")
+      .eq("id", id)
+      .single();
 
     if (memberError || !member) {
       return res.status(404).json({
@@ -367,7 +448,6 @@ export const deleteTeamMember = async (req, res) => {
       });
     }
 
-    // Never delete owner
     if (member.role === "owner") {
       return res.status(403).json({
         success: false,
@@ -382,11 +462,6 @@ export const deleteTeamMember = async (req, res) => {
       .eq("id", id);
 
     if (error) {
-      console.error(
-        "Delete team member error:",
-        error
-      );
-
       return res.status(500).json({
         success: false,
         message: error.message,
@@ -394,14 +469,11 @@ export const deleteTeamMember = async (req, res) => {
     }
 
     try {
-      getIO().emit(
-        "teamMemberRemoved",
-        {
-          id,
-          projectId: member.project_id,
-          userId: member.user_id,
-        }
-      );
+      getIO().emit("teamMemberRemoved", {
+        id,
+        projectId: member.project_id,
+        userId: member.user_id,
+      });
     } catch (socketError) {
       console.warn(
         "Team socket event skipped:",
