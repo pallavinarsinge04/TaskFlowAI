@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import socket from "../../socket/socket";
+import { supabase } from "../../supabase/supabaseClient";
+
 import "./Notifications.css";
-import useNotification from "../../hooks/useNotification";
+
 import {
   FaBell,
   FaSearch,
@@ -15,422 +17,432 @@ import {
 const API = "http://localhost:5000/api/notifications";
 
 function Notifications() {
-
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
 
-  // Current user's role
-  const role = localStorage.getItem("role");
+  // --------------------------------------------------
+  // AUTH HEADERS
+  // --------------------------------------------------
 
-  // Browser desktop notifications
-  useNotification(socket);
+  const getAuthHeaders = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
 
-  useEffect(() => {
-
-    // Join Socket.IO room based on role
-    if (role) {
-      socket.emit("joinRole", role);
+    if (!session?.access_token) {
+      throw new Error("User is not authenticated.");
     }
 
-    loadNotifications();
-
-   socket.on("notification",(notification)=>{
-
-setNotifications(prev=>[
-notification,
-...prev
-]);
-
-});
-    return () => {
-
-      socket.off("notification");
-
+    return {
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
     };
+  };
 
-  }, []);
+  // --------------------------------------------------
+  // LOAD NOTIFICATIONS
+  // --------------------------------------------------
 
   const loadNotifications = async () => {
-
     try {
+      setLoading(true);
 
-      const res = await axios.get(
-        `${API}?role=${role}`
+      const headers = await getAuthHeaders();
+
+      const response = await axios.get(API, {
+        headers,
+      });
+
+      console.log("Notifications API response:", response.data);
+
+      setNotifications(response.data?.notifications || []);
+    } catch (error) {
+      console.error(
+        "Load notifications error:",
+        error.response?.data || error.message
       );
 
-      setNotifications(res.data);
-
-    } catch (err) {
-
-      console.log(err);
-
+      setNotifications([]);
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
- const unreadCount = notifications.reduce(
+  // --------------------------------------------------
+  // INITIAL LOAD
+  // --------------------------------------------------
 
-(count,item)=>
+  useEffect(() => {
+    loadNotifications();
+  }, []);
 
-item.read ? count : count + 1
+  // --------------------------------------------------
+  // REAL-TIME NOTIFICATIONS
+  // --------------------------------------------------
 
-,0
+  useEffect(() => {
+    let mounted = true;
 
-);
-  const filteredNotifications = useMemo(() => {
+    const setupRealtime = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-    return notifications.filter((item) => {
+        if (!user || !mounted) return;
 
-      const matchesSearch =
+        const handleNotificationCreated = (notification) => {
+          console.log("Real-time notification:", notification);
 
-        item.title
-          ?.toLowerCase()
-          .includes(search.toLowerCase())
+          if (!notification) return;
 
-        ||
+          // Only show notifications belonging to current user
+          if (notification.user_id !== user.id) return;
 
-        item.message
-          ?.toLowerCase()
-          .includes(search.toLowerCase());
+          setNotifications((currentNotifications) => {
+            const exists = currentNotifications.some(
+              (item) => item.id === notification.id
+            );
 
-      if (filter === "unread")
-        return !item.read && matchesSearch;
+            if (exists) {
+              return currentNotifications;
+            }
 
-      return matchesSearch;
+            return [notification, ...currentNotifications];
+          });
+        };
 
+        socket.on(
+          "notificationCreated",
+          handleNotificationCreated
+        );
+
+        return () => {
+          socket.off(
+            "notificationCreated",
+            handleNotificationCreated
+          );
+        };
+      } catch (error) {
+        console.error(
+          "Notification realtime setup error:",
+          error
+        );
+      }
+    };
+
+    let cleanup;
+
+    setupRealtime().then((cleanupFunction) => {
+      if (mounted) {
+        cleanup = cleanupFunction;
+      } else if (cleanupFunction) {
+        cleanupFunction();
+      }
     });
 
+    return () => {
+      mounted = false;
+
+      if (cleanup) {
+        cleanup();
+      }
+    };
+  }, []);
+
+  // --------------------------------------------------
+  // UNREAD COUNT
+  // --------------------------------------------------
+
+  const unreadCount = useMemo(() => {
+    return notifications.filter(
+      (notification) => notification.read === false
+    ).length;
+  }, [notifications]);
+
+  // --------------------------------------------------
+  // FILTER + SEARCH
+  // --------------------------------------------------
+
+  const filteredNotifications = useMemo(() => {
+    const searchText = search.toLowerCase().trim();
+
+    return notifications.filter((notification) => {
+      const matchesSearch =
+        !searchText ||
+        notification.title
+          ?.toLowerCase()
+          .includes(searchText) ||
+        notification.message
+          ?.toLowerCase()
+          .includes(searchText);
+
+      if (!matchesSearch) {
+        return false;
+      }
+
+      if (filter === "unread") {
+        return notification.read === false;
+      }
+
+      return true;
+    });
   }, [notifications, filter, search]);
 
+  // --------------------------------------------------
+  // MARK ONE AS READ
+  // --------------------------------------------------
+
   const markRead = async (id) => {
-
     try {
-
-      await axios.put(`${API}/${id}`);
-
-      setNotifications(prev =>
-        prev.map(item =>
-          item._id === id
-            ? { ...item, read: true }
-            : item
-        )
-      );
-
-    } catch (err) {
-
-      console.log(err);
-
-    }
-
-  };
-
-  const deleteNotification = async (id) => {
-
-    try {
-
-      await axios.delete(`${API}/${id}`);
-
-      setNotifications(prev =>
-        prev.filter(
-          item => item._id !== id
-        )
-      );
-
-    } catch (err) {
-
-      console.log(err);
-
-    }
-
-  };
-
-  const archiveNotification = async (id) => {
-
-  try {
-
-    await axios.put(
-
-      `${API}/archive/${id}`
-
-    );
-
-    setNotifications(prev =>
-
-      prev.filter(item => item._id !== id)
-
-    );
-
-  } catch (err) {
-
-    console.log(err);
-
-  }
-
-};
-  const markAllRead = async () => {
-
-    try {
+      const headers = await getAuthHeaders();
 
       await axios.put(
-        `${API}/read-all`
+        `${API}/${id}/read`,
+        {},
+        {
+          headers,
+        }
       );
 
-      setNotifications(prev =>
-        prev.map(item => ({
-          ...item,
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((notification) =>
+          notification.id === id
+            ? {
+                ...notification,
+                read: true,
+              }
+            : notification
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Mark notification read error:",
+        error.response?.data || error.message
+      );
+    }
+  };
+
+  // --------------------------------------------------
+  // MARK ALL AS READ
+  // --------------------------------------------------
+
+  const markAllRead = async () => {
+    try {
+      const headers = await getAuthHeaders();
+
+      await axios.put(
+        `${API}/read-all`,
+        {},
+        {
+          headers,
+        }
+      );
+
+      setNotifications((currentNotifications) =>
+        currentNotifications.map((notification) => ({
+          ...notification,
           read: true,
         }))
       );
-
-    } catch (err) {
-
-      console.log(err);
-
+    } catch (error) {
+      console.error(
+        "Mark all notifications error:",
+        error.response?.data || error.message
+      );
     }
-
   };
 
+  // --------------------------------------------------
+  // DELETE NOTIFICATION
+  // --------------------------------------------------
+
+  const deleteNotification = async (id) => {
+    try {
+      const headers = await getAuthHeaders();
+
+      await axios.delete(`${API}/${id}`, {
+        headers,
+      });
+
+      setNotifications((currentNotifications) =>
+        currentNotifications.filter(
+          (notification) => notification.id !== id
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Delete notification error:",
+        error.response?.data || error.message
+      );
+    }
+  };
+
+  // --------------------------------------------------
+  // FORMAT DATE
+  // --------------------------------------------------
+
+  const formatDate = (date) => {
+    if (!date) return "";
+
+    return new Date(date).toLocaleString();
+  };
+
+  // --------------------------------------------------
+  // UI
+  // --------------------------------------------------
+
   return (
-
     <div className="notifications-page">
-
       {/* HEADER */}
 
       <div className="notifications-header">
-
         <div>
-
           <h1>
-
             <FaBell />
-
             Notifications
-
           </h1>
 
           <p>
-
-            Role :
-            <strong>
-              {" "}
-              {role || "Guest"}
-            </strong>
-
+            Stay updated with Projects, Tasks, Meetings & AI
+            Alerts.
           </p>
-
-          <p>
-
-            Stay updated with Projects,
-            Tasks, Meetings & AI Alerts.
-
-          </p>
-
         </div>
 
         <div className="notification-counter">
-
           {unreadCount}
-
         </div>
-
       </div>
 
       {/* TOOLBAR */}
 
       <div className="notification-toolbar">
-
         <div className="search-box">
-
           <FaSearch />
 
           <input
-
+            type="text"
             placeholder="Search Notification..."
-
             value={search}
-
-            onChange={(e) =>
-              setSearch(
-                e.target.value
-              )
+            onChange={(event) =>
+              setSearch(event.target.value)
             }
-
           />
-
         </div>
 
         <button
-
-          className={
-            filter === "all"
-              ? "active"
-              : ""
-          }
-
-          onClick={() =>
-            setFilter("all")
-          }
-
+          type="button"
+          className={filter === "all" ? "active" : ""}
+          onClick={() => setFilter("all")}
         >
-
           <FaFilter />
-
           All
-
         </button>
 
         <button
-
-          className={
-            filter === "unread"
-              ? "active"
-              : ""
-          }
-
-          onClick={() =>
-            setFilter("unread")
-          }
-
+          type="button"
+          className={filter === "unread" ? "active" : ""}
+          onClick={() => setFilter("unread")}
         >
-
           Unread
-
         </button>
 
-        <button
-
-          className="mark-all"
-
-          onClick={markAllRead}
-
-        >
-
-          <FaCheckDouble />
-
-          Mark All Read
-
-        </button>
-
+        {unreadCount > 0 && (
+          <button
+            type="button"
+            className="mark-all"
+            onClick={markAllRead}
+          >
+            <FaCheckDouble />
+            Mark All Read
+          </button>
+        )}
       </div>
 
-      {/* LIST */}
+      {/* NOTIFICATION LIST */}
 
       <div className="notification-list">
-
         {loading ? (
-
           <div className="empty-state">
+            <FaBell size={40} />
 
-            Loading Notifications...
-
+            <h2>Loading Notifications...</h2>
           </div>
-
         ) : filteredNotifications.length === 0 ? (
-
           <div className="empty-state">
+            <FaBell size={50} />
 
-            No Notifications Found
+            <h2>No Notifications</h2>
 
+            <p>
+              {filter === "unread"
+                ? "You're all caught up."
+                : "You don't have any notifications yet."}
+            </p>
           </div>
-
         ) : (
-
-        <div className="notification-list">
-
-  {loading ? (
-
-    <div className="empty-state">
-      Loading Notifications...
-    </div>
-
-  ) : filteredNotifications.length === 0 ? (
-
-    <div className="empty-state">
-      <FaBell size={50} />
-      <h2>No Notifications</h2>
-      <p>You're all caught up.</p>
-    </div>
-
-  ) : (
-
-    filteredNotifications.map(item => (
-
-      <div
-        key={item._id}
-        className={`notification-card ${item.type} ${
-          item.read ? "" : "unread"
-        }`}
-      >
-
-        <div className="notification-icon">
-
-          <FaBell />
-
-        </div>
-
-        <div className="notification-body">
-
-          <h3>{item.title}</h3>
-
-          <p>{item.message}</p>
-
-          <small>
-            {new Date(item.createdAt).toLocaleString()}
-          </small>
-
-        </div>
-
-        <div className="notification-actions">
-
-          {!item.read && (
-
-            <button
-              className="read-btn"
-              onClick={() => markRead(item._id)}
+          filteredNotifications.map((notification) => (
+            <div
+              key={notification.id}
+              className={`notification-card ${
+                notification.type || "general"
+              } ${
+                notification.read ? "" : "unread"
+              }`}
             >
-              <FaCheck />
-            </button>
+              {/* ICON */}
 
-          )}
+              <div className="notification-icon">
+                <FaBell />
+              </div>
 
-          <button
-            className="archive-btn"
-            onClick={() => archiveNotification(item._id)}
-          >
-            Archive
-          </button>
+              {/* BODY */}
 
-          <button
-            className="delete-btn"
-            onClick={() => deleteNotification(item._id)}
-          >
-            <FaTrash />
-          </button>
+              <div className="notification-body">
+                <h3>{notification.title}</h3>
 
-        </div>
+                <p>{notification.message}</p>
 
-      </div>
+                <small>
+                  {formatDate(notification.created_at)}
+                </small>
+              </div>
 
-    ))
+              {/* ACTIONS */}
 
-  )}
+              <div className="notification-actions">
+                {!notification.read && (
+                  <button
+                    type="button"
+                    className="read-btn"
+                    onClick={() =>
+                      markRead(notification.id)
+                    }
+                    title="Mark as read"
+                  >
+                    <FaCheck />
+                  </button>
+                )}
 
-</div>
-
+                <button
+                  type="button"
+                  className="delete-btn"
+                  onClick={() =>
+                    deleteNotification(notification.id)
+                  }
+                  title="Delete notification"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </div>
+          ))
         )}
-
       </div>
-
     </div>
-
   );
-
 }
 
 export default Notifications;
