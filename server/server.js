@@ -13,7 +13,8 @@ import aiRoutes from "./routes/aiRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import teamRoutes from "./routes/teamRoutes.js";
-
+import notificationRoutes from "./routes/notificationRoutes.js";
+import activityLogRoutes from "./routes/activityLogRoutes.js";
 // =========================================
 // SOCKET.IO
 // =========================================
@@ -112,6 +113,16 @@ app.use(
 app.use(
   "/api/team",
   teamRoutes
+);
+
+app.use(
+  "/api/notifications",
+  notificationRoutes
+);
+
+app.use(
+  "/api/activity-logs",
+  activityLogRoutes
 );
 
 // =========================================
