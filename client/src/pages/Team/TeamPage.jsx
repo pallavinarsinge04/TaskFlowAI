@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import "./TeamPage.css";
+
 import {
   FaPlus,
   FaTrash,
   FaUsers,
   FaTimes,
+  FaEdit,
+  FaSave,
 } from "react-icons/fa";
 
 import { supabase } from "../../supabase/supabaseClient";
@@ -18,12 +21,20 @@ function TeamPage() {
   const [members, setMembers] = useState([]);
   const [projects, setProjects] = useState([]);
 
-  const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [selectedProjectId, setSelectedProjectId] =
+    useState("");
 
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-
   const [search, setSearch] = useState("");
+
+  const [editingMemberId, setEditingMemberId] =
+    useState(null);
+
+  const [editForm, setEditForm] = useState({
+    role: "member",
+    status: "Offline",
+  });
 
   const [form, setForm] = useState({
     userId: "",
@@ -33,17 +44,22 @@ function TeamPage() {
   });
 
   // =====================================================
-  // AUTH HEADERS
+  // AUTH
   // =====================================================
 
   const getAuthHeaders = async () => {
     const {
       data: { session },
+      error,
     } = await supabase.auth.getSession();
+
+    if (error) {
+      throw error;
+    }
 
     if (!session?.access_token) {
       throw new Error(
-        "Your session has expired. Please login again."
+        "No active login session. Please login again."
       );
     }
 
@@ -61,22 +77,21 @@ function TeamPage() {
     try {
       const headers = await getAuthHeaders();
 
-      const response = await axios.get(PROJECT_API, {
-        headers,
-      });
+      const response = await axios.get(
+        PROJECT_API,
+        { headers }
+      );
 
-      const projectList =
+      const list =
         response.data?.projects || [];
 
-      setProjects(projectList);
+      setProjects(list);
 
       if (
-        projectList.length > 0 &&
+        list.length > 0 &&
         !selectedProjectId
       ) {
-        setSelectedProjectId(
-          projectList[0].id
-        );
+        setSelectedProjectId(list[0].id);
       }
     } catch (error) {
       console.error(
@@ -106,9 +121,7 @@ function TeamPage() {
 
       const response = await axios.get(
         `${API_URL}/project/${projectId}`,
-        {
-          headers,
-        }
+        { headers }
       );
 
       setMembers(
@@ -142,15 +155,11 @@ function TeamPage() {
   }, [selectedProjectId]);
 
   // =====================================================
-  // REALTIME TEAM UPDATES
+  // REALTIME
   // =====================================================
 
   useEffect(() => {
-    if (!selectedProjectId) {
-      return;
-    }
-
-    const handleMemberAdded = (member) => {
+    const handleAdded = (member) => {
       if (!member) return;
 
       if (
@@ -160,27 +169,21 @@ function TeamPage() {
         return;
       }
 
-      setMembers((currentMembers) => {
-        const exists =
-          currentMembers.some(
+      setMembers((current) => {
+        if (
+          current.some(
             (item) =>
               item.id === member.id
-          );
-
-        if (exists) {
-          return currentMembers;
+          )
+        ) {
+          return current;
         }
 
-        return [
-          member,
-          ...currentMembers,
-        ];
+        return [member, ...current];
       });
     };
 
-    const handleMemberUpdated = (
-      member
-    ) => {
+    const handleUpdated = (member) => {
       if (!member) return;
 
       if (
@@ -190,33 +193,20 @@ function TeamPage() {
         return;
       }
 
-      setMembers((currentMembers) =>
-        currentMembers.map((item) =>
+      setMembers((current) =>
+        current.map((item) =>
           item.id === member.id
-            ? {
-                ...item,
-                ...member,
-              }
+            ? { ...item, ...member }
             : item
         )
       );
     };
 
-    const handleMemberRemoved = (
-      data
-    ) => {
+    const handleRemoved = (data) => {
       if (!data) return;
 
-      if (
-        data.projectId &&
-        data.projectId !==
-          selectedProjectId
-      ) {
-        return;
-      }
-
-      setMembers((currentMembers) =>
-        currentMembers.filter(
+      setMembers((current) =>
+        current.filter(
           (item) =>
             item.id !== data.id
         )
@@ -225,39 +215,39 @@ function TeamPage() {
 
     socket.on(
       "teamMemberAdded",
-      handleMemberAdded
+      handleAdded
     );
 
     socket.on(
       "teamMemberUpdated",
-      handleMemberUpdated
+      handleUpdated
     );
 
     socket.on(
       "teamMemberRemoved",
-      handleMemberRemoved
+      handleRemoved
     );
 
     return () => {
       socket.off(
         "teamMemberAdded",
-        handleMemberAdded
+        handleAdded
       );
 
       socket.off(
         "teamMemberUpdated",
-        handleMemberUpdated
+        handleUpdated
       );
 
       socket.off(
         "teamMemberRemoved",
-        handleMemberRemoved
+        handleRemoved
       );
     };
   }, [selectedProjectId]);
 
   // =====================================================
-  // FORM CHANGE
+  // ADD FORM
   // =====================================================
 
   const handleChange = (event) => {
@@ -280,23 +270,17 @@ function TeamPage() {
     event.preventDefault();
 
     if (!selectedProjectId) {
-      alert(
-        "Please select a project first."
-      );
+      alert("Please select a project.");
       return;
     }
 
     if (!form.userId.trim()) {
-      alert(
-        "Enter the Supabase User ID."
-      );
+      alert("Enter User ID.");
       return;
     }
 
     if (!form.name.trim()) {
-      alert(
-        "Enter member name."
-      );
+      alert("Enter member name.");
       return;
     }
 
@@ -322,40 +306,25 @@ function TeamPage() {
 
             profileImage: "",
           },
-          {
-            headers,
-          }
+          { headers }
         );
 
-      const newMember =
+      const member =
         response.data?.member;
 
-      /*
-       Socket.IO will also send the event.
-       We do not manually insert here if
-       the socket event will handle it.
-      */
-
-      if (newMember) {
-        setMembers(
-          (currentMembers) => {
-            const exists =
-              currentMembers.some(
-                (item) =>
-                  item.id ===
-                  newMember.id
-              );
-
-            if (exists) {
-              return currentMembers;
-            }
-
-            return [
-              newMember,
-              ...currentMembers,
-            ];
+      if (member) {
+        setMembers((current) => {
+          if (
+            current.some(
+              (item) =>
+                item.id === member.id
+            )
+          ) {
+            return current;
           }
-        );
+
+          return [member, ...current];
+        });
       }
 
       setForm({
@@ -368,7 +337,7 @@ function TeamPage() {
       setShowForm(false);
 
       alert(
-        "Team member added successfully."
+        "Member added successfully."
       );
     } catch (error) {
       console.error(
@@ -379,13 +348,133 @@ function TeamPage() {
 
       alert(
         error.response?.data?.message ||
-          "Failed to add team member."
+          error.message ||
+          "Failed to add member."
       );
     }
   };
 
   // =====================================================
-  // DELETE MEMBER
+  // START EDIT
+  // =====================================================
+
+  const startEdit = (member) => {
+    console.log(
+      "Editing member:",
+      member
+    );
+
+    setEditingMemberId(member.id);
+
+    setEditForm({
+      role:
+        member.role || "member",
+
+      status:
+        member.status || "Offline",
+    });
+  };
+
+  // =====================================================
+  // CANCEL EDIT
+  // =====================================================
+
+  const cancelEdit = () => {
+    setEditingMemberId(null);
+
+    setEditForm({
+      role: "member",
+      status: "Offline",
+    });
+  };
+
+  // =====================================================
+  // EDIT FORM CHANGE
+  // =====================================================
+
+  const handleEditChange = (event) => {
+    const {
+      name,
+      value,
+    } = event.target;
+
+    setEditForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+  };
+
+  // =====================================================
+  // SAVE EDIT
+  // =====================================================
+
+  const saveMember = async (memberId) => {
+    console.log(
+      "Saving member:",
+      memberId,
+      editForm
+    );
+
+    try {
+      const headers =
+        await getAuthHeaders();
+
+      const response =
+        await axios.put(
+          `${API_URL}/${memberId}`,
+          {
+            role:
+              editForm.role,
+
+            status:
+              editForm.status,
+          },
+          {
+            headers,
+          }
+        );
+
+      console.log(
+        "Update response:",
+        response.data
+      );
+
+      const updatedMember =
+        response.data?.member;
+
+      if (updatedMember) {
+        setMembers((current) =>
+          current.map((member) =>
+            member.id ===
+            updatedMember.id
+              ? updatedMember
+              : member
+          )
+        );
+      }
+
+      setEditingMemberId(null);
+
+      alert(
+        "Member updated successfully."
+      );
+    } catch (error) {
+      console.error(
+        "UPDATE MEMBER ERROR:",
+        error.response?.data ||
+          error.message
+      );
+
+      alert(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to update member."
+      );
+    }
+  };
+
+  // =====================================================
+  // DELETE
   // =====================================================
 
   const removeMember = async (id) => {
@@ -403,40 +492,32 @@ function TeamPage() {
 
       await axios.delete(
         `${API_URL}/${id}`,
-        {
-          headers,
-        }
+        { headers }
       );
 
-      /*
-       Socket event also removes it.
-       We remove locally immediately for
-       faster UI response.
-      */
-
-      setMembers(
-        (currentMembers) =>
-          currentMembers.filter(
-            (member) =>
-              member.id !== id
-          )
+      setMembers((current) =>
+        current.filter(
+          (member) =>
+            member.id !== id
+        )
       );
     } catch (error) {
       console.error(
-        "Remove member error:",
+        "Delete member error:",
         error.response?.data ||
           error.message
       );
 
       alert(
         error.response?.data?.message ||
+          error.message ||
           "Failed to remove member."
       );
     }
   };
 
   // =====================================================
-  // CLOSE FORM
+  // CLOSE ADD FORM
   // =====================================================
 
   const closeForm = () => {
@@ -451,24 +532,44 @@ function TeamPage() {
   };
 
   // =====================================================
-  // FILTER MEMBERS
+  // SEARCH
   // =====================================================
 
   const filtered = useMemo(() => {
-    const searchText =
+    const text =
       search.toLowerCase();
 
     return members.filter(
       (member) =>
         (member.name || "")
           .toLowerCase()
-          .includes(searchText) ||
+          .includes(text) ||
         (member.role || "")
           .toLowerCase()
-          .includes(searchText)
+          .includes(text)
     );
   }, [members, search]);
+const handleNotificationCreated = (notification) => {
+  if (!notification) return;
 
+  if (notification.user_id !== user.id) {
+    return;
+  }
+
+  console.log(
+    "🔔 New notification:",
+    notification
+  );
+};
+
+socket.on(
+  "notificationCreated",
+  handleNotificationCreated
+);
+socket.off(
+  "notificationCreated",
+  handleNotificationCreated
+);
   // =====================================================
   // UI
   // =====================================================
@@ -487,13 +588,14 @@ function TeamPage() {
           </h1>
 
           <p>
-            Manage your project members.
+            Manage members, roles and
+            permissions.
           </p>
         </div>
 
         <button
-          className="add-btn"
           type="button"
+          className="add-btn"
           onClick={() =>
             setShowForm(true)
           }
@@ -534,7 +636,7 @@ function TeamPage() {
 
         <input
           type="text"
-          placeholder="Search existing members..."
+          placeholder="Search members..."
           value={search}
           onChange={(event) =>
             setSearch(
@@ -549,7 +651,7 @@ function TeamPage() {
 
       </div>
 
-      {/* ADD MEMBER */}
+      {/* ADD FORM */}
 
       {showForm && (
         <div className="add-member-card">
@@ -563,7 +665,6 @@ function TeamPage() {
             <button
               type="button"
               onClick={closeForm}
-              title="Close"
             >
               <FaTimes />
             </button>
@@ -574,8 +675,6 @@ function TeamPage() {
             onSubmit={addMember}
           >
 
-            {/* USER ID */}
-
             <label>
               Supabase User ID
             </label>
@@ -583,19 +682,12 @@ function TeamPage() {
             <input
               type="text"
               name="userId"
-              placeholder="Enter Supabase Authentication UUID"
               value={form.userId}
               onChange={
                 handleChange
               }
+              placeholder="User UUID"
             />
-
-            <small>
-              Enter the UUID of the
-              registered Supabase user.
-            </small>
-
-            {/* NAME */}
 
             <label>
               Member Name
@@ -604,14 +696,12 @@ function TeamPage() {
             <input
               type="text"
               name="name"
-              placeholder="Member Name"
               value={form.name}
               onChange={
                 handleChange
               }
+              placeholder="Member name"
             />
-
-            {/* ROLE */}
 
             <label>
               Role
@@ -636,8 +726,6 @@ function TeamPage() {
                 Admin
               </option>
             </select>
-
-            {/* STATUS */}
 
             <label>
               Status
@@ -667,8 +755,6 @@ function TeamPage() {
               </option>
             </select>
 
-            {/* BUTTONS */}
-
             <div className="form-buttons">
 
               <button type="submit">
@@ -678,9 +764,7 @@ function TeamPage() {
               <button
                 type="button"
                 className="cancel-btn"
-                onClick={
-                  closeForm
-                }
+                onClick={closeForm}
               >
                 Cancel
               </button>
@@ -692,7 +776,7 @@ function TeamPage() {
         </div>
       )}
 
-      {/* MEMBER LIST */}
+      {/* MEMBERS */}
 
       {loading ? (
         <div className="empty-card">
@@ -702,7 +786,6 @@ function TeamPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="empty-card">
-
           <h2>
             No Team Members
           </h2>
@@ -710,60 +793,194 @@ function TeamPage() {
           <p>
             Add your first member.
           </p>
-
         </div>
       ) : (
         <div className="member-grid">
 
           {filtered.map(
-            (member) => (
-              <div
-                className="member-card"
-                key={member.id}
-              >
+            (member) => {
 
-                <img
-                  src={
-                    member.profile_image ||
-                    "https://i.pravatar.cc/150?img=1"
-                  }
-                  alt={
-                    member.name
-                  }
-                  className="avatar"
-                />
+              const isEditing =
+                editingMemberId ===
+                member.id;
 
-                <h3>
-                  {member.name}
-                </h3>
+              return (
+                <div
+                  className="member-card"
+                  key={member.id}
+                >
 
-                <p>
-                  {member.role}
-                </p>
-
-                <span>
-                  {member.status ||
-                    "Offline"}
-                </span>
-
-                {member.role !==
-                  "owner" && (
-                  <button
-                    className="delete-btn"
-                    type="button"
-                    onClick={() =>
-                      removeMember(
-                        member.id
-                      )
+                  <img
+                    src={
+                      member.profile_image ||
+                      "https://i.pravatar.cc/150?img=1"
                     }
-                  >
-                    <FaTrash />
-                    Remove
-                  </button>
-                )}
+                    alt={
+                      member.name
+                    }
+                    className="avatar"
+                  />
 
-              </div>
-            )
+                  <h3>
+                    {member.name}
+                  </h3>
+
+                  {/* EDIT MODE */}
+
+                  {isEditing ? (
+
+                    <div className="edit-member-form">
+
+                      <label>
+                        Role
+                      </label>
+
+                      <select
+                        name="role"
+                        value={
+                          editForm.role
+                        }
+                        onChange={
+                          handleEditChange
+                        }
+                      >
+                        <option value="member">
+                          Member
+                        </option>
+
+                        <option value="viewer">
+                          Viewer
+                        </option>
+
+                        <option value="admin">
+                          Admin
+                        </option>
+                      </select>
+
+                      <label>
+                        Status
+                      </label>
+
+                      <select
+                        name="status"
+                        value={
+                          editForm.status
+                        }
+                        onChange={
+                          handleEditChange
+                        }
+                      >
+                        <option value="Online">
+                          Online
+                        </option>
+
+                        <option value="Away">
+                          Away
+                        </option>
+
+                        <option value="Busy">
+                          Busy
+                        </option>
+
+                        <option value="Offline">
+                          Offline
+                        </option>
+                      </select>
+
+                      <div className="member-actions">
+
+                        <button
+                          type="button"
+                          className="save-btn"
+                          onClick={() =>
+                            saveMember(
+                              member.id
+                            )
+                          }
+                        >
+                          <FaSave />
+                          Save
+                        </button>
+
+                        <button
+                          type="button"
+                          className="cancel-btn"
+                          onClick={
+                            cancelEdit
+                          }
+                        >
+                          Cancel
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  ) : (
+
+                    <>
+                      <p>
+                        <strong>
+                          Role:
+                        </strong>{" "}
+                        {member.role}
+                      </p>
+
+                      <p>
+                        <strong>
+                          Status:
+                        </strong>{" "}
+                        {member.status ||
+                          "Offline"}
+                      </p>
+
+                      <div className="member-actions">
+
+                        {member.role !==
+                          "owner" && (
+                          <>
+                            <button
+                              type="button"
+                              className="edit-btn"
+                              onClick={() =>
+                                startEdit(
+                                  member
+                                )
+                              }
+                            >
+                              <FaEdit />
+                              Edit
+                            </button>
+
+                            <button
+                              type="button"
+                              className="delete-btn"
+                              onClick={() =>
+                                removeMember(
+                                  member.id
+                                )
+                              }
+                            >
+                              <FaTrash />
+                              Remove
+                            </button>
+                          </>
+                        )}
+
+                        {member.role ===
+                          "owner" && (
+                          <div className="owner-badge">
+                            👑 Project Owner
+                          </div>
+                        )}
+
+                      </div>
+                    </>
+                  )}
+
+                </div>
+              );
+            }
           )}
 
         </div>
