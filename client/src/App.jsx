@@ -30,6 +30,8 @@ import {  useEffect } from "react";
 import { supabase } from "./supabase/supabaseClient";
 import ProjectDetails from "./pages/Projects/ProjectDetails";
 import { Toaster } from "react-hot-toast";
+import ActivityLog from "./components/activity/ActivityLog";
+import { FaHistory } from "react-icons/fa";
 <>
   <Toaster position="top-right" />
   {/* Your Routes */}
@@ -103,6 +105,10 @@ function App() {
           <Route
   path="/test"
   element={<TestSupabase />}
+/>
+<Route
+  path="/activity"
+  element={<ActivityLog />}
 />
 
         </Route>
