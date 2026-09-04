@@ -3,85 +3,91 @@ import { Link } from "react-router-dom";
 
 import {
   FaSearch,
-  FaBell,
   FaMoon,
   FaSun,
   FaRobot,
   FaCog,
   FaChevronDown,
-  FaBars
+  FaBars,
 } from "react-icons/fa";
 
 import "./Navbar.css";
+import NotificationBell from "../notifications/NotificationBell";
 
 function Navbar({ toggleSidebar }) {
   const [darkMode, setDarkMode] = useState(false);
-  const [notificationOpen, setNotificationOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const notificationRef = useRef(null);
   const profileRef = useRef(null);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Project Alpha Updated",
-      time: "2 min ago",
-    },
-    {
-      id: 2,
-      title: "New Task Assigned",
-      time: "15 min ago",
-    },
-    {
-      id: 3,
-      title: "AI Generated Sprint Plan",
-      time: "1 hour ago",
-    },
-  ];
+  /*
+  ======================================================
+  CLOSE PROFILE MENU WHEN CLICKING OUTSIDE
+  ======================================================
+  */
 
   useEffect(() => {
-    const closeMenus = (e) => {
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(e.target)
-      ) {
-        setNotificationOpen(false);
-      }
-
+    const closeMenus = (event) => {
       if (
         profileRef.current &&
-        !profileRef.current.contains(e.target)
+        !profileRef.current.contains(event.target)
       ) {
         setProfileOpen(false);
       }
     };
 
-    document.addEventListener("click", closeMenus);
+    document.addEventListener(
+      "click",
+      closeMenus
+    );
 
-    return () =>
-      document.removeEventListener("click", closeMenus);
+    return () => {
+      document.removeEventListener(
+        "click",
+        closeMenus
+      );
+    };
   }, []);
+
+  /*
+  ======================================================
+  DARK MODE
+  ======================================================
+  */
 
   useEffect(() => {
     if (darkMode) {
-      document.body.classList.add("dark-mode");
+      document.body.classList.add(
+        "dark-mode"
+      );
     } else {
-      document.body.classList.remove("dark-mode");
+      document.body.classList.remove(
+        "dark-mode"
+      );
     }
   }, [darkMode]);
+
+  /*
+  ======================================================
+  RENDER
+  ======================================================
+  */
 
   return (
     <header className="navbar">
 
-      {/* LEFT */}
+      {/* ==================================================
+          LEFT
+      ================================================== */}
 
       <div className="navbar-left">
 
         <button
+          type="button"
           className="hamburger-btn"
           onClick={toggleSidebar}
+          aria-label="Toggle sidebar"
         >
           <FaBars />
         </button>
@@ -92,7 +98,10 @@ function Navbar({ toggleSidebar }) {
 
       </div>
 
-      {/* SEARCH */}
+
+      {/* ==================================================
+          SEARCH
+      ================================================== */}
 
       <div className="navbar-search">
 
@@ -102,117 +111,86 @@ function Navbar({ toggleSidebar }) {
           type="text"
           placeholder="Search projects, tasks..."
           value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
+          onChange={(event) =>
+            setSearch(event.target.value)
           }
         />
 
       </div>
 
-      {/* RIGHT */}
+
+      {/* ==================================================
+          RIGHT
+      ================================================== */}
 
       <div className="navbar-right">
 
-        {/* AI */}
+        {/* ==================================================
+            AI COPILOT
+        ================================================== */}
 
         <Link
           to="/ai"
           className="navbar-ai-btn"
         >
           <FaRobot />
-          <span>AI Copilot</span>
+
+          <span>
+            AI Copilot
+          </span>
         </Link>
 
-        {/* Notifications */}
 
-        <div
-          className="notification-wrapper"
-          ref={notificationRef}
-        >
+        {/* ==================================================
+            NOTIFICATIONS
+        ================================================== */}
 
-          <button
-            className="icon-btn"
-            onClick={() =>
-              setNotificationOpen(!notificationOpen)
-            }
-          >
-            <FaBell />
+        <NotificationBell />
 
-            <span className="notification-badge">
-              {notifications.length}
-            </span>
 
-          </button>
-
-          {notificationOpen && (
-
-            <div className="notification-dropdown">
-
-              <div className="dropdown-title">
-
-                Notifications
-
-              </div>
-
-              {notifications.map((item) => (
-
-                <div
-                  className="notification-item"
-                  key={item.id}
-                >
-
-                  <strong>
-
-                    {item.title}
-
-                  </strong>
-
-                  <small>
-
-                    {item.time}
-
-                  </small>
-
-                </div>
-
-              ))}
-
-            </div>
-
-          )}
-
-        </div>
-
-        {/* Theme */}
+        {/* ==================================================
+            THEME
+        ================================================== */}
 
         <button
+          type="button"
           className="icon-btn"
           onClick={() =>
-            setDarkMode(!darkMode)
+            setDarkMode(
+              (currentMode) =>
+                !currentMode
+            )
+          }
+          title={
+            darkMode
+              ? "Switch to light mode"
+              : "Switch to dark mode"
           }
         >
-
           {darkMode ? (
-
             <FaSun />
-
           ) : (
-
             <FaMoon />
-
           )}
-
         </button>
 
-        {/* Settings */}
 
-        <button className="icon-btn">
+        {/* ==================================================
+            SETTINGS
+        ================================================== */}
 
+        <Link
+          to="/settings"
+          className="icon-btn"
+          title="Settings"
+        >
           <FaCog />
+        </Link>
 
-        </button>
 
-        {/* Profile */}
+        {/* ==================================================
+            PROFILE
+        ================================================== */}
 
         <div
           className="profile-wrapper"
@@ -220,9 +198,13 @@ function Navbar({ toggleSidebar }) {
         >
 
           <button
+            type="button"
             className="profile-btn"
             onClick={() =>
-              setProfileOpen(!profileOpen)
+              setProfileOpen(
+                (currentOpen) =>
+                  !currentOpen
+              )
             }
           >
 
@@ -232,39 +214,49 @@ function Navbar({ toggleSidebar }) {
             />
 
             <span>
-
               Pallavi
-
             </span>
 
             <FaChevronDown />
 
           </button>
 
-          {profileOpen && (
 
+          {/* ==================================================
+              PROFILE DROPDOWN
+          ================================================== */}
+
+          {profileOpen && (
             <div className="profile-dropdown">
 
-              <Link to="/profile">
-
+              <Link
+                to="/profile"
+                onClick={() =>
+                  setProfileOpen(false)
+                }
+              >
                 My Profile
-
               </Link>
 
-              <Link to="/settings">
-
+              <Link
+                to="/settings"
+                onClick={() =>
+                  setProfileOpen(false)
+                }
+              >
                 Settings
-
               </Link>
 
-              <Link to="/login">
-
+              <Link
+                to="/login"
+                onClick={() =>
+                  setProfileOpen(false)
+                }
+              >
                 Logout
-
               </Link>
 
             </div>
-
           )}
 
         </div>
