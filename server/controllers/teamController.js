@@ -1,9 +1,11 @@
 import supabase from "../config/supabase.js";
 import { getIO } from "../config/socket.js";
+import { createNotification } from "../services/notificationService.js";
 
 /*
 ========================================================
 GET PROJECT MEMBERS
+GET /api/team/project/:projectId
 ========================================================
 */
 export const getProjectMembers = async (req, res) => {
@@ -29,6 +31,8 @@ export const getProjectMembers = async (req, res) => {
       });
 
     if (error) {
+      console.error("Get project members error:", error);
+
       return res.status(500).json({
         success: false,
         message: error.message,
@@ -53,6 +57,7 @@ export const getProjectMembers = async (req, res) => {
 /*
 ========================================================
 ADD TEAM MEMBER
+POST /api/team/project/:projectId
 ========================================================
 */
 export const addTeamMember = async (req, res) => {
@@ -67,12 +72,24 @@ export const addTeamMember = async (req, res) => {
       status = "Offline",
     } = req.body || {};
 
+    /*
+    ----------------------------------------------------
+    VALIDATE USER ID
+    ----------------------------------------------------
+    */
+
     if (!userId) {
       return res.status(400).json({
         success: false,
         message: "User ID is required.",
       });
     }
+
+    /*
+    ----------------------------------------------------
+    VALIDATE ROLE
+    ----------------------------------------------------
+    */
 
     const allowedRoles = [
       "member",
@@ -90,7 +107,7 @@ export const addTeamMember = async (req, res) => {
 
     /*
     ----------------------------------------------------
-    Verify user exists in Supabase Auth
+    VERIFY USER EXISTS IN SUPABASE AUTH
     ----------------------------------------------------
     */
 
@@ -102,14 +119,13 @@ export const addTeamMember = async (req, res) => {
     if (authError || !authData?.user) {
       return res.status(404).json({
         success: false,
-        message:
-          "The Supabase user was not found.",
+        message: "The Supabase user was not found.",
       });
     }
 
     /*
     ----------------------------------------------------
-    Check duplicate
+    CHECK DUPLICATE MEMBER
     ----------------------------------------------------
     */
 
@@ -124,6 +140,11 @@ export const addTeamMember = async (req, res) => {
       .maybeSingle();
 
     if (existingError) {
+      console.error(
+        "Check existing member error:",
+        existingError
+      );
+
       return res.status(500).json({
         success: false,
         message: existingError.message,
@@ -140,14 +161,14 @@ export const addTeamMember = async (req, res) => {
 
     /*
     ----------------------------------------------------
-    Insert member
+    PREPARE MEMBER DATA
     ----------------------------------------------------
     */
 
     const user = authData.user;
 
     const finalName =
-      name.trim() ||
+      String(name).trim() ||
       user.user_metadata?.full_name ||
       user.user_metadata?.name ||
       user.email?.split("@")[0] ||
@@ -159,7 +180,16 @@ export const addTeamMember = async (req, res) => {
       user.user_metadata?.picture ||
       null;
 
-    const { data, error } = await supabase
+    /*
+    ----------------------------------------------------
+    INSERT MEMBER
+    ----------------------------------------------------
+    */
+
+    const {
+      data,
+      error,
+    } = await supabase
       .from("team_members")
       .insert({
         user_id: userId,
@@ -186,7 +216,7 @@ export const addTeamMember = async (req, res) => {
 
     /*
     ----------------------------------------------------
-    REALTIME
+    REALTIME TEAM EVENT
     ----------------------------------------------------
     */
 
@@ -201,6 +231,26 @@ export const addTeamMember = async (req, res) => {
         socketError.message
       );
     }
+
+    /*
+    ----------------------------------------------------
+    CREATE NOTIFICATION
+    ----------------------------------------------------
+    */
+
+    await createNotification({
+      userId: userId,
+      projectId: projectId,
+      type: "team_member_added",
+      title: "Added to a project",
+      message: `You have been added to a project as ${role}.`,
+    });
+
+    /*
+    ----------------------------------------------------
+    RESPONSE
+    ----------------------------------------------------
+    */
 
     return res.status(201).json({
       success: true,
@@ -226,6 +276,7 @@ export const addTeamMember = async (req, res) => {
 /*
 ========================================================
 UPDATE TEAM MEMBER
+PUT /api/team/:id
 ========================================================
 */
 export const updateTeamMember = async (
@@ -274,8 +325,7 @@ export const updateTeamMember = async (
     */
 
     if (name !== undefined) {
-      updateData.name =
-        String(name).trim();
+      updateData.name = String(name).trim();
     }
 
     /*
@@ -313,6 +363,12 @@ export const updateTeamMember = async (
         profileImage || null;
     }
 
+    /*
+    ----------------------------------------------------
+    CHECK EMPTY UPDATE
+    ----------------------------------------------------
+    */
+
     if (
       Object.keys(updateData).length === 0
     ) {
@@ -325,7 +381,7 @@ export const updateTeamMember = async (
 
     /*
     ----------------------------------------------------
-    FIND MEMBER
+    FIND EXISTING MEMBER
     ----------------------------------------------------
     */
 
@@ -365,7 +421,7 @@ export const updateTeamMember = async (
 
     /*
     ----------------------------------------------------
-    UPDATE
+    UPDATE MEMBER
     ----------------------------------------------------
     */
 
@@ -380,6 +436,11 @@ export const updateTeamMember = async (
       .single();
 
     if (error) {
+      console.error(
+        "Update team member error:",
+        error
+      );
+
       return res.status(500).json({
         success: false,
         message: error.message,
@@ -388,7 +449,45 @@ export const updateTeamMember = async (
 
     /*
     ----------------------------------------------------
-    REALTIME
+    ROLE CHANGE NOTIFICATION
+    ----------------------------------------------------
+    */
+
+    if (
+      updateData.role !== undefined &&
+      updateData.role !== existingMember.role
+    ) {
+      await createNotification({
+        userId: existingMember.user_id,
+        projectId: existingMember.project_id,
+        type: "team_role_changed",
+        title: "Team role changed",
+        message: `Your project role has been changed from ${existingMember.role} to ${updateData.role}.`,
+      });
+    }
+
+    /*
+    ----------------------------------------------------
+    STATUS CHANGE NOTIFICATION
+    ----------------------------------------------------
+    */
+
+    if (
+      updateData.status !== undefined &&
+      updateData.status !== existingMember.status
+    ) {
+      await createNotification({
+        userId: existingMember.user_id,
+        projectId: existingMember.project_id,
+        type: "team_status_changed",
+        title: "Team status updated",
+        message: `Your team status has been changed to ${updateData.status}.`,
+      });
+    }
+
+    /*
+    ----------------------------------------------------
+    REALTIME TEAM EVENT
     ----------------------------------------------------
     */
 
@@ -403,6 +502,12 @@ export const updateTeamMember = async (
         socketError.message
       );
     }
+
+    /*
+    ----------------------------------------------------
+    RESPONSE
+    ----------------------------------------------------
+    */
 
     return res.status(200).json({
       success: true,
@@ -428,6 +533,7 @@ export const updateTeamMember = async (
 /*
 ========================================================
 DELETE TEAM MEMBER
+DELETE /api/team/:id
 ========================================================
 */
 export const deleteTeamMember = async (
@@ -436,6 +542,12 @@ export const deleteTeamMember = async (
 ) => {
   try {
     const { id } = req.params;
+
+    /*
+    ----------------------------------------------------
+    FIND MEMBER
+    ----------------------------------------------------
+    */
 
     const {
       data: member,
@@ -468,12 +580,23 @@ export const deleteTeamMember = async (
       });
     }
 
+    /*
+    ----------------------------------------------------
+    DELETE MEMBER
+    ----------------------------------------------------
+    */
+
     const { error } = await supabase
       .from("team_members")
       .delete()
       .eq("id", id);
 
     if (error) {
+      console.error(
+        "Delete team member error:",
+        error
+      );
+
       return res.status(500).json({
         success: false,
         message: error.message,
@@ -482,7 +605,20 @@ export const deleteTeamMember = async (
 
     /*
     ----------------------------------------------------
-    REALTIME
+    REMOVAL NOTIFICATION
+    ----------------------------------------------------
+    */
+
+    await createNotification({
+  userId,
+  projectId,
+  type: "team_member_added",
+  title: "Added to a project",
+  message: `You have been added to a project as ${role}.`,
+});
+    /*
+    ----------------------------------------------------
+    REALTIME TEAM EVENT
     ----------------------------------------------------
     */
 
@@ -491,10 +627,8 @@ export const deleteTeamMember = async (
         "teamMemberRemoved",
         {
           id,
-          projectId:
-            member.project_id,
-          userId:
-            member.user_id,
+          projectId: member.project_id,
+          userId: member.user_id,
         }
       );
     } catch (socketError) {
@@ -503,6 +637,12 @@ export const deleteTeamMember = async (
         socketError.message
       );
     }
+
+    /*
+    ----------------------------------------------------
+    RESPONSE
+    ----------------------------------------------------
+    */
 
     return res.status(200).json({
       success: true,
