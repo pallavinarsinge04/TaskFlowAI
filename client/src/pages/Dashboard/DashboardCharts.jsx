@@ -1,105 +1,162 @@
-import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import LineChartCard from "./components/LineChartCard";
-import PieChartCard from "./components/PieChartCard";
+import {
+  FaChartBar,
+  FaCheckCircle,
+  FaTasks,
+} from "react-icons/fa";
 
-const statusColors = {
-  Active: "#2563eb",
-  Planning: "#f59e0b",
-  Completed: "#10b981",
-};
+import "./DashboardCharts.css";
 
-const priorityColors = {
-  High: "#ef4444",
-  Medium: "#f59e0b",
-  Low: "#64748b",
-};
+function DashboardCharts({
+  projects = [],
+  loading = false,
+}) {
+  // =====================================================
+  // SAFE PROJECT DATA
+  // =====================================================
 
-function DashboardCharts({ projects = [] }) {
-  const navigate = useNavigate();
+  const projectData = Array.isArray(projects)
+    ? projects
+    : [];
+
+  // =====================================================
+  // EMPTY STATE
+  // =====================================================
+
+  if (!loading && projectData.length === 0) {
+    return (
+      <section className="dashboard-chart-card">
+        <div className="dashboard-chart-header">
+          <div>
+            <h2>Project Productivity</h2>
+
+            <p>
+              Task completion by project
+            </p>
+          </div>
+
+          <div className="dashboard-chart-icon">
+            <FaChartBar />
+          </div>
+        </div>
+
+        <div className="dashboard-chart-empty">
+          <FaTasks />
+
+          <h3>No project data yet</h3>
+
+          <p>
+            Create projects and tasks to see
+            productivity analytics here.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="dashboard-widget dashboard-charts-section">
-      <div className="widget-header">
+    <section className="dashboard-chart-card">
+
+      {/* ============================================= */}
+      {/* HEADER */}
+      {/* ============================================= */}
+
+      <div className="dashboard-chart-header">
+
         <div>
-          <h2>Analytics & Projects</h2>
-          <p>Track productivity trends and active project progress</p>
-        </div>
-        <button
-          type="button"
-          className="widget-link-btn"
-          onClick={() => navigate("/analytics")}
-        >
-          View Analytics
-        </button>
-      </div>
+          <h2>Project Productivity</h2>
 
-      <div className="charts-grid">
-        <LineChartCard />
-        <PieChartCard />
-      </div>
-
-      <div className="projects-panel">
-        <div className="projects-panel-header">
-          <h3>Recent Projects</h3>
-          <button
-            type="button"
-            className="widget-link-btn"
-            onClick={() => navigate("/projects")}
-          >
-            See all
-          </button>
+          <p>
+            Task completion by project
+          </p>
         </div>
 
-        <ul className="projects-list">
-          {projects.map((project, index) => (
-            <motion.li
-              key={project.id}
-              className="project-item"
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.06 }}
-              whileHover={{ scale: 1.01 }}
-              onClick={() => navigate(`/projects/${project.id}`)}
-            >
-              <div className="project-item-top">
-                <strong>{project.name}</strong>
-                <span
-                  className="project-badge"
-                  style={{
-                    background: `${statusColors[project.status] || "#64748b"}18`,
-                    color: statusColors[project.status] || "#64748b",
-                  }}
-                >
-                  {project.status}
-                </span>
-              </div>
+        <div className="dashboard-chart-icon">
+          <FaChartBar />
+        </div>
 
-              <div className="project-progress-row">
+      </div>
+
+      {/* ============================================= */}
+      {/* PROJECT LIST */}
+      {/* ============================================= */}
+
+      <div className="project-productivity-list">
+
+        {loading ? (
+          <div className="dashboard-chart-loading">
+            Loading analytics...
+          </div>
+        ) : (
+          projectData.map((project) => {
+
+            const completion =
+              Number(
+                project.completionRate
+              ) || 0;
+
+            return (
+              <div
+                className="project-productivity-item"
+                key={project.id}
+              >
+
+                {/* PROJECT INFO */}
+
+                <div className="project-productivity-info">
+
+                  <div className="project-productivity-title">
+
+                    <span>
+                      {project.name ||
+                        "Untitled Project"}
+                    </span>
+
+                    {completion === 100 && (
+                      <FaCheckCircle
+                        className="project-complete-icon"
+                      />
+                    )}
+
+                  </div>
+
+                  <small>
+                    {project.completedTasks || 0}
+                    {" / "}
+                    {project.totalTasks || 0}
+                    {" tasks completed"}
+                  </small>
+
+                </div>
+
+                {/* PERCENTAGE */}
+
+                <strong>
+                  {completion}%
+                </strong>
+
+                {/* PROGRESS */}
+
                 <div className="project-progress-track">
-                  <motion.div
+
+                  <div
                     className="project-progress-fill"
                     style={{
-                      background: statusColors[project.status] || "#2563eb",
+                      width: `${Math.min(
+                        100,
+                        completion
+                      )}%`,
                     }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${project.progress}%` }}
-                    transition={{ duration: 1.2, delay: index * 0.1 }}
                   />
-                </div>
-                <span>{project.progress}%</span>
-              </div>
 
-              <span
-                className="project-priority"
-                style={{ color: priorityColors[project.priority] || "#64748b" }}
-              >
-                {project.priority} priority
-              </span>
-            </motion.li>
-          ))}
-        </ul>
+                </div>
+
+              </div>
+            );
+          })
+        )}
+
       </div>
+
     </section>
   );
 }
