@@ -1,14 +1,19 @@
+import "dotenv/config";
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-console.log(
-  "GEMINI_API_KEY:",
-  process.env.GEMINI_API_KEY ? "Loaded ✅" : "Missing ❌"
-);
+const apiKey = process.env.GEMINI_API_KEY;
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+if (!apiKey) {
+  throw new Error(
+    "GEMINI_API_KEY is missing. Check server/.env"
+  );
+}
 
-const model = genAI.getGenerativeModel({
-  model: "gemini-2.5-flash",
-});
+const genAI = new GoogleGenerativeAI(apiKey);
 
-export default model;
+export const getGeminiModel = () => {
+  return genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+  });
+};
