@@ -1,5 +1,6 @@
 import supabase from "../config/supabase.js";
 import { getIO } from "../config/socket.js";
+import { createActivityLog } from "../services/activityLogService.js";
 
 // =========================
 // Get all projects
@@ -28,7 +29,7 @@ export const getProjects = async (req, res) => {
 
     return res.json({
       success: true,
-      projects: data,
+      projects: data || [],
     });
   } catch (err) {
     console.error("Get Projects Error:", err);
@@ -63,7 +64,7 @@ export const getProjectById = async (req, res) => {
       .eq("owner", userId)
       .single();
 
-    if (error) {
+    if (error || !data) {
       return res.status(404).json({
         success: false,
         message: "Project not found.",
@@ -136,6 +137,28 @@ export const createProject = async (req, res) => {
         message: error.message,
       });
     }
+
+    // =========================
+    // Activity Log
+    // =========================
+
+    await createActivityLog({
+      userId,
+      projectId: data.id,
+      action: "created",
+      entityType: "project",
+      entityId: data.id,
+      description: `Created project "${data.name}"`,
+      metadata: {
+        projectName: data.name,
+        status: data.status,
+        priority: data.priority,
+      },
+    });
+
+    // =========================
+    // Realtime Socket Event
+    // =========================
 
     try {
       getIO().emit("projectCreated", data);
@@ -243,14 +266,34 @@ export const updateProject = async (req, res) => {
       .select()
       .single();
 
-    if (error) {
+    if (error || !data) {
       console.error("Supabase Update Project Error:", error);
 
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message: error?.message || "Project update failed.",
       });
     }
+
+    // =========================
+    // Activity Log
+    // =========================
+
+    await createActivityLog({
+      userId,
+      projectId: data.id,
+      action: "updated",
+      entityType: "project",
+      entityId: data.id,
+      description: `Updated project "${data.name}"`,
+      metadata: {
+        updatedFields: Object.keys(updateData),
+      },
+    });
+
+    // =========================
+    // Realtime Socket Event
+    // =========================
 
     try {
       getIO().emit("projectUpdated", data);
@@ -292,6 +335,28 @@ export const deleteProject = async (req, res) => {
       });
     }
 
+    // =========================
+    // Get project before deleting
+    // =========================
+
+    const { data: project, error: projectError } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("id", id)
+      .eq("owner", userId)
+      .single();
+
+    if (projectError || !project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found.",
+      });
+    }
+
+    // =========================
+    // Delete project
+    // =========================
+
     const { data, error } = await supabase
       .from("projects")
       .delete()
@@ -301,13 +366,36 @@ export const deleteProject = async (req, res) => {
       .single();
 
     if (error) {
-      console.error("Supabase Delete Project Error:", error);
+      console.error(
+        "Supabase Delete Project Error:",
+        error
+      );
 
       return res.status(500).json({
         success: false,
         message: error.message,
       });
     }
+
+    // =========================
+    // Activity Log
+    // =========================
+
+    await createActivityLog({
+      userId,
+      projectId: project.id,
+      action: "deleted",
+      entityType: "project",
+      entityId: project.id,
+      description: `Deleted project "${project.name}"`,
+      metadata: {
+        projectName: project.name,
+      },
+    });
+
+    // =========================
+    // Realtime Socket Event
+    // =========================
 
     try {
       getIO().emit("projectDeleted", id);
