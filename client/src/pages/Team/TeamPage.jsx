@@ -44,7 +44,7 @@ function TeamPage() {
   });
 
   // =====================================================
-  // AUTH
+  // AUTH HEADERS
   // =====================================================
 
   const getAuthHeaders = async () => {
@@ -87,11 +87,20 @@ function TeamPage() {
 
       setProjects(list);
 
-      if (
-        list.length > 0 &&
-        !selectedProjectId
-      ) {
-        setSelectedProjectId(list[0].id);
+      if (list.length > 0) {
+        setSelectedProjectId((current) => {
+          if (
+            current &&
+            list.some(
+              (project) =>
+                project.id === current
+            )
+          ) {
+            return current;
+          }
+
+          return list[0].id;
+        });
       }
     } catch (error) {
       console.error(
@@ -124,9 +133,15 @@ function TeamPage() {
         { headers }
       );
 
-      setMembers(
-        response.data?.members || []
+      const list =
+        response.data?.members || [];
+
+      console.log(
+        "Loaded team members:",
+        list
       );
+
+      setMembers(list);
     } catch (error) {
       console.error(
         "Load members error:",
@@ -155,10 +170,14 @@ function TeamPage() {
   }, [selectedProjectId]);
 
   // =====================================================
-  // REALTIME
+  // REALTIME TEAM EVENTS
   // =====================================================
 
   useEffect(() => {
+    if (!selectedProjectId) {
+      return;
+    }
+
     const handleAdded = (member) => {
       if (!member) return;
 
@@ -196,7 +215,10 @@ function TeamPage() {
       setMembers((current) =>
         current.map((item) =>
           item.id === member.id
-            ? { ...item, ...member }
+            ? {
+                ...item,
+                ...member,
+              }
             : item
         )
       );
@@ -204,6 +226,13 @@ function TeamPage() {
 
     const handleRemoved = (data) => {
       if (!data) return;
+
+      if (
+        data.projectId &&
+        data.projectId !== selectedProjectId
+      ) {
+        return;
+      }
 
       setMembers((current) =>
         current.filter(
@@ -247,7 +276,7 @@ function TeamPage() {
   }, [selectedProjectId]);
 
   // =====================================================
-  // ADD FORM
+  // ADD FORM CHANGE
   // =====================================================
 
   const handleChange = (event) => {
@@ -288,6 +317,11 @@ function TeamPage() {
       const headers =
         await getAuthHeaders();
 
+      console.log(
+        "Adding member to project:",
+        selectedProjectId
+      );
+
       const response =
         await axios.post(
           `${API_URL}/project/${selectedProjectId}`,
@@ -308,6 +342,11 @@ function TeamPage() {
           },
           { headers }
         );
+
+      console.log(
+        "Add member response:",
+        response.data
+      );
 
       const member =
         response.data?.member;
@@ -360,8 +399,13 @@ function TeamPage() {
 
   const startEdit = (member) => {
     console.log(
-      "Editing member:",
+      "Editing member object:",
       member
+    );
+
+    console.log(
+      "Team member database ID:",
+      member.id
     );
 
     setEditingMemberId(member.id);
@@ -405,13 +449,24 @@ function TeamPage() {
   };
 
   // =====================================================
-  // SAVE EDIT
+  // SAVE MEMBER
   // =====================================================
 
   const saveMember = async (memberId) => {
+    if (!memberId) {
+      alert(
+        "Team member ID is missing."
+      );
+      return;
+    }
+
     console.log(
-      "Saving member:",
-      memberId,
+      "Saving team member ID:",
+      memberId
+    );
+
+    console.log(
+      "Update data:",
       editForm
     );
 
@@ -447,7 +502,10 @@ function TeamPage() {
           current.map((member) =>
             member.id ===
             updatedMember.id
-              ? updatedMember
+              ? {
+                  ...member,
+                  ...updatedMember,
+                }
               : member
           )
         );
@@ -474,13 +532,33 @@ function TeamPage() {
   };
 
   // =====================================================
-  // DELETE
+  // DELETE MEMBER
   // =====================================================
 
-  const removeMember = async (id) => {
+  const removeMember = async (memberId) => {
+    if (!memberId) {
+      alert(
+        "Team member ID is missing."
+      );
+      return;
+    }
+
+    const member = members.find(
+      (item) =>
+        item.id === memberId
+    );
+
+    console.log(
+      "Removing team member:",
+      member
+    );
+
     if (
       !window.confirm(
-        "Delete this team member?"
+        `Delete ${
+          member?.name ||
+          "this team member"
+        }?`
       )
     ) {
       return;
@@ -490,15 +568,21 @@ function TeamPage() {
       const headers =
         await getAuthHeaders();
 
-      await axios.delete(
-        `${API_URL}/${id}`,
-        { headers }
+      const response =
+        await axios.delete(
+          `${API_URL}/${memberId}`,
+          { headers }
+        );
+
+      console.log(
+        "Delete response:",
+        response.data
       );
 
       setMembers((current) =>
         current.filter(
-          (member) =>
-            member.id !== id
+          (item) =>
+            item.id !== memberId
         )
       );
     } catch (error) {
@@ -537,7 +621,11 @@ function TeamPage() {
 
   const filtered = useMemo(() => {
     const text =
-      search.toLowerCase();
+      search.toLowerCase().trim();
+
+    if (!text) {
+      return members;
+    }
 
     return members.filter(
       (member) =>
@@ -546,30 +634,13 @@ function TeamPage() {
           .includes(text) ||
         (member.role || "")
           .toLowerCase()
+          .includes(text) ||
+        (member.status || "")
+          .toLowerCase()
           .includes(text)
     );
   }, [members, search]);
-const handleNotificationCreated = (notification) => {
-  if (!notification) return;
 
-  if (notification.user_id !== user.id) {
-    return;
-  }
-
-  console.log(
-    "🔔 New notification:",
-    notification
-  );
-};
-
-socket.on(
-  "notificationCreated",
-  handleNotificationCreated
-);
-socket.off(
-  "notificationCreated",
-  handleNotificationCreated
-);
   // =====================================================
   // UI
   // =====================================================
@@ -816,13 +887,15 @@ socket.off(
                       "https://i.pravatar.cc/150?img=1"
                     }
                     alt={
-                      member.name
+                      member.name ||
+                      "Team Member"
                     }
                     className="avatar"
                   />
 
                   <h3>
-                    {member.name}
+                    {member.name ||
+                      "Team Member"}
                   </h3>
 
                   {/* EDIT MODE */}
