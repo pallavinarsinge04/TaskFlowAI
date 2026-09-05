@@ -1,0 +1,210 @@
+/* =====================================================
+   DASHBOARD INSIGHTS
+   ===================================================== */
+
+.dashboard-insights-card {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.dashboard-insights-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.dashboard-insights-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #fef3c7;
+  color: #d97706;
+
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.dashboard-insights-header h2 {
+  margin: 0;
+
+  font-size: 20px;
+  font-weight: 700;
+
+  color: var(--text-primary, #111827);
+}
+
+.dashboard-insights-header p {
+  margin: 4px 0 0;
+
+  font-size: 13px;
+
+  color: var(--text-secondary, #6b7280);
+}
+
+/* =====================================================
+   INSIGHTS LIST
+   ===================================================== */
+
+.dashboard-insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* =====================================================
+   INDIVIDUAL INSIGHT
+   ===================================================== */
+
+.dashboard-insight-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  padding: 14px;
+
+  border-radius: 12px;
+
+  border: 1px solid transparent;
+}
+
+.dashboard-insight-item-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  flex-shrink: 0;
+
+  font-size: 14px;
+}
+
+.dashboard-insight-item h3 {
+  margin: 0 0 4px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  color: var(--text-primary, #111827);
+}
+
+.dashboard-insight-item p {
+  margin: 0;
+
+  font-size: 12px;
+  line-height: 1.5;
+
+  color: var(--text-secondary, #6b7280);
+}
+
+/* =====================================================
+   SUCCESS
+   ===================================================== */
+
+.dashboard-insight-item.success {
+  background: #ecfdf5;
+  border-color: #d1fae5;
+}
+
+.dashboard-insight-item.success
+  .dashboard-insight-item-icon {
+  background: #d1fae5;
+  color: #059669;
+}
+
+/* =====================================================
+   POSITIVE
+   ===================================================== */
+
+.dashboard-insight-item.positive {
+  background: #eff6ff;
+  border-color: #dbeafe;
+}
+
+.dashboard-insight-item.positive
+  .dashboard-insight-item-icon {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+/* =====================================================
+   WARNING
+   ===================================================== */
+
+.dashboard-insight-item.warning {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.dashboard-insight-item.warning
+  .dashboard-insight-item-icon {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+/* =====================================================
+   INFO
+   ===================================================== */
+
+.dashboard-insight-item.info {
+  background: #f5f3ff;
+  border-color: #ede9fe;
+}
+
+.dashboard-insight-item.info
+  .dashboard-insight-item-icon {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+/* =====================================================
+   HOVER
+   ===================================================== */
+
+.dashboard-insight-item {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.dashboard-insight-item:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 600px) {
+  .dashboard-insights-card {
+    padding: 16px;
+  }
+
+  .dashboard-insights-header h2 {
+    font-size: 18px;
+  }
+
+  .dashboard-insight-item {
+    padding: 12px;
+  }
+}
