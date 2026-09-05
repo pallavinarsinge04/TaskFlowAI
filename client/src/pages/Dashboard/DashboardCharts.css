@@ -1,0 +1,244 @@
+.dashboard-chart-card {
+  background: var(--card-bg, #ffffff);
+
+  border: 1px solid
+    var(--border-color, #e5e7eb);
+
+  border-radius: 16px;
+
+  padding: 22px;
+
+  margin-bottom: 20px;
+
+  box-shadow:
+    0 4px 18px
+      rgba(0, 0, 0, 0.04);
+}
+
+/* =====================================================
+   HEADER
+   ===================================================== */
+
+.dashboard-chart-header {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 24px;
+}
+
+.dashboard-chart-header h2 {
+  margin: 0;
+
+  font-size: 20px;
+
+  font-weight: 700;
+
+  color:
+    var(--text-primary, #111827);
+}
+
+.dashboard-chart-header p {
+  margin: 5px 0 0;
+
+  font-size: 13px;
+
+  color:
+    var(--text-secondary, #6b7280);
+}
+
+.dashboard-chart-icon {
+  width: 42px;
+
+  height: 42px;
+
+  border-radius: 12px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 18px;
+}
+
+/* =====================================================
+   PROJECT PRODUCTIVITY
+   ===================================================== */
+
+.project-productivity-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 20px;
+}
+
+.project-productivity-item {
+  display: grid;
+
+  grid-template-columns:
+    minmax(150px, 1fr)
+    55px;
+
+  gap: 8px 15px;
+
+  align-items: center;
+}
+
+.project-productivity-info {
+  min-width: 0;
+}
+
+.project-productivity-title {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color:
+    var(--text-primary, #111827);
+}
+
+.project-productivity-title span {
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.project-complete-icon {
+  flex-shrink: 0;
+
+  font-size: 13px;
+
+  color: #10b981;
+}
+
+.project-productivity-info small {
+  display: block;
+
+  margin-top: 4px;
+
+  font-size: 12px;
+
+  color:
+    var(--text-secondary, #6b7280);
+}
+
+.project-productivity-item > strong {
+  text-align: right;
+
+  font-size: 14px;
+
+  color:
+    var(--text-primary, #111827);
+}
+
+/* =====================================================
+   PROGRESS BAR
+   ===================================================== */
+
+.project-progress-track {
+  grid-column: 1 / -1;
+
+  height: 8px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: #e5e7eb;
+}
+
+.project-progress-fill {
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: #2563eb;
+
+  transition:
+    width 0.5s ease;
+}
+
+/* =====================================================
+   EMPTY STATE
+   ===================================================== */
+
+.dashboard-chart-empty {
+  min-height: 180px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-direction: column;
+
+  text-align: center;
+}
+
+.dashboard-chart-empty svg {
+  font-size: 32px;
+
+  margin-bottom: 12px;
+
+  color: #9ca3af;
+}
+
+.dashboard-chart-empty h3 {
+  margin: 0;
+
+  font-size: 16px;
+}
+
+.dashboard-chart-empty p {
+  max-width: 360px;
+
+  margin: 8px 0 0;
+
+  font-size: 13px;
+
+  color: #6b7280;
+}
+
+.dashboard-chart-loading {
+  padding: 40px;
+
+  text-align: center;
+
+  color: #6b7280;
+}
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 600px) {
+  .dashboard-chart-card {
+    padding: 16px;
+  }
+
+  .dashboard-chart-header h2 {
+    font-size: 18px;
+  }
+
+  .project-productivity-list {
+    gap: 16px;
+  }
+}
