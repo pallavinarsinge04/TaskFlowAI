@@ -1,0 +1,271 @@
+.ai-task-generator {
+  margin-top: 24px;
+  padding: 22px;
+  border-radius: 16px;
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.ai-task-header {
+  margin-bottom: 18px;
+}
+
+.ai-task-title {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.ai-task-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #ede9fe;
+  color: #7c3aed;
+  font-size: 21px;
+}
+
+.ai-task-title h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.ai-task-title p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.ai-task-input-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-task-input-area textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  border: 1px solid #dbe1e8;
+  border-radius: 10px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+.ai-task-input-area textarea:focus {
+  border-color: #8b5cf6;
+}
+
+.generate-task-btn {
+  align-self: flex-end;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 17px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #7c3aed;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.generate-task-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-task-error,
+.ai-task-success {
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.ai-task-error {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.ai-task-success {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.generated-tasks {
+  margin-top: 24px;
+}
+
+.generated-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 13px;
+}
+
+.generated-header h4 {
+  margin: 0;
+}
+
+.generated-header p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.generated-header button {
+  border: none;
+  border-radius: 9px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #16a34a;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.generated-header button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.generated-task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.generated-task {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.generated-task:hover {
+  border-color: #c4b5fd;
+}
+
+.generated-task.selected {
+  background: #faf5ff;
+  border-color: #a78bfa;
+}
+
+.task-checkbox {
+  width: 21px;
+  height: 21px;
+  min-width: 21px;
+  border: 2px solid #cbd5e1;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 11px;
+}
+
+.task-checkbox.checked {
+  background: #7c3aed;
+  border-color: #7c3aed;
+}
+
+.generated-task-content {
+  flex: 1;
+}
+
+.generated-task-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.generated-task-title strong {
+  font-size: 13px;
+}
+
+.generated-task-content p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.task-priority {
+  padding: 4px 7px;
+  border-radius: 15px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.task-priority.high {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.task-priority.medium {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.task-priority.low {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.ai-spin {
+  animation: ai-generator-spin 1s linear infinite;
+}
+
+@keyframes ai-generator-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 600px) {
+  .ai-task-generator {
+    padding: 16px;
+  }
+
+  .generated-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .generate-task-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .generated-header button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .generated-task-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
