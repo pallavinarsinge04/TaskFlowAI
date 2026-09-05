@@ -1,0 +1,160 @@
+.team-performance {
+  margin-top: 24px;
+  padding: 22px;
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.team-performance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.team-performance-header h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 18px;
+}
+
+.team-performance-header p {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.team-member-count {
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.team-performance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.team-performance-item {
+  display: flex;
+  gap: 14px;
+  padding: 15px;
+  border: 1px solid #eef2f7;
+  border-radius: 12px;
+}
+
+.member-avatar {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e7ff;
+  color: #3730a3;
+  font-weight: 700;
+}
+
+.member-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.member-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.member-heading div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.member-heading strong {
+  font-size: 14px;
+}
+
+.member-heading span {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: capitalize;
+}
+
+.completion-rate {
+  font-size: 15px !important;
+}
+
+.member-progress {
+  height: 7px;
+  margin-top: 10px;
+  background: #eef2f7;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.member-progress-fill {
+  height: 100%;
+  background: #22c55e;
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+.member-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 9px;
+}
+
+.member-stats span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #64748b;
+  font-size: 11px;
+}
+
+.member-overdue {
+  color: #dc2626 !important;
+}
+
+.team-empty {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+.team-empty svg {
+  font-size: 25px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 600px) {
+  .team-performance {
+    padding: 16px;
+  }
+
+  .team-performance-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .member-stats {
+    gap: 8px;
+  }
+}
