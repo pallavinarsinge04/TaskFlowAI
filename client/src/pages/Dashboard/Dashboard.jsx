@@ -8,6 +8,7 @@ import DashboardActivity from "./DashboardActivity";
 import DashboardTeam from "./DashboardTeam";
 import DashboardQuickActions from "./DashboardQuickActions";
 import DashboardTasks from "./DashboardTasks";
+import ProductivityScore from "./ProductivityScore";
 
 import {
   FaFolderOpen,
@@ -16,16 +17,23 @@ import {
   FaRobot,
 } from "react-icons/fa";
 
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import { supabase } from "../../supabase/supabaseClient";
+import socket from "../../socket/socket";
+
+import TaskAnalytics from "./TaskAnalytics";
+import TeamPerformance from "./TeamPerformance";
+import AICommandCenter from "./AICommandCenter";
 
 function Dashboard() {
-  const navigate = useNavigate();
-
-  // =========================================
+  // =====================================================
   // DASHBOARD STATS
-  // =========================================
+  // =====================================================
 
   const [stats, setStats] = useState({
     projects: 0,
@@ -35,47 +43,79 @@ function Dashboard() {
     totalTasks: 0,
     completedTasks: 0,
     pendingTasks: 0,
+    inProgressTasks: 0,
+    overdueTasks: 0,
 
     teamMembers: 0,
 
-    aiScore: 94,
+    completionRate: 0,
+    productivityScore: 0,
   });
 
-  // =========================================
-  // RECENT PROJECTS
-  // =========================================
+  // =====================================================
+  // PROJECTS
+  // =====================================================
 
-  const [recentProjects, setRecentProjects] = useState([]);
+  const [recentProjects, setRecentProjects] =
+    useState([]);
 
-  // =========================================
-  // LOADING STATES
-  // =========================================
+  // =====================================================
+  // TODAY TASKS
+  // =====================================================
 
-  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [todayTasks, setTodayTasks] =
+    useState([]);
 
-  // =========================================
-  // LOAD DASHBOARD DATA
-  // =========================================
+  // =====================================================
+  // PROJECT ANALYTICS
+  // =====================================================
 
-  useEffect(() => {
-    let projectChannel = null;
-    let teamChannel = null;
+  const [projectAnalytics, setProjectAnalytics] =
+    useState([]);
 
-    let mounted = true;
+  // =====================================================
+  // TASK ANALYTICS
+  // =====================================================
 
-    // =========================================
-    // LOAD PROJECTS
-    // =========================================
+  const [taskTrend, setTaskTrend] =
+    useState([]);
 
-    const loadProjects = async () => {
+  const [priorityDistribution, setPriorityDistribution] =
+    useState({
+      High: 0,
+      Medium: 0,
+      Low: 0,
+    });
+
+  const [overdueTaskList, setOverdueTaskList] =
+    useState([]);
+
+  // =====================================================
+  // TEAM PERFORMANCE
+  // =====================================================
+
+  const [teamPerformance, setTeamPerformance] =
+    useState([]);
+
+  // =====================================================
+  // LOADING
+  // =====================================================
+
+  const [loading, setLoading] =
+    useState(true);
+
+  // =====================================================
+  // LOAD DASHBOARD ANALYTICS
+  // =====================================================
+
+  const loadAnalytics = useCallback(
+    async () => {
       try {
-        if (mounted) {
-          setProjectsLoading(true);
-        }
+        setLoading(true);
 
-        // -----------------------------------------
-        // GET CURRENT SESSION
-        // -----------------------------------------
+        // ---------------------------------------------
+        // GET SUPABASE SESSION
+        // ---------------------------------------------
 
         const {
           data: { session },
@@ -86,152 +126,181 @@ function Dashboard() {
           throw sessionError;
         }
 
-        const token = session?.access_token;
+        const token =
+          session?.access_token;
 
         if (!token) {
-          console.log("No access token found.");
-
-          if (mounted) {
-            setRecentProjects([]);
-
-            setStats((prev) => ({
-              ...prev,
-              projects: 0,
-              activeProjects: 0,
-              completedProjects: 0,
-            }));
-          }
+          console.log(
+            "Dashboard: no access token."
+          );
 
           return;
         }
 
-        // -----------------------------------------
-        // GET PROJECTS FROM BACKEND
-        // -----------------------------------------
+        // ---------------------------------------------
+        // GET DASHBOARD ANALYTICS
+        // ---------------------------------------------
 
         const response = await fetch(
-          "http://localhost:5000/api/projects",
+          "http://localhost:5000/api/dashboard/analytics",
           {
             method: "GET",
 
             headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
+              Authorization:
+                `Bearer ${token}`,
+
+              "Content-Type":
+                "application/json",
             },
           }
         );
 
-        const result = await response.json();
+        const result =
+          await response.json();
 
         if (!response.ok) {
           throw new Error(
-            result.message || "Failed to load projects."
+            result.message ||
+              "Failed to load dashboard analytics."
           );
         }
 
-        // -----------------------------------------
-        // SUPPORT BOTH RESPONSE FORMATS
-        // -----------------------------------------
+        const analytics =
+          result.analytics || {};
 
-        const projects =
-          result.projects ||
-          result.data ||
-          [];
-
-        if (!Array.isArray(projects)) {
-          throw new Error(
-            "Invalid projects data received from server."
-          );
-        }
-
-        if (!mounted) return;
-
-        // -----------------------------------------
-        // RECENT PROJECTS
-        // -----------------------------------------
-
-        // Backend already returns projects ordered
-        // by created_at descending.
-
-        setRecentProjects(
-          projects.slice(0, 5)
-        );
-
-        // -----------------------------------------
-        // PROJECT STATISTICS
-        // -----------------------------------------
-
-        const activeProjects =
-          projects.filter((project) => {
-            const status =
-              project.status
-                ?.toString()
-                .trim()
-                .toLowerCase();
-
-            return (
-              status === "active" ||
-              status === "in progress"
-            );
-          }).length;
-
-        const completedProjects =
-          projects.filter((project) => {
-            const status =
-              project.status
-                ?.toString()
-                .trim()
-                .toLowerCase();
-
-            return status === "completed";
-          }).length;
-
-        // -----------------------------------------
-        // UPDATE DASHBOARD STATS
-        // -----------------------------------------
+        // ---------------------------------------------
+        // UPDATE MAIN STATS
+        // ---------------------------------------------
 
         setStats((prev) => ({
           ...prev,
 
-          projects: projects.length,
+          projects:
+            analytics.projects || 0,
 
-          activeProjects,
+          activeProjects:
+            analytics.activeProjects || 0,
 
-          completedProjects,
+          completedProjects:
+            analytics.completedProjects || 0,
+
+          totalTasks:
+            analytics.totalTasks || 0,
+
+          completedTasks:
+            analytics.completedTasks || 0,
+
+          pendingTasks:
+            analytics.pendingTasks || 0,
+
+          inProgressTasks:
+            analytics.inProgressTasks || 0,
+
+          overdueTasks:
+            analytics.overdueTasks || 0,
+
+          teamMembers:
+            analytics.teamMembers ||
+            prev.teamMembers ||
+            0,
+
+          completionRate:
+            analytics.completionRate || 0,
+
+          productivityScore:
+            analytics.productivityScore || 0,
         }));
 
+        // ---------------------------------------------
+        // PROJECT ANALYTICS
+        // ---------------------------------------------
+
+        setProjectAnalytics(
+          analytics.projectAnalytics || []
+        );
+
+        // ---------------------------------------------
+        // TODAY TASKS
+        // ---------------------------------------------
+
+        setTodayTasks(
+          analytics.todayTasks || []
+        );
+
+        // ---------------------------------------------
+        // TASK TREND
+        // ---------------------------------------------
+
+        setTaskTrend(
+          analytics.taskTrend || []
+        );
+
+        // ---------------------------------------------
+        // PRIORITY DISTRIBUTION
+        // ---------------------------------------------
+
+        setPriorityDistribution(
+          analytics.priorityDistribution || {
+            High: 0,
+            Medium: 0,
+            Low: 0,
+          }
+        );
+
+        // ---------------------------------------------
+        // OVERDUE TASK LIST
+        // ---------------------------------------------
+
+        setOverdueTaskList(
+          analytics.overdueTaskList || []
+        );
+
+        // ---------------------------------------------
+        // TEAM PERFORMANCE
+        // ---------------------------------------------
+
+        setTeamPerformance(
+          analytics.teamPerformance || []
+        );
+
+        // ---------------------------------------------
+        // RECENT PROJECTS
+        // ---------------------------------------------
+
+        setRecentProjects(
+          (
+            analytics.projectAnalytics ||
+            []
+          ).slice(0, 5)
+        );
+
+        // ---------------------------------------------
+        // DEBUG
+        // ---------------------------------------------
+
         console.log(
-          "Dashboard projects:",
-          projects
+          "📊 Dashboard analytics:",
+          analytics
         );
       } catch (error) {
         console.error(
-          "Dashboard projects error:",
+          "Dashboard analytics error:",
           error
         );
-
-        if (mounted) {
-          setRecentProjects([]);
-
-          setStats((prev) => ({
-            ...prev,
-            projects: 0,
-            activeProjects: 0,
-            completedProjects: 0,
-          }));
-        }
       } finally {
-        if (mounted) {
-          setProjectsLoading(false);
-        }
+        setLoading(false);
       }
-    };
+    },
+    []
+  );
 
-    // =========================================
-    // LOAD TEAM COUNT
-    // =========================================
+  // =====================================================
+  // LOAD TEAM COUNT
+  // =====================================================
 
-    const loadTeamCount = async () => {
+  const loadTeamCount =
+    useCallback(async () => {
       try {
         const {
           data: { user },
@@ -243,19 +312,13 @@ function Dashboard() {
         }
 
         if (!user) {
-          if (mounted) {
-            setStats((prev) => ({
-              ...prev,
-              teamMembers: 0,
-            }));
-          }
+          setStats((prev) => ({
+            ...prev,
+            teamMembers: 0,
+          }));
 
           return;
         }
-
-        // -----------------------------------------
-        // GET TEAM MEMBER COUNT
-        // -----------------------------------------
 
         const {
           count,
@@ -272,8 +335,6 @@ function Dashboard() {
           throw error;
         }
 
-        if (!mounted) return;
-
         setStats((prev) => ({
           ...prev,
           teamMembers: count || 0,
@@ -284,21 +345,24 @@ function Dashboard() {
           error
         );
       }
-    };
+    }, []);
 
-    // =========================================
-    // INITIAL DATA LOAD
-    // =========================================
+  // =====================================================
+  // INITIAL LOAD + REALTIME
+  // =====================================================
 
-    loadProjects();
+  useEffect(() => {
+    let mounted = true;
 
-    loadTeamCount();
+    let projectChannel = null;
+    let teamChannel = null;
+    let taskChannel = null;
 
-    // =========================================
-    // PROJECT REALTIME
-    // =========================================
+    // ===================================================
+    // SUPABASE REALTIME
+    // ===================================================
 
-    const setupProjectRealtime = async () => {
+    const setupRealtime = async () => {
       try {
         const {
           data: { user },
@@ -313,203 +377,191 @@ function Dashboard() {
           return;
         }
 
-        // -----------------------------------------
-        // CREATE PROJECT CHANNEL
-        // -----------------------------------------
+        // -----------------------------------------------
+        // PROJECT REALTIME
+        // -----------------------------------------------
 
-        projectChannel = supabase
-          .channel(
-            `dashboard-projects-${user.id}`
-          )
-          .on(
-            "postgres_changes",
-            {
-              event: "*",
-
-              schema: "public",
-
-              table: "projects",
-
-              filter: `owner=eq.${user.id}`,
-            },
-            () => {
-              // -------------------------------------
-              // RELOAD PROJECT DATA WHEN DB CHANGES
-              // -------------------------------------
-
-              if (mounted) {
-                loadProjects();
+        projectChannel =
+          supabase
+            .channel(
+              `dashboard-projects-${user.id}`
+            )
+            .on(
+              "postgres_changes",
+              {
+                event: "*",
+                schema: "public",
+                table: "projects",
+                filter:
+                  `owner=eq.${user.id}`,
+              },
+              () => {
+                if (mounted) {
+                  loadAnalytics();
+                }
               }
-            }
-          );
-
-        // -----------------------------------------
-        // SUBSCRIBE AFTER .on()
-        // -----------------------------------------
+            );
 
         await projectChannel.subscribe();
-      } catch (error) {
-        console.error(
-          "Dashboard project realtime error:",
-          error
-        );
-      }
-    };
 
-    // =========================================
-    // TEAM REALTIME
-    // =========================================
+        // -----------------------------------------------
+        // TEAM REALTIME
+        // -----------------------------------------------
 
-    const setupTeamRealtime = async () => {
-      try {
-        const {
-          data: { user },
-          error,
-        } = await supabase.auth.getUser();
-
-        if (error) {
-          throw error;
-        }
-
-        if (!user || !mounted) {
-          return;
-        }
-
-        // -----------------------------------------
-        // CREATE TEAM CHANNEL
-        // -----------------------------------------
-
-        teamChannel = supabase
-          .channel(
-            `dashboard-team-count-${user.id}`
-          )
-          .on(
-            "postgres_changes",
-            {
-              event: "*",
-
-              schema: "public",
-
-              table: "team_members",
-
-              filter: `user_id=eq.${user.id}`,
-            },
-            () => {
-              // -------------------------------------
-              // RELOAD TEAM COUNT
-              // -------------------------------------
-
-              if (mounted) {
-                loadTeamCount();
+        teamChannel =
+          supabase
+            .channel(
+              `dashboard-team-count-${user.id}`
+            )
+            .on(
+              "postgres_changes",
+              {
+                event: "*",
+                schema: "public",
+                table: "team_members",
+                filter:
+                  `user_id=eq.${user.id}`,
+              },
+              () => {
+                if (mounted) {
+                  loadTeamCount();
+                  loadAnalytics();
+                }
               }
-            }
-          );
-
-        // -----------------------------------------
-        // SUBSCRIBE AFTER .on()
-        // -----------------------------------------
+            );
 
         await teamChannel.subscribe();
+
+        // -----------------------------------------------
+        // TASK REALTIME
+        // -----------------------------------------------
+
+        taskChannel =
+          supabase
+            .channel(
+              `dashboard-tasks-${user.id}`
+            )
+            .on(
+              "postgres_changes",
+              {
+                event: "*",
+                schema: "public",
+                table: "tasks",
+                filter:
+                  `user_id=eq.${user.id}`,
+              },
+              () => {
+                if (mounted) {
+                  loadAnalytics();
+                }
+              }
+            );
+
+        await taskChannel.subscribe();
+
       } catch (error) {
         console.error(
-          "Dashboard team realtime error:",
+          "Dashboard realtime error:",
           error
         );
       }
     };
 
-    // =========================================
-    // START REALTIME
-    // =========================================
+    // ===================================================
+    // INITIAL DATA
+    // ===================================================
 
-    setupProjectRealtime();
+    loadAnalytics();
+    loadTeamCount();
+    setupRealtime();
 
-    setupTeamRealtime();
+    // ===================================================
+    // SOCKET.IO TASK EVENTS
+    // ===================================================
 
-    // =========================================
+    const handleTaskCreated = () => {
+      if (mounted) {
+        loadAnalytics();
+      }
+    };
+
+    const handleTaskUpdated = () => {
+      if (mounted) {
+        loadAnalytics();
+      }
+    };
+
+    const handleTaskDeleted = () => {
+      if (mounted) {
+        loadAnalytics();
+      }
+    };
+
+    socket.on(
+      "taskCreated",
+      handleTaskCreated
+    );
+
+    socket.on(
+      "taskUpdated",
+      handleTaskUpdated
+    );
+
+    socket.on(
+      "taskDeleted",
+      handleTaskDeleted
+    );
+
+    // ===================================================
     // CLEANUP
-    // =========================================
+    // ===================================================
 
     return () => {
       mounted = false;
 
-      // -----------------------------------------
-      // REMOVE PROJECT CHANNEL
-      // -----------------------------------------
+      socket.off(
+        "taskCreated",
+        handleTaskCreated
+      );
+
+      socket.off(
+        "taskUpdated",
+        handleTaskUpdated
+      );
+
+      socket.off(
+        "taskDeleted",
+        handleTaskDeleted
+      );
 
       if (projectChannel) {
         supabase.removeChannel(
           projectChannel
         );
-
-        projectChannel = null;
       }
-
-      // -----------------------------------------
-      // REMOVE TEAM CHANNEL
-      // -----------------------------------------
 
       if (teamChannel) {
         supabase.removeChannel(
           teamChannel
         );
+      }
 
-        teamChannel = null;
+      if (taskChannel) {
+        supabase.removeChannel(
+          taskChannel
+        );
       }
     };
-  }, []);
+  }, [
+    loadAnalytics,
+    loadTeamCount,
+  ]);
 
-  // =========================================
-  // TODAY TASKS
-  // =========================================
-
-  /*
-    NOTE:
-    Tasks are still demo data at this stage.
-
-    We will connect the Tasks module to the
-    backend/database in the next phase.
-  */
-
-  const todayTasks = [
-    {
-      id: 1,
-      title: "Finish Dashboard UI",
-      priority: "High",
-      completed: false,
-    },
-
-    {
-      id: 2,
-      title: "Review Sprint Board",
-      priority: "Medium",
-      completed: true,
-    },
-
-    {
-      id: 3,
-      title: "Deploy Backend",
-      priority: "High",
-      completed: false,
-    },
-
-    {
-      id: 4,
-      title: "Update documentation",
-      priority: "Low",
-      completed: false,
-    },
-  ];
-
-  // =========================================
+  // =====================================================
   // DASHBOARD CARDS
-  // =========================================
+  // =====================================================
 
   const dashboardCards = [
-    // =========================================
-    // PROJECTS
-    // =========================================
-
     {
       title: "Projects",
 
@@ -519,14 +571,11 @@ function Dashboard() {
 
       color: "#2563eb",
 
-      subtitle: `${stats.activeProjects} active`,
+      subtitle:
+        `${stats.activeProjects} active`,
 
       path: "/projects",
     },
-
-    // =========================================
-    // TASKS
-    // =========================================
 
     {
       title: "Tasks",
@@ -537,14 +586,11 @@ function Dashboard() {
 
       color: "#10b981",
 
-      subtitle: `${stats.pendingTasks} pending`,
+      subtitle:
+        `${stats.completedTasks} completed`,
 
       path: "/tasks",
     },
-
-    // =========================================
-    // TEAM
-    // =========================================
 
     {
       title: "Team",
@@ -563,106 +609,216 @@ function Dashboard() {
       path: "/team",
     },
 
-    // =========================================
-    // AI SCORE
-    // =========================================
-
     {
       title: "AI Score",
 
-      value: `${stats.aiScore}%`,
+      value:
+        `${stats.productivityScore}%`,
 
       icon: <FaRobot />,
 
       color: "#8b5cf6",
 
-      subtitle: "Productivity rating",
+      subtitle:
+        "Productivity rating",
 
       path: "/ai-assistant",
     },
   ];
 
-  // =========================================
+  // =====================================================
   // RENDER
-  // =========================================
+  // =====================================================
 
   return (
     <div className="dashboard">
 
-      {/* ===================================== */}
-      {/* TOP STAT CARDS */}
-      {/* ===================================== */}
+      {/* ================================================= */}
+      {/* TOP CARDS */}
+      {/* ================================================= */}
 
       <DashboardCards
         cards={dashboardCards}
       />
 
-      {/* ===================================== */}
+      {/* ================================================= */}
+      {/* ANALYTICS SUMMARY */}
+      {/* ================================================= */}
+
+      <div className="dashboard-analytics-summary">
+
+        <div className="analytics-item">
+          <span>Total Tasks</span>
+
+          <strong>
+            {loading
+              ? "..."
+              : stats.totalTasks}
+          </strong>
+        </div>
+
+        <div className="analytics-item">
+          <span>Completed</span>
+
+          <strong>
+            {loading
+              ? "..."
+              : stats.completedTasks}
+          </strong>
+        </div>
+
+        <div className="analytics-item">
+          <span>In Progress</span>
+
+          <strong>
+            {loading
+              ? "..."
+              : stats.inProgressTasks}
+          </strong>
+        </div>
+
+        <div className="analytics-item">
+          <span>Pending</span>
+
+          <strong>
+            {loading
+              ? "..."
+              : stats.pendingTasks}
+          </strong>
+        </div>
+
+        <div className="analytics-item">
+          <span>Overdue</span>
+
+          <strong>
+            {loading
+              ? "..."
+              : stats.overdueTasks}
+          </strong>
+        </div>
+
+        <div className="analytics-item">
+          <span>Completion Rate</span>
+
+          <strong>
+            {loading
+              ? "..."
+              : `${stats.completionRate}%`}
+          </strong>
+        </div>
+
+      </div>
+
+      {/* ================================================= */}
       {/* MAIN DASHBOARD */}
-      {/* ===================================== */}
+      {/* ================================================= */}
 
       <div className="dashboard-main">
 
-        {/* =================================== */}
+        {/* =============================================== */}
         {/* LEFT SIDE */}
-        {/* =================================== */}
+        {/* =============================================== */}
 
         <div className="dashboard-left">
 
-          {/* ================================= */}
-          {/* PROJECT CHARTS */}
-          {/* ================================= */}
+          {/* --------------------------------------------- */}
+          {/* PROJECT PRODUCTIVITY */}
+          {/* --------------------------------------------- */}
 
           <DashboardCharts
             projects={recentProjects}
-            loading={projectsLoading}
           />
 
-          {/* ================================= */}
-          {/* TODAY TASKS */}
-          {/* ================================= */}
+          {/* --------------------------------------------- */}
+          {/* TASK ANALYTICS */}
+          {/* --------------------------------------------- */}
+
+          <TaskAnalytics
+            taskTrend={taskTrend}
+            priorityDistribution={
+              priorityDistribution
+            }
+            overdueTaskList={
+              overdueTaskList
+            }
+          />
+
+          {/* --------------------------------------------- */}
+          {/* TEAM PERFORMANCE */}
+          {/* --------------------------------------------- */}
+
+          <TeamPerformance
+            members={teamPerformance}
+          />
+
+          {/* --------------------------------------------- */}
+          {/* TODAY'S TASKS */}
+          {/* --------------------------------------------- */}
 
           <DashboardTasks
             tasks={todayTasks}
           />
 
-          {/* ================================= */}
+          {/* --------------------------------------------- */}
           {/* ACTIVITY */}
-          {/* ================================= */}
+          {/* --------------------------------------------- */}
 
           <DashboardActivity />
 
         </div>
 
-        {/* =================================== */}
+        {/* =============================================== */}
         {/* RIGHT SIDE */}
-        {/* =================================== */}
+        {/* =============================================== */}
 
         <div className="dashboard-right">
 
-          {/* ================================= */}
-          {/* INSIGHTS */}
-          {/* ================================= */}
+          {/* --------------------------------------------- */}
+          {/* PRODUCTIVITY SCORE */}
+          {/* --------------------------------------------- */}
 
-          <DashboardInsights />
+          <ProductivityScore
+            score={
+              stats.productivityScore
+            }
+          />
 
-          {/* ================================= */}
+          {/* --------------------------------------------- */}
+          {/* DASHBOARD INSIGHTS */}
+          {/* --------------------------------------------- */}
+
+          <DashboardInsights
+            stats={stats}
+          />
+
+          {/* --------------------------------------------- */}
           {/* QUICK ACTIONS */}
-          {/* ================================= */}
+          {/* --------------------------------------------- */}
 
           <DashboardQuickActions />
 
-          {/* ================================= */}
+          {/* --------------------------------------------- */}
           {/* CALENDAR */}
-          {/* ================================= */}
+          {/* --------------------------------------------- */}
 
           <DashboardCalendar />
 
-          {/* ================================= */}
-          {/* REAL TEAM DATA */}
-          {/* ================================= */}
+          {/* --------------------------------------------- */}
+          {/* TEAM */}
+          {/* --------------------------------------------- */}
 
           <DashboardTeam />
+
+          {/* --------------------------------------------- */}
+          {/* AI COMMAND CENTER */}
+          {/* --------------------------------------------- */}
+
+          <AICommandCenter
+            project={recentProjects[0]}
+            onTasksUpdated={() => {
+              loadAnalytics();
+            }}
+          />
 
         </div>
 
