@@ -1,5 +1,6 @@
 import supabase from "../config/supabase.js";
 import { getIO } from "../config/socket.js";
+import { createActivityLog } from "../services/activityLogService.js";
 
 // ============================================
 // GET ALL TASKS
@@ -36,7 +37,6 @@ export const getTasks = async (req, res) => {
     });
   }
 };
-
 
 // ============================================
 // GET SINGLE TASK
@@ -80,7 +80,6 @@ export const getTaskById = async (req, res) => {
     });
   }
 };
-
 
 // ============================================
 // CREATE TASK
@@ -159,8 +158,34 @@ export const createTask = async (req, res) => {
       });
     }
 
-    // Socket.IO realtime event
-    getIO().emit("taskCreated", data);
+    // ============================================
+    // ACTIVITY LOG - TASK CREATED
+    // ============================================
+    await createActivityLog({
+      userId,
+      projectId: data.project_id,
+      action: "created",
+      entityType: "task",
+      entityId: data.id,
+      description: `Created task "${data.title}"`,
+      metadata: {
+        priority: data.priority,
+        status: data.status,
+        assignee: data.assignee || "",
+      },
+    });
+
+    // ============================================
+    // SOCKET.IO REALTIME EVENT
+    // ============================================
+    try {
+      getIO().emit("taskCreated", data);
+    } catch (socketError) {
+      console.warn(
+        "Task socket event skipped:",
+        socketError.message
+      );
+    }
 
     return res.status(201).json({
       success: true,
@@ -176,7 +201,6 @@ export const createTask = async (req, res) => {
     });
   }
 };
-
 
 // ============================================
 // UPDATE TASK
@@ -264,7 +288,35 @@ export const updateTask = async (req, res) => {
       });
     }
 
-    getIO().emit("taskUpdated", data);
+    // ============================================
+    // ACTIVITY LOG - TASK UPDATED
+    // ============================================
+    await createActivityLog({
+      userId,
+      projectId: data.project_id,
+      action: "updated",
+      entityType: "task",
+      entityId: data.id,
+      description: `Updated task "${data.title}"`,
+      metadata: {
+        updatedFields: Object.keys(updateData),
+        priority: data.priority,
+        status: data.status,
+        assignee: data.assignee || "",
+      },
+    });
+
+    // ============================================
+    // SOCKET.IO REALTIME EVENT
+    // ============================================
+    try {
+      getIO().emit("taskUpdated", data);
+    } catch (socketError) {
+      console.warn(
+        "Task socket event skipped:",
+        socketError.message
+      );
+    }
 
     return res.status(200).json({
       success: true,
@@ -280,7 +332,6 @@ export const updateTask = async (req, res) => {
     });
   }
 };
-
 
 // ============================================
 // UPDATE TASK STATUS
@@ -318,7 +369,33 @@ export const updateStatus = async (req, res) => {
       });
     }
 
-    getIO().emit("taskUpdated", data);
+    // ============================================
+    // ACTIVITY LOG - STATUS CHANGED
+    // ============================================
+    await createActivityLog({
+      userId,
+      projectId: data.project_id,
+      action: "status_changed",
+      entityType: "task",
+      entityId: data.id,
+      description: `Changed task "${data.title}" status to ${data.status}`,
+      metadata: {
+        status: data.status,
+        completed: data.completed,
+      },
+    });
+
+    // ============================================
+    // SOCKET.IO REALTIME EVENT
+    // ============================================
+    try {
+      getIO().emit("taskUpdated", data);
+    } catch (socketError) {
+      console.warn(
+        "Task status socket event skipped:",
+        socketError.message
+      );
+    }
 
     return res.status(200).json({
       success: true,
@@ -335,7 +412,6 @@ export const updateStatus = async (req, res) => {
   }
 };
 
-
 // ============================================
 // DELETE TASK
 // ============================================
@@ -351,27 +427,73 @@ export const deleteTask = async (req, res) => {
       });
     }
 
-    const { data, error } = await supabase
+    // ============================================
+    // GET TASK BEFORE DELETE
+    // ============================================
+    const { data: task, error: taskError } = await supabase
       .from("tasks")
-      .delete()
+      .select("*")
       .eq("id", id)
       .eq("user_id", userId)
-      .select()
       .single();
 
-    if (error || !data) {
+    if (taskError || !task) {
       return res.status(404).json({
         success: false,
         message: "Task not found.",
       });
     }
 
-    getIO().emit("taskDeleted", data.id);
+    // ============================================
+    // DELETE TASK
+    // ============================================
+    const { error } = await supabase
+      .from("tasks")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", userId);
+
+    if (error) {
+      console.error("Delete Task Error:", error);
+
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+
+    // ============================================
+    // ACTIVITY LOG - TASK DELETED
+    // ============================================
+    await createActivityLog({
+      userId,
+      projectId: task.project_id,
+      action: "deleted",
+      entityType: "task",
+      entityId: task.id,
+      description: `Deleted task "${task.title}"`,
+      metadata: {
+        priority: task.priority,
+        status: task.status,
+      },
+    });
+
+    // ============================================
+    // SOCKET.IO REALTIME EVENT
+    // ============================================
+    try {
+      getIO().emit("taskDeleted", task.id);
+    } catch (socketError) {
+      console.warn(
+        "Task delete socket event skipped:",
+        socketError.message
+      );
+    }
 
     return res.status(200).json({
       success: true,
       message: "Task deleted successfully.",
-      taskId: data.id,
+      taskId: task.id,
     });
   } catch (error) {
     console.error("Delete Task Error:", error);
