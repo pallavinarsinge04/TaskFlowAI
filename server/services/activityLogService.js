@@ -12,10 +12,7 @@ export const createActivityLog = async ({
 }) => {
   try {
     if (!userId || !action) {
-      console.warn(
-        "Activity log skipped: userId or action missing."
-      );
-
+      console.warn("Activity log skipped: userId or action missing.");
       return null;
     }
 
@@ -34,25 +31,17 @@ export const createActivityLog = async ({
       .single();
 
     if (error) {
-      console.error(
-        "Create activity log error:",
-        error
-      );
-
+      console.error("Create activity log error:", error);
       return null;
     }
 
-    console.log(
-      "✅ Activity log created:",
-      data
-    );
+    console.log("✅ Activity log created:", data);
 
-    // Real-time activity event
+    // Realtime notification
     try {
-      getIO().emit(
-        "activityCreated",
-        data
-      );
+      const io = getIO();
+
+      io.emit("activityCreated", data);
     } catch (socketError) {
       console.warn(
         "Activity socket event skipped:",
@@ -62,11 +51,7 @@ export const createActivityLog = async ({
 
     return data;
   } catch (error) {
-    console.error(
-      "Activity log service error:",
-      error
-    );
-
+    console.error("Activity log service error:", error);
     return null;
   }
 };
