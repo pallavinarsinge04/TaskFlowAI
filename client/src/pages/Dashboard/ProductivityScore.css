@@ -1,0 +1,162 @@
+.productivity-score-card {
+  background: var(--card-bg, #ffffff);
+
+  border: 1px solid
+    var(--border-color, #e5e7eb);
+
+  border-radius: 16px;
+
+  padding: 22px;
+
+  margin-bottom: 20px;
+
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.04);
+}
+
+.productivity-score-header h2 {
+  margin: 0;
+
+  font-size: 20px;
+
+  color:
+    var(--text-primary, #111827);
+}
+
+.productivity-score-header p {
+  margin: 5px 0 0;
+
+  font-size: 13px;
+
+  color:
+    var(--text-secondary, #6b7280);
+}
+
+/* =====================================================
+   CONTENT
+   ===================================================== */
+
+.productivity-score-content {
+  display: flex;
+
+  align-items: center;
+
+  gap: 25px;
+
+  margin-top: 25px;
+}
+
+/* =====================================================
+   SCORE RING
+   ===================================================== */
+
+.productivity-score-ring {
+  width: 130px;
+
+  height: 130px;
+
+  border-radius: 50%;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background:
+    conic-gradient(
+      #8b5cf6 var(--score),
+      #e5e7eb var(--score)
+    );
+
+  flex-shrink: 0;
+
+  position: relative;
+}
+
+.productivity-score-inner {
+  width: 102px;
+
+  height: 102px;
+
+  border-radius: 50%;
+
+  background:
+    var(--card-bg, #ffffff);
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-direction: column;
+}
+
+.productivity-score-inner strong {
+  font-size: 28px;
+
+  font-weight: 800;
+
+  color:
+    var(--text-primary, #111827);
+}
+
+.productivity-score-inner span {
+  font-size: 11px;
+
+  color:
+    var(--text-secondary, #6b7280);
+}
+
+/* =====================================================
+   DETAILS
+   ===================================================== */
+
+.productivity-score-details {
+  flex: 1;
+}
+
+.productivity-score-status {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 16px;
+
+  color:
+    var(--text-primary, #111827);
+}
+
+.productivity-score-status svg {
+  color: #8b5cf6;
+}
+
+.productivity-score-details p {
+  margin: 10px 0 0;
+
+  font-size: 13px;
+
+  line-height: 1.6;
+
+  color:
+    var(--text-secondary, #6b7280);
+}
+
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
+@media (max-width: 600px) {
+  .productivity-score-content {
+    flex-direction: column;
+
+    text-align: center;
+  }
+
+  .productivity-score-status {
+    justify-content: center;
+  }
+}
