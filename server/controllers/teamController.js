@@ -1,6 +1,7 @@
 import supabase from "../config/supabase.js";
 import { getIO } from "../config/socket.js";
 import { createNotification } from "../services/notificationService.js";
+import { createActivityLog } from "../services/activityLogService.js";
 
 /*
 ========================================================
@@ -53,7 +54,6 @@ export const getProjectMembers = async (req, res) => {
   }
 };
 
-
 /*
 ========================================================
 ADD TEAM MEMBER
@@ -63,6 +63,7 @@ POST /api/team/project/:projectId
 export const addTeamMember = async (req, res) => {
   try {
     const { projectId } = req.params;
+    const currentUserId = req.user.id;
 
     const {
       userId,
@@ -216,6 +217,27 @@ export const addTeamMember = async (req, res) => {
 
     /*
     ----------------------------------------------------
+    CREATE ACTIVITY LOG
+    ----------------------------------------------------
+    */
+
+    await createActivityLog({
+      userId: currentUserId,
+      projectId,
+      action: "member_added",
+      entityType: "team_member",
+      entityId: data.id,
+      description: `Added "${finalName}" to the project as ${role}.`,
+      metadata: {
+        memberUserId: userId,
+        memberName: finalName,
+        role,
+        status,
+      },
+    });
+
+    /*
+    ----------------------------------------------------
     REALTIME TEAM EVENT
     ----------------------------------------------------
     */
@@ -239,8 +261,8 @@ export const addTeamMember = async (req, res) => {
     */
 
     await createNotification({
-      userId: userId,
-      projectId: projectId,
+      userId,
+      projectId,
       type: "team_member_added",
       title: "Added to a project",
       message: `You have been added to a project as ${role}.`,
@@ -272,7 +294,6 @@ export const addTeamMember = async (req, res) => {
   }
 };
 
-
 /*
 ========================================================
 UPDATE TEAM MEMBER
@@ -285,6 +306,7 @@ export const updateTeamMember = async (
 ) => {
   try {
     const { id } = req.params;
+    const currentUserId = req.user.id;
 
     const {
       role,
@@ -435,7 +457,7 @@ export const updateTeamMember = async (
       .select()
       .single();
 
-    if (error) {
+    if (error || !data) {
       console.error(
         "Update team member error:",
         error
@@ -443,7 +465,9 @@ export const updateTeamMember = async (
 
       return res.status(500).json({
         success: false,
-        message: error.message,
+        message:
+          error?.message ||
+          "Failed to update team member.",
       });
     }
 
@@ -484,6 +508,62 @@ export const updateTeamMember = async (
         message: `Your team status has been changed to ${updateData.status}.`,
       });
     }
+
+    /*
+    ----------------------------------------------------
+    CREATE ACTIVITY LOG
+    ----------------------------------------------------
+    */
+
+    const activityChanges = {};
+
+    if (
+      updateData.role !== undefined &&
+      updateData.role !== existingMember.role
+    ) {
+      activityChanges.oldRole =
+        existingMember.role;
+      activityChanges.newRole =
+        updateData.role;
+    }
+
+    if (
+      updateData.status !== undefined &&
+      updateData.status !== existingMember.status
+    ) {
+      activityChanges.oldStatus =
+        existingMember.status;
+      activityChanges.newStatus =
+        updateData.status;
+    }
+
+    if (
+      updateData.name !== undefined &&
+      updateData.name !== existingMember.name
+    ) {
+      activityChanges.oldName =
+        existingMember.name;
+      activityChanges.newName =
+        updateData.name;
+    }
+
+    if (updateData.profile_image !== undefined) {
+      activityChanges.profileImageUpdated = true;
+    }
+
+    await createActivityLog({
+      userId: currentUserId,
+      projectId: existingMember.project_id,
+      action: "member_updated",
+      entityType: "team_member",
+      entityId: data.id,
+      description: `Updated team member "${data.name || existingMember.name}".`,
+      metadata: {
+        ...activityChanges,
+        updatedFields: Object.keys(updateData),
+        memberUserId: existingMember.user_id,
+      },
+    });
 
     /*
     ----------------------------------------------------
@@ -529,7 +609,6 @@ export const updateTeamMember = async (
   }
 };
 
-
 /*
 ========================================================
 DELETE TEAM MEMBER
@@ -542,6 +621,7 @@ export const deleteTeamMember = async (
 ) => {
   try {
     const { id } = req.params;
+    const currentUserId = req.user.id;
 
     /*
     ----------------------------------------------------
@@ -605,17 +685,40 @@ export const deleteTeamMember = async (
 
     /*
     ----------------------------------------------------
+    CREATE ACTIVITY LOG
+    ----------------------------------------------------
+    */
+
+    await createActivityLog({
+      userId: currentUserId,
+      projectId: member.project_id,
+      action: "member_removed",
+      entityType: "team_member",
+      entityId: member.id,
+      description: `Removed team member "${member.name || "Team Member"}" from the project.`,
+      metadata: {
+        memberUserId: member.user_id,
+        memberName: member.name || "",
+        previousRole: member.role,
+        previousStatus: member.status,
+      },
+    });
+
+    /*
+    ----------------------------------------------------
     REMOVAL NOTIFICATION
     ----------------------------------------------------
     */
 
     await createNotification({
-  userId,
-  projectId,
-  type: "team_member_added",
-  title: "Added to a project",
-  message: `You have been added to a project as ${role}.`,
-});
+      userId: member.user_id,
+      projectId: member.project_id,
+      type: "team_member_removed",
+      title: "Removed from project",
+      message:
+        "You have been removed from the project.",
+    });
+
     /*
     ----------------------------------------------------
     REALTIME TEAM EVENT
