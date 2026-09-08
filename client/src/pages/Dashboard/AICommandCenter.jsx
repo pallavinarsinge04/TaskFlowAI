@@ -7,6 +7,7 @@ import AITaskPrioritizer from "./AITaskPrioritizer";
 import AIDailyPlanner from "./AIDailyPlanner";
 import AIChatAssistant from "./AIChatAssistant";
 
+
 const AICommandCenter = ({ project, onTasksUpdated }) => {
   const [activeTool, setActiveTool] = useState("overview");
 
@@ -16,6 +17,12 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
       icon: "🧠",
       title: "Project Insights",
       description: "Analyze project health, risks and recommendations.",
+    },
+    {
+      id: "command",
+      icon: "⚡",
+      title: "AI Task Command",
+      description: "Create and manage tasks using natural language.",
     },
     {
       id: "generate",
@@ -48,7 +55,9 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
       <section className="ai-command-center">
         <div className="ai-empty-state">
           <div className="ai-empty-icon">🤖</div>
+
           <h2>AI Command Center</h2>
+
           <p>
             Create a project first to unlock project-specific AI features.
           </p>
@@ -57,16 +66,30 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
     );
   }
 
+  const handleTasksUpdated = () => {
+    if (typeof onTasksUpdated === "function") {
+      onTasksUpdated();
+    }
+  };
+
   const renderTool = () => {
     switch (activeTool) {
       case "overview":
         return <AIAssistant project={project} />;
 
+      case "command":
+        return (
+          <AITaskCommand
+            project={project}
+            onTaskCreated={handleTasksUpdated}
+          />
+        );
+
       case "generate":
         return (
           <AITaskGenerator
             project={project}
-            onTasksCreated={onTasksUpdated}
+            onTasksCreated={handleTasksUpdated}
           />
         );
 
@@ -74,7 +97,7 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
         return (
           <AITaskPrioritizer
             project={project}
-            onTasksUpdated={onTasksUpdated}
+            onTasksUpdated={handleTasksUpdated}
           />
         );
 
@@ -82,7 +105,7 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
         return <AIDailyPlanner project={project} />;
 
       case "chat":
-        return <AIChatAssistant />;
+        return <AIChatAssistant project={project} />;
 
       default:
         return <AIAssistant project={project} />;
@@ -127,6 +150,7 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
 
             <div className="ai-tool-content">
               <h3>{tool.title}</h3>
+
               <p>{tool.description}</p>
             </div>
 
