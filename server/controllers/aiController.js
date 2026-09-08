@@ -1905,3 +1905,503 @@ Return a natural-language answer only.
     });
   }
 };
+export const executeTaskCommand = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { message, projectId, confirmed = false } = req.body;
+
+    if (!message?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Command is required.",
+      });
+    }
+
+    if (!projectId) {
+      return res.status(400).json({
+        success: false,
+        message: "Project ID is required.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 1. Verify project ownership
+    // --------------------------------------------------
+
+    const { data: project, error: projectError } = await supabase
+      .from("projects")
+      .select("id, name")
+      .eq("id", projectId)
+      .eq("owner", userId)
+      .single();
+
+    if (projectError || !project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or access denied.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 2. Get existing tasks
+    // --------------------------------------------------
+
+    const { data: existingTasks, error: tasksError } = await supabase
+      .from("tasks")
+      .select(
+        "id, project_id, title, description, priority, status, due_date, completed, assignee"
+      )
+      .eq("project_id", projectId)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (tasksError) {
+      console.error("AI command task fetch error:", tasksError);
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to load project tasks.",
+      });
+    }
+
+    const taskContext = (existingTasks || []).map((task) => ({
+      id: task.id,
+      title: task.title,
+      description: task.description || "",
+      priority: task.priority || "Medium",
+      status: task.status || "Pending",
+      dueDate: task.due_date || null,
+      completed: task.completed || false,
+      assignee: task.assignee || "",
+    }));
+
+    // --------------------------------------------------
+    // 3. Ask Gemini to understand command
+    // --------------------------------------------------
+
+    const model = getGeminiModel();
+
+    const prompt = `
+You are an AI project management assistant.
+
+PROJECT:
+${project.name}
+
+USER COMMAND:
+${message}
+
+EXISTING TASKS:
+${JSON.stringify(taskContext, null, 2)}
+
+Convert the user's command into exactly ONE task action.
+
+Return ONLY valid JSON:
+
+{
+  "action": "create_task | update_task | delete_task | unknown",
+  "taskId": null,
+  "title": "",
+  "description": "",
+  "priority": "High | Medium | Low",
+  "status": "Pending | In Progress | Completed",
+  "dueDate": null
+}
+
+RULES:
+
+1. create_task:
+   - Use when the user wants to create a new task.
+   - title is required.
+   - taskId must be null.
+
+2. update_task:
+   - Use when the user wants to modify an existing task.
+   - Match the user's requested task against EXISTING TASKS.
+   - taskId MUST be the ID of an existing task.
+   - Never invent a task ID.
+   - Only provide fields that need changing.
+
+3. delete_task:
+   - Use ONLY when the user explicitly asks to delete/remove a task.
+   - Match the requested task against EXISTING TASKS.
+   - taskId MUST be an existing task ID.
+   - Never invent a task ID.
+
+4. unknown:
+   - Use when the command is unclear.
+   - Use when an existing task cannot be confidently identified.
+
+5. Priority must be exactly:
+   High
+   Medium
+   Low
+
+6. Status must be exactly:
+   Pending
+   In Progress
+   Completed
+
+7. dueDate must use:
+   YYYY-MM-DD
+   or null.
+
+8. Do not invent tasks or task IDs.
+`;
+
+    const result = await model.generateContent(prompt);
+
+    const responseText = result.response.text();
+
+    const cleanedResponse = responseText
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
+
+    let command;
+
+    try {
+      command = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error("AI command JSON parse error:", parseError);
+      console.error("Gemini response:", responseText);
+
+      return res.status(500).json({
+        success: false,
+        message: "AI returned an invalid command.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 4. Validate action
+    // --------------------------------------------------
+
+    const allowedActions = [
+      "create_task",
+      "update_task",
+      "delete_task",
+    ];
+
+    if (!allowedActions.includes(command.action)) {
+      return res.status(400).json({
+        success: false,
+        action: "unknown",
+        message:
+          "I could not understand the task command. Please be more specific.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 5. CREATE TASK
+    // --------------------------------------------------
+
+    if (command.action === "create_task") {
+      if (!command.title?.trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Task title is required.",
+        });
+      }
+
+      const priority = ["High", "Medium", "Low"].includes(command.priority)
+        ? command.priority
+        : "Medium";
+
+      const status = ["Pending", "In Progress", "Completed"].includes(
+        command.status
+      )
+        ? command.status
+        : "Pending";
+
+      const completed = status === "Completed";
+
+      const { data: task, error: createError } = await supabase
+        .from("tasks")
+        .insert({
+          project_id: project.id,
+          user_id: userId,
+          title: command.title.trim(),
+          description: command.description?.trim() || "",
+          priority,
+          status,
+          completed,
+          assignee: "",
+          due_date: command.dueDate || null,
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error("AI create task error:", createError);
+
+        return res.status(500).json({
+          success: false,
+          message: "Failed to create task.",
+        });
+      }
+
+      // Activity log
+      try {
+        await createActivityLog({
+          userId,
+          projectId: project.id,
+          action: "created",
+          entityType: "task",
+          entityId: task.id,
+          description: `AI created task "${task.title}"`,
+          metadata: {
+            source: "AI",
+            priority: task.priority,
+            status: task.status,
+          },
+        });
+      } catch (activityError) {
+        console.warn(
+          "AI task activity log skipped:",
+          activityError.message
+        );
+      }
+
+      // Socket event
+      try {
+        getIO().emit("taskCreated", task);
+      } catch (socketError) {
+        console.warn(
+          "AI task socket event skipped:",
+          socketError.message
+        );
+      }
+
+      return res.status(201).json({
+        success: true,
+        action: "create_task",
+        message: `Task "${task.title}" created successfully.`,
+        task,
+      });
+    }
+
+    // --------------------------------------------------
+    // 6. UPDATE TASK
+    // --------------------------------------------------
+
+    if (command.action === "update_task") {
+      if (!command.taskId) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "I could not identify which task you want to update.",
+        });
+      }
+
+      const existingTask = taskContext.find(
+        (task) => task.id === command.taskId
+      );
+
+      if (!existingTask) {
+        return res.status(404).json({
+          success: false,
+          message: "The requested task was not found.",
+        });
+      }
+
+      const updateData = {};
+
+      if (command.title?.trim()) {
+        updateData.title = command.title.trim();
+      }
+
+      if (typeof command.description === "string") {
+        updateData.description = command.description.trim();
+      }
+
+      if (
+        ["High", "Medium", "Low"].includes(command.priority)
+      ) {
+        updateData.priority = command.priority;
+      }
+
+      if (
+        ["Pending", "In Progress", "Completed"].includes(
+          command.status
+        )
+      ) {
+        updateData.status = command.status;
+        updateData.completed = command.status === "Completed";
+      }
+
+      if (command.dueDate !== undefined) {
+        updateData.due_date = command.dueDate || null;
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No valid task changes were detected.",
+        });
+      }
+
+      const { data: updatedTask, error: updateError } = await supabase
+        .from("tasks")
+        .update(updateData)
+        .eq("id", existingTask.id)
+        .eq("project_id", project.id)
+        .eq("user_id", userId)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error("AI update task error:", updateError);
+
+        return res.status(500).json({
+          success: false,
+          message: "Failed to update task.",
+        });
+      }
+
+      // Activity log
+      try {
+        await createActivityLog({
+          userId,
+          projectId: project.id,
+          action: "updated",
+          entityType: "task",
+          entityId: updatedTask.id,
+          description: `AI updated task "${updatedTask.title}"`,
+          metadata: {
+            source: "AI",
+            updatedFields: Object.keys(updateData),
+          },
+        });
+      } catch (activityError) {
+        console.warn(
+          "AI update activity log skipped:",
+          activityError.message
+        );
+      }
+
+      // Socket event
+      try {
+        getIO().emit("taskUpdated", updatedTask);
+      } catch (socketError) {
+        console.warn(
+          "AI task update socket event skipped:",
+          socketError.message
+        );
+      }
+
+      return res.status(200).json({
+        success: true,
+        action: "update_task",
+        message: `Task "${updatedTask.title}" updated successfully.`,
+        task: updatedTask,
+      });
+    }
+
+    // --------------------------------------------------
+    // 7. DELETE TASK
+    // --------------------------------------------------
+
+    if (command.action === "delete_task") {
+      if (!command.taskId) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "I could not identify which task you want to delete.",
+        });
+      }
+
+      const existingTask = taskContext.find(
+        (task) => task.id === command.taskId
+      );
+
+      if (!existingTask) {
+        return res.status(404).json({
+          success: false,
+          message: "The requested task was not found.",
+        });
+      }
+
+      // First request confirmation
+      if (!confirmed) {
+        return res.status(200).json({
+          success: true,
+          requiresConfirmation: true,
+          action: "delete_task",
+          task: existingTask,
+          message: `Are you sure you want to delete "${existingTask.title}"?`,
+        });
+      }
+
+      // Actual deletion
+      const { error: deleteError } = await supabase
+        .from("tasks")
+        .delete()
+        .eq("id", existingTask.id)
+        .eq("project_id", project.id)
+        .eq("user_id", userId);
+
+      if (deleteError) {
+        console.error("AI delete task error:", deleteError);
+
+        return res.status(500).json({
+          success: false,
+          message: "Failed to delete task.",
+        });
+      }
+
+      // Activity log
+      try {
+        await createActivityLog({
+          userId,
+          projectId: project.id,
+          action: "deleted",
+          entityType: "task",
+          entityId: existingTask.id,
+          description: `AI deleted task "${existingTask.title}"`,
+          metadata: {
+            source: "AI",
+            priority: existingTask.priority,
+            status: existingTask.status,
+          },
+        });
+      } catch (activityError) {
+        console.warn(
+          "AI delete activity log skipped:",
+          activityError.message
+        );
+      }
+
+      // Socket event
+      try {
+        getIO().emit("taskDeleted", {
+          id: existingTask.id,
+          project_id: project.id,
+        });
+      } catch (socketError) {
+        console.warn(
+          "AI task delete socket event skipped:",
+          socketError.message
+        );
+      }
+
+      return res.status(200).json({
+        success: true,
+        action: "delete_task",
+        message: `Task "${existingTask.title}" deleted successfully.`,
+        taskId: existingTask.id,
+      });
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Unsupported AI task command.",
+    });
+  } catch (error) {
+    console.error("Execute AI task command error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to execute AI task command.",
+      error: error.message,
+    });
+  }
+};
