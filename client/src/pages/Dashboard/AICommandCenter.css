@@ -195,3 +195,19 @@
     width: 100%;
   }
 }
+.ai-command-tools {
+  position: relative;
+  z-index: 10;
+}
+
+.ai-command-tool {
+  position: relative;
+  z-index: 11;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.ai-command-tool-panel {
+  position: relative;
+  z-index: 1;
+}
