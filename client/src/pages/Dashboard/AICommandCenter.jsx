@@ -6,7 +6,7 @@ import AITaskGenerator from "./AITaskGenerator";
 import AITaskPrioritizer from "./AITaskPrioritizer";
 import AIDailyPlanner from "./AIDailyPlanner";
 import AIChatAssistant from "./AIChatAssistant";
-
+import AITaskCommand from "./AITaskCommand";
 
 const AICommandCenter = ({ project, onTasksUpdated }) => {
   const [activeTool, setActiveTool] = useState("overview");
@@ -17,12 +17,6 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
       icon: "🧠",
       title: "Project Insights",
       description: "Analyze project health, risks and recommendations.",
-    },
-    {
-      id: "command",
-      icon: "⚡",
-      title: "AI Task Command",
-      description: "Create and manage tasks using natural language.",
     },
     {
       id: "generate",
@@ -48,23 +42,14 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
       title: "AI Chat",
       description: "Ask questions about your projects and tasks.",
     },
+    {
+      id: "command",
+      icon: "⚡",
+      title: "AI Task Command",
+      description:
+        "Create, update, complete or delete tasks using natural language.",
+    },
   ];
-
-  if (!project) {
-    return (
-      <section className="ai-command-center">
-        <div className="ai-empty-state">
-          <div className="ai-empty-icon">🤖</div>
-
-          <h2>AI Command Center</h2>
-
-          <p>
-            Create a project first to unlock project-specific AI features.
-          </p>
-        </div>
-      </section>
-    );
-  }
 
   const handleTasksUpdated = () => {
     if (typeof onTasksUpdated === "function") {
@@ -76,14 +61,6 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
     switch (activeTool) {
       case "overview":
         return <AIAssistant project={project} />;
-
-      case "command":
-        return (
-          <AITaskCommand
-            project={project}
-            onTaskCreated={handleTasksUpdated}
-          />
-        );
 
       case "generate":
         return (
@@ -107,62 +84,85 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
       case "chat":
         return <AIChatAssistant project={project} />;
 
+      case "command":
+        return (
+          <AITaskCommand
+            project={project}
+            onTaskCreated={handleTasksUpdated}
+          />
+        );
+
       default:
         return <AIAssistant project={project} />;
     }
   };
 
+  if (!project) {
+    return (
+      <div className="ai-command-center">
+        <div className="ai-command-empty">
+          <div className="ai-command-empty-icon">🤖</div>
+
+          <h2>AI Command Center</h2>
+
+          <p>
+            Create or select a project to start using the AI project
+            management tools.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <section className="ai-command-center">
-      <div className="ai-command-header">
-        <div>
-          <div className="ai-title-row">
-            <span className="ai-main-icon">🤖</span>
+    <div className="ai-command-center">
+      <div className="ai-command-center-header">
+        <div className="ai-command-center-title">
+          <div className="ai-command-center-main-icon">🤖</div>
 
-            <div>
-              <h2>AI Command Center</h2>
+          <div>
+            <h2>AI Command Center</h2>
 
-              <p>
-                Intelligent assistance for{" "}
-                <strong>{project.name}</strong>
-              </p>
-            </div>
+            <p>
+              AI-powered tools for <strong>{project.name}</strong>
+            </p>
           </div>
         </div>
 
-        <div className="ai-status">
-          <span className="ai-status-dot"></span>
-          AI Ready
+        <div className="ai-command-center-badge">
+          ✨ AI Powered
         </div>
       </div>
 
-      <div className="ai-tool-grid">
+      <div className="ai-command-tools">
         {tools.map((tool) => (
           <button
             key={tool.id}
             type="button"
-            className={`ai-tool-card ${
+            className={`ai-command-tool ${
               activeTool === tool.id ? "active" : ""
             }`}
-            onClick={() => setActiveTool(tool.id)}
+            onClick={() => {
+              console.log("AI tool clicked:", tool.id);
+              setActiveTool(tool.id);
+            }}
           >
-            <div className="ai-tool-icon">{tool.icon}</div>
+            <span className="ai-command-tool-icon">
+              {tool.icon}
+            </span>
 
-            <div className="ai-tool-content">
-              <h3>{tool.title}</h3>
-
-              <p>{tool.description}</p>
-            </div>
-
-            <span className="ai-tool-arrow">→</span>
+            <span className="ai-command-tool-content">
+              <strong>{tool.title}</strong>
+              <small>{tool.description}</small>
+            </span>
           </button>
         ))}
       </div>
 
-      <div className="ai-command-content">
+      <div className="ai-command-tool-panel">
         {renderTool()}
       </div>
-    </section>
+    </div>
   );
 };
 
