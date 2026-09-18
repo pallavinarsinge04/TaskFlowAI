@@ -8,6 +8,7 @@ import {
   generateDailyPlan,
   chatWithAI,
   automateProject,
+   applyAutomationActions,
 } from "../controllers/aiController.js";
 
 import { authenticateUser } from "../middleware/authMiddleware.js";
@@ -81,6 +82,10 @@ router.post(
 router.post(
   "/project/:projectId/automate",
   automateProject
+);
+router.post(
+  "/project/:projectId/automate/apply",
+  applyAutomationActions
 );
 
 export default router;
