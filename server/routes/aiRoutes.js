@@ -7,49 +7,80 @@ import {
   prioritizeTasks,
   generateDailyPlan,
   chatWithAI,
+  automateProject,
 } from "../controllers/aiController.js";
 
 import { authenticateUser } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Authentication for all AI routes
+// ============================================================
+// Authentication
+// ============================================================
+
 router.use(authenticateUser);
 
-// Project analysis
+// ============================================================
+// Project Analysis
+// ============================================================
+
 router.get(
   "/project/:projectId/analyze",
   analyzeProject
 );
 
-// Gemini project insights
+// ============================================================
+// Gemini Project Insights
+// ============================================================
+
 router.get(
   "/project/:projectId/insights",
   generateProjectInsights
 );
 
-// AI task generator
+// ============================================================
+// AI Task Generator
+// ============================================================
+
 router.post(
   "/project/:projectId/generate-tasks",
   generateTasks
 );
 
-// AI task prioritization
+// ============================================================
+// AI Task Prioritization
+// ============================================================
+
 router.post(
   "/project/:projectId/prioritize-tasks",
   prioritizeTasks
 );
 
-// AI daily planner
+// ============================================================
+// AI Daily Planner
+// ============================================================
+
 router.post(
   "/daily-plan",
   generateDailyPlan
 );
 
-// AI chat assistant
+// ============================================================
+// AI Chat Assistant
+// ============================================================
+
 router.post(
   "/chat",
   chatWithAI
+);
+
+// ============================================================
+// AI Project Automation
+// ============================================================
+
+router.post(
+  "/project/:projectId/automate",
+  automateProject
 );
 
 export default router;
