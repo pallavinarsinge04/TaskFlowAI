@@ -2405,3 +2405,275 @@ RULES:
     });
   }
 };
+export const automateProject = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { projectId } = req.params;
+
+    if (!projectId) {
+      return res.status(400).json({
+        success: false,
+        message: "Project ID is required.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 1. Get project
+    // --------------------------------------------------
+
+    const { data: project, error: projectError } = await supabase
+      .from("projects")
+      .select("id, name, description, status, priority")
+      .eq("id", projectId)
+      .eq("owner", userId)
+      .single();
+
+    if (projectError || !project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 2. Get project tasks
+    // --------------------------------------------------
+
+    const { data: tasks, error: tasksError } = await supabase
+      .from("tasks")
+      .select(
+        "id, title, description, status, priority, due_date, completed, assignee"
+      )
+      .eq("project_id", projectId)
+      .eq("user_id", userId)
+      .order("created_at", {
+        ascending: false,
+      });
+
+    if (tasksError) {
+      console.error("Automation task fetch error:", tasksError);
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to load project tasks.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 3. Get team members
+    // --------------------------------------------------
+
+    const { data: teamMembers } = await supabase
+      .from("team_members")
+      .select("id, name, role, status")
+      .eq("project_id", projectId);
+
+    // --------------------------------------------------
+    // 4. Build AI prompt
+    // --------------------------------------------------
+
+    const prompt = `
+You are an expert AI project manager.
+
+Analyze the following project and create a safe automation plan.
+
+PROJECT:
+${JSON.stringify(project)}
+
+TASKS:
+${JSON.stringify(tasks || [])}
+
+TEAM MEMBERS:
+${JSON.stringify(teamMembers || [])}
+
+Your job is to identify useful project-management actions.
+
+Possible actions:
+
+1. create_task
+2. update_task
+3. prioritize_task
+4. suggest_deadline
+5. identify_risk
+
+IMPORTANT:
+- Do not invent existing task IDs.
+- Existing task IDs must come from the supplied task list.
+- Team member names must come from the supplied team members.
+- Do not delete tasks.
+- Do not make destructive changes.
+- Avoid duplicate tasks.
+- Only suggest useful actions.
+- Maximum 10 actions.
+
+Return ONLY valid JSON.
+
+Use exactly this structure:
+
+{
+  "summary": "short explanation",
+  "actions": [
+    {
+      "type": "create_task",
+      "taskId": null,
+      "title": "task title",
+      "description": "task description",
+      "priority": "High",
+      "status": "Pending",
+      "dueDate": null,
+      "assignee": null,
+      "reason": "why this action is useful"
+    }
+  ],
+  "risks": [
+    {
+      "title": "risk title",
+      "description": "risk description",
+      "severity": "High"
+    }
+  ]
+}
+
+Allowed priority:
+High | Medium | Low
+
+Allowed severity:
+High | Medium | Low
+`;
+
+    // --------------------------------------------------
+    // 5. Ask Gemini
+    // --------------------------------------------------
+
+    const model = getGeminiModel();
+
+    const result = await model.generateContent(prompt);
+
+    const responseText = result.response.text();
+
+    const cleanedResponse = responseText
+      .replace(/```json/gi, "")
+      .replace(/```/g, "")
+      .trim();
+
+    let automation;
+
+    try {
+      automation = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error("Automation JSON parse error:", parseError);
+      console.error("Gemini response:", responseText);
+
+      return res.status(500).json({
+        success: false,
+        message: "AI returned an invalid automation plan.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 6. Validate actions
+    // --------------------------------------------------
+
+    const existingTaskIds = new Set(
+      (tasks || []).map((task) => task.id)
+    );
+
+    const existingMemberNames = new Set(
+      (teamMembers || [])
+        .map((member) => member.name)
+        .filter(Boolean)
+    );
+
+    const allowedTypes = [
+      "create_task",
+      "update_task",
+      "prioritize_task",
+      "suggest_deadline",
+      "identify_risk",
+    ];
+
+    const allowedPriorities = [
+      "High",
+      "Medium",
+      "Low",
+    ];
+
+    const actions = Array.isArray(automation.actions)
+      ? automation.actions
+          .slice(0, 10)
+          .filter((action) =>
+            allowedTypes.includes(action.type)
+          )
+          .map((action) => ({
+            type: action.type,
+
+            taskId:
+              action.taskId &&
+              existingTaskIds.has(action.taskId)
+                ? action.taskId
+                : null,
+
+            title: String(action.title || "").trim(),
+
+            description: String(
+              action.description || ""
+            ).trim(),
+
+            priority: allowedPriorities.includes(
+              action.priority
+            )
+              ? action.priority
+              : "Medium",
+
+            status: "Pending",
+
+            dueDate:
+              typeof action.dueDate === "string" &&
+              /^\d{4}-\d{2}-\d{2}$/.test(
+                action.dueDate
+              )
+                ? action.dueDate
+                : null,
+
+            assignee:
+              action.assignee &&
+              existingMemberNames.has(action.assignee)
+                ? action.assignee
+                : null,
+
+            reason: String(
+              action.reason || ""
+            ).trim(),
+          }))
+      : [];
+
+    return res.status(200).json({
+      success: true,
+
+      project: {
+        id: project.id,
+        name: project.name,
+      },
+
+      summary:
+        automation.summary ||
+        "AI automation plan generated.",
+
+      actions,
+
+      risks: Array.isArray(automation.risks)
+        ? automation.risks.slice(0, 10)
+        : [],
+    });
+  } catch (error) {
+    console.error(
+      "AI project automation error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to generate AI automation plan.",
+    });
+  }
+};
