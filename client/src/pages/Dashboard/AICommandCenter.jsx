@@ -7,7 +7,7 @@ import AITaskPrioritizer from "./AITaskPrioritizer";
 import AIDailyPlanner from "./AIDailyPlanner";
 import AIChatAssistant from "./AIChatAssistant";
 import AITaskCommand from "./AITaskCommand";
-
+import AIProjectAutomation from "./AIProjectAutomation";
 const AICommandCenter = ({ project, onTasksUpdated }) => {
   const [activeTool, setActiveTool] = useState("overview");
 
@@ -49,6 +49,13 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
       description:
         "Create, update, complete or delete tasks using natural language.",
     },
+    {
+  id: "automation",
+  icon: "🤖",
+  title: "Project Automation",
+  description:
+    "Analyze your project and generate a safe AI automation plan.",
+},
   ];
 
   const handleTasksUpdated = () => {
@@ -91,6 +98,13 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
             onTaskCreated={handleTasksUpdated}
           />
         );
+        case "automation":
+  return (
+    <AIProjectAutomation
+      project={project}
+      onTasksUpdated={handleTasksUpdated}
+    />
+  );
 
       default:
         return <AIAssistant project={project} />;
