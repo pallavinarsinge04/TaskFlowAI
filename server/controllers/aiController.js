@@ -2677,3 +2677,478 @@ High | Medium | Low
     });
   }
 };
+export const applyAutomationActions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { projectId } = req.params;
+    const { actions } = req.body;
+
+    if (!projectId) {
+      return res.status(400).json({
+        success: false,
+        message: "Project ID is required.",
+      });
+    }
+
+    if (!Array.isArray(actions) || actions.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one automation action is required.",
+      });
+    }
+
+    if (actions.length > 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Maximum 10 actions can be applied at once.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 1. Verify project ownership
+    // --------------------------------------------------
+
+    const { data: project, error: projectError } =
+      await supabase
+        .from("projects")
+        .select("id, name")
+        .eq("id", projectId)
+        .eq("owner", userId)
+        .single();
+
+    if (projectError || !project) {
+      return res.status(404).json({
+        success: false,
+        message: "Project not found or access denied.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 2. Load existing tasks
+    // --------------------------------------------------
+
+    const { data: existingTasks, error: tasksError } =
+      await supabase
+        .from("tasks")
+        .select(
+          "id, project_id, title, description, status, priority, due_date, completed, assignee"
+        )
+        .eq("project_id", projectId)
+        .eq("user_id", userId);
+
+    if (tasksError) {
+      console.error(
+        "Load automation tasks error:",
+        tasksError
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: "Failed to load project tasks.",
+      });
+    }
+
+    const taskMap = new Map(
+      (existingTasks || []).map((task) => [
+        task.id,
+        task,
+      ])
+    );
+
+    const results = [];
+
+    // --------------------------------------------------
+    // 3. Apply each action
+    // --------------------------------------------------
+
+    for (const action of actions) {
+      try {
+        if (!action || !action.type) {
+          results.push({
+            success: false,
+            message: "Invalid automation action.",
+          });
+
+          continue;
+        }
+
+        // ==============================================
+        // CREATE TASK
+        // ==============================================
+
+        if (action.type === "create_task") {
+          const title = String(
+            action.title || ""
+          ).trim();
+
+          if (!title) {
+            results.push({
+              success: false,
+              type: action.type,
+              message: "Task title is required.",
+            });
+
+            continue;
+          }
+
+          const priority = [
+            "High",
+            "Medium",
+            "Low",
+          ].includes(action.priority)
+            ? action.priority
+            : "Medium";
+
+          const status = [
+            "Pending",
+            "In Progress",
+            "Completed",
+          ].includes(action.status)
+            ? action.status
+            : "Pending";
+
+          const completed =
+            status === "Completed";
+
+          const insertData = {
+            project_id: projectId,
+            user_id: userId,
+            title,
+            description:
+              String(action.description || "").trim(),
+            priority,
+            status,
+            due_date: action.dueDate || null,
+            assignee:
+              String(action.assignee || "").trim(),
+            completed,
+          };
+
+          const {
+            data: createdTask,
+            error: createError,
+          } = await supabase
+            .from("tasks")
+            .insert(insertData)
+            .select()
+            .single();
+
+          if (createError) {
+            console.error(
+              "AI create task error:",
+              createError
+            );
+
+            results.push({
+              success: false,
+              type: action.type,
+              message: createError.message,
+            });
+
+            continue;
+          }
+
+          // Activity log
+          await createActivityLog({
+            userId,
+            projectId,
+            action: "created",
+            entityType: "task",
+            entityId: createdTask.id,
+            description: `AI created task "${createdTask.title}"`,
+            metadata: {
+              source: "ai_automation",
+              priority: createdTask.priority,
+              status: createdTask.status,
+            },
+          });
+
+          // Realtime
+          try {
+            getIO().emit(
+              "taskCreated",
+              createdTask
+            );
+          } catch (socketError) {
+            console.warn(
+              "Task socket event skipped:",
+              socketError.message
+            );
+          }
+
+          results.push({
+            success: true,
+            type: "create_task",
+            task: createdTask,
+            message: `Created task "${createdTask.title}".`,
+          });
+
+          continue;
+        }
+
+        // ==============================================
+        // UPDATE TASK
+        // ==============================================
+
+        if (
+          action.type === "update_task" ||
+          action.type === "prioritize_task" ||
+          action.type === "suggest_deadline"
+        ) {
+          if (!action.taskId) {
+            results.push({
+              success: false,
+              type: action.type,
+              message: "Task ID is required.",
+            });
+
+            continue;
+          }
+
+          const existingTask =
+            taskMap.get(action.taskId);
+
+          if (!existingTask) {
+            results.push({
+              success: false,
+              type: action.type,
+              message: "Task not found.",
+            });
+
+            continue;
+          }
+
+          const updateData = {};
+
+          // Title
+          if (
+            action.type === "update_task" &&
+            typeof action.title === "string" &&
+            action.title.trim()
+          ) {
+            updateData.title =
+              action.title.trim();
+          }
+
+          // Description
+          if (
+            action.type === "update_task" &&
+            typeof action.description === "string"
+          ) {
+            updateData.description =
+              action.description.trim();
+          }
+
+          // Priority
+          if (
+            ["High", "Medium", "Low"].includes(
+              action.priority
+            )
+          ) {
+            updateData.priority =
+              action.priority;
+          }
+
+          // Status
+          if (
+            [
+              "Pending",
+              "In Progress",
+              "Completed",
+            ].includes(action.status)
+          ) {
+            updateData.status =
+              action.status;
+
+            updateData.completed =
+              action.status === "Completed";
+          }
+
+          // Deadline
+          if (
+            action.dueDate === null ||
+            /^\d{4}-\d{2}-\d{2}$/.test(
+              String(action.dueDate || "")
+            )
+          ) {
+            if (
+              action.dueDate !== undefined
+            ) {
+              updateData.due_date =
+                action.dueDate;
+            }
+          }
+
+          // Assignee
+          if (
+            action.assignee !== undefined &&
+            action.assignee !== null
+          ) {
+            updateData.assignee =
+              String(
+                action.assignee
+              ).trim();
+          }
+
+          if (
+            Object.keys(updateData).length === 0
+          ) {
+            results.push({
+              success: false,
+              type: action.type,
+              taskId: action.taskId,
+              message:
+                "No valid changes were supplied.",
+            });
+
+            continue;
+          }
+
+          const {
+            data: updatedTask,
+            error: updateError,
+          } = await supabase
+            .from("tasks")
+            .update(updateData)
+            .eq("id", action.taskId)
+            .eq("project_id", projectId)
+            .eq("user_id", userId)
+            .select()
+            .single();
+
+          if (updateError) {
+            console.error(
+              "AI update task error:",
+              updateError
+            );
+
+            results.push({
+              success: false,
+              type: action.type,
+              taskId: action.taskId,
+              message: updateError.message,
+            });
+
+            continue;
+          }
+
+          await createActivityLog({
+            userId,
+            projectId,
+            action: "updated",
+            entityType: "task",
+            entityId: updatedTask.id,
+            description: `AI updated task "${updatedTask.title}"`,
+            metadata: {
+              source: "ai_automation",
+              updatedFields:
+                Object.keys(updateData),
+            },
+          });
+
+          try {
+            getIO().emit(
+              "taskUpdated",
+              updatedTask
+            );
+          } catch (socketError) {
+            console.warn(
+              "Task socket event skipped:",
+              socketError.message
+            );
+          }
+
+          // Keep local map updated in case
+          // another action references the same task.
+          taskMap.set(
+            updatedTask.id,
+            updatedTask
+          );
+
+          results.push({
+            success: true,
+            type: action.type,
+            task: updatedTask,
+            message: `Updated task "${updatedTask.title}".`,
+          });
+
+          continue;
+        }
+
+        // ==============================================
+        // RISK / INFORMATION ONLY
+        // ==============================================
+
+        if (action.type === "identify_risk") {
+          results.push({
+            success: true,
+            type: "identify_risk",
+            applied: false,
+            message:
+              "Risk identification does not modify project data.",
+          });
+
+          continue;
+        }
+
+        // ==============================================
+        // UNSUPPORTED ACTION
+        // ==============================================
+
+        results.push({
+          success: false,
+          type: action.type,
+          message: "Unsupported automation action.",
+        });
+      } catch (actionError) {
+        console.error(
+          "Automation action error:",
+          actionError
+        );
+
+        results.push({
+          success: false,
+          type: action?.type || "unknown",
+          message:
+            actionError.message ||
+            "Failed to apply action.",
+        });
+      }
+    }
+
+    const successful = results.filter(
+      (result) => result.success && result.applied !== false
+    );
+
+    const failed = results.filter(
+      (result) => !result.success
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Applied ${successful.length} automation action(s).`,
+      project: {
+        id: project.id,
+        name: project.name,
+      },
+      results,
+      summary: {
+        total: results.length,
+        successful: successful.length,
+        failed: failed.length,
+      },
+    });
+  } catch (error) {
+    console.error(
+      "Apply automation actions error:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Failed to apply automation actions.",
+    });
+  }
+};
