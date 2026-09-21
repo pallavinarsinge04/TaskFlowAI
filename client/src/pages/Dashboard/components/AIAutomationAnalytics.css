@@ -1,0 +1,170 @@
+.ai-automation-analytics {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.automation-analytics-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.automation-analytics-header h3 {
+  margin: 0 0 6px;
+}
+
+.automation-analytics-header p {
+  margin: 0;
+  opacity: 0.7;
+  font-size: 14px;
+}
+
+.analytics-refresh-btn {
+  padding: 8px 13px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  cursor: pointer;
+}
+
+.automation-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.automation-stat-card {
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.automation-stat-icon {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 20px;
+}
+
+.automation-stat-card strong {
+  display: block;
+  font-size: 25px;
+  margin-bottom: 4px;
+}
+
+.automation-stat-card > span:last-child {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.automation-success-section,
+.automation-breakdown,
+.automation-recent {
+  margin-top: 20px;
+}
+
+.automation-success-section h4,
+.automation-breakdown h4,
+.automation-recent h4 {
+  margin: 0 0 7px;
+}
+
+.automation-success-section p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.automation-progress {
+  height: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.automation-progress-bar {
+  height: 100%;
+  border-radius: inherit;
+  background: #6366f1;
+  transition: width 0.4s ease;
+}
+
+.automation-breakdown-list,
+.automation-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.automation-breakdown-item,
+.automation-recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.automation-breakdown-item span {
+  text-transform: capitalize;
+}
+
+.automation-recent-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.automation-recent-item span {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.automation-status {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px !important;
+  text-transform: uppercase;
+}
+
+.automation-status.success {
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.automation-status.failed {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.analytics-loading {
+  padding: 30px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+@media (max-width: 800px) {
+  .automation-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .automation-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .automation-analytics-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .analytics-refresh-btn {
+    width: 100%;
+  }
+}
