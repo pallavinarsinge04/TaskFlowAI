@@ -8,84 +8,40 @@ import {
   generateDailyPlan,
   chatWithAI,
   automateProject,
-   applyAutomationActions,
+  applyAutomationActions,
 } from "../controllers/aiController.js";
+
+import { getAutomationAnalytics } from "../controllers/aiAutomationAnalyticsController.js";
 
 import { authenticateUser } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// ============================================================
-// Authentication
-// ============================================================
-
 router.use(authenticateUser);
 
-// ============================================================
-// Project Analysis
-// ============================================================
+// Project AI
+router.get("/project/:projectId/analyze", analyzeProject);
+router.get("/project/:projectId/insights", generateProjectInsights);
 
-router.get(
-  "/project/:projectId/analyze",
-  analyzeProject
-);
+// AI Task Tools
+router.post("/project/:projectId/generate-tasks", generateTasks);
+router.post("/project/:projectId/prioritize-tasks", prioritizeTasks);
 
-// ============================================================
-// Gemini Project Insights
-// ============================================================
+// AI Planner & Chat
+router.post("/daily-plan", generateDailyPlan);
+router.post("/chat", chatWithAI);
 
-router.get(
-  "/project/:projectId/insights",
-  generateProjectInsights
-);
-
-// ============================================================
-// AI Task Generator
-// ============================================================
-
-router.post(
-  "/project/:projectId/generate-tasks",
-  generateTasks
-);
-
-// ============================================================
-// AI Task Prioritization
-// ============================================================
-
-router.post(
-  "/project/:projectId/prioritize-tasks",
-  prioritizeTasks
-);
-
-// ============================================================
-// AI Daily Planner
-// ============================================================
-
-router.post(
-  "/daily-plan",
-  generateDailyPlan
-);
-
-// ============================================================
-// AI Chat Assistant
-// ============================================================
-
-router.post(
-  "/chat",
-  chatWithAI
-);
-
-// ============================================================
 // AI Project Automation
-// ============================================================
-
-router.post(
-  "/project/:projectId/automate",
-  automateProject
-);
+router.post("/project/:projectId/automate", automateProject);
 router.post(
   "/project/:projectId/automate/apply",
   applyAutomationActions
+);
+
+// AI Automation Analytics
+router.get(
+  "/project/:projectId/automation-analytics",
+  getAutomationAnalytics
 );
 
 export default router;
