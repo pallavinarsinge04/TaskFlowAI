@@ -8,6 +8,7 @@ import AIDailyPlanner from "./AIDailyPlanner";
 import AIChatAssistant from "./AIChatAssistant";
 import AITaskCommand from "./AITaskCommand";
 import AIProjectAutomation from "./AIProjectAutomation";
+import AIAutomationAnalytics from "./components/AIAutomationAnalytics";
 const AICommandCenter = ({ project, onTasksUpdated }) => {
   const [activeTool, setActiveTool] = useState("overview");
 
@@ -55,6 +56,12 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
   title: "Project Automation",
   description:
     "Analyze your project and generate a safe AI automation plan.",
+},
+{
+  id: "analytics",
+  icon: "📊",
+  title: "Automation Analytics",
+  description: "Track AI automation activity, results and task changes.",
 },
   ];
 
@@ -105,6 +112,8 @@ const AICommandCenter = ({ project, onTasksUpdated }) => {
       onTasksUpdated={handleTasksUpdated}
     />
   );
+  case "analytics":
+  return <AIAutomationAnalytics project={project} />;
 
       default:
         return <AIAssistant project={project} />;
